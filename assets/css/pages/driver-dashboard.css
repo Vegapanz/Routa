@@ -1,0 +1,549 @@
+/* Driver Dashboard Styles */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background: #f8fafc;
+    color: #1e293b;
+}
+
+/* Logout Button Custom */
+.btn-logout-custom {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: transparent;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    color: #64748b;
+    font-weight: 400;
+    font-size: 0.875rem;
+    text-decoration: none;
+    transition: all 0.2s;
+}
+
+.btn-logout-custom:hover {
+    background: #f8fafc;
+    border-color: #cbd5e1;
+    color: #475569;
+}
+
+.btn-logout-custom i {
+    font-size: 1rem;
+}
+
+/* Status Toggle */
+.status-toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.status-toggle-switch {
+    position: relative;
+    width: 60px;
+    height: 32px;
+    background: #cbd5e1;
+    border-radius: 16px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.status-toggle-switch.online {
+    background: #10b981;
+}
+
+.status-toggle-switch .toggle-slider {
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    width: 24px;
+    height: 24px;
+    background: white;
+    border-radius: 50%;
+    transition: transform 0.3s;
+}
+
+.status-toggle-switch.online .toggle-slider {
+    transform: translateX(28px);
+}
+
+.status-label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #64748b;
+}
+
+.status-label.online {
+    color: #10b981;
+}
+
+
+
+/* Stats Cards */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.5rem;
+    margin: 2rem 0;
+}
+
+.stat-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    border: 1px solid #e2e8f0;
+    transition: all 0.2s;
+}
+
+.stat-card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    transform: translateY(-2px);
+}
+
+.stat-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 0.75rem;
+}
+
+.stat-label {
+    font-size: 0.875rem;
+    color: #64748b;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.stat-icon {
+    font-size: 1.5rem;
+    opacity: 0.3;
+}
+
+.stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #0f172a;
+    line-height: 1;
+    margin-bottom: 0.5rem;
+}
+
+.stat-meta {
+    font-size: 0.8125rem;
+    color: #94a3b8;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.stat-rating {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.star-filled {
+    color: #fbbf24;
+}
+
+/* Assigned Rides Section */
+.section-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.section-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #0f172a;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.section-subtitle {
+    font-size: 0.875rem;
+    color: #64748b;
+    margin-top: 0.25rem;
+}
+
+.assigned-rides-section {
+    margin-bottom: 3rem;
+}
+
+.assigned-notice {
+    background: #dcfce7;
+    border: 1px solid #86efac;
+    border-radius: 8px;
+    padding: 1rem 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.assigned-notice-content {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.assigned-notice-icon {
+    color: #16a34a;
+    font-size: 1.25rem;
+}
+
+.assigned-notice-text {
+    flex: 1;
+}
+
+.assigned-notice-title {
+    font-weight: 600;
+    color: #15803d;
+    margin-bottom: 0.125rem;
+}
+
+.assigned-notice-desc {
+    font-size: 0.875rem;
+    color: #16a34a;
+    margin: 0;
+}
+
+/* Ride Card */
+.ride-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    border: 1px solid #e2e8f0;
+    margin-bottom: 1rem;
+}
+
+.ride-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+}
+
+.ride-id-section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.booking-id {
+    font-weight: 600;
+    color: #0f172a;
+    font-size: 0.9375rem;
+}
+
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.375rem 0.75rem;
+    border-radius: 6px;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    width: fit-content;
+}
+
+.status-badge.confirmed {
+    background: #dcfce7;
+    color: #15803d;
+}
+
+.status-badge.in-progress {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.ride-fare {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+/* Rider Info */
+.rider-info {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem;
+    background: #f8fafc;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    font-size: 0.875rem;
+}
+
+.rider-info i {
+    color: #64748b;
+}
+
+.rider-name {
+    font-weight: 600;
+    color: #0f172a;
+}
+
+.rider-phone {
+    color: #64748b;
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    margin-left: auto;
+}
+
+/* Location Items */
+.location-item {
+    display: flex;
+    gap: 0.75rem;
+    padding: 0.875rem;
+    background: #f8fafc;
+    border-radius: 8px;
+    margin-bottom: 0.5rem;
+}
+
+.location-icon {
+    font-size: 1.125rem;
+    margin-top: 0.125rem;
+}
+
+.location-icon.from {
+    color: #10b981;
+}
+
+.location-icon.to {
+    color: #ef4444;
+}
+
+.location-content {
+    flex: 1;
+}
+
+.location-label {
+    font-size: 0.6875rem;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.location-value {
+    font-size: 0.875rem;
+    color: #334155;
+    font-weight: 500;
+}
+
+/* Ride Footer */
+.ride-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1.25rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid #e2e8f0;
+}
+
+.ride-time {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    color: #64748b;
+}
+
+.ride-time i {
+    font-size: 1rem;
+}
+
+.btn-start-ride {
+    background: #10b981;
+    color: white;
+    border: none;
+    padding: 0.625rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.9375rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn-start-ride:hover {
+    background: #059669;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.btn-start-ride:active {
+    transform: translateY(0);
+}
+
+/* Trip History Section */
+.trip-history-section {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    border: 1px solid #e2e8f0;
+}
+
+.trip-history-header {
+    margin-bottom: 1.5rem;
+}
+
+.trip-history-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #0f172a;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.375rem;
+}
+
+.trip-history-desc {
+    font-size: 0.875rem;
+    color: #64748b;
+}
+
+/* Profile Tab Section */
+.tab-navigation {
+    display: flex;
+    gap: 2rem;
+    border-bottom: 2px solid #e2e8f0;
+    margin-bottom: 2rem;
+}
+
+.tab-button {
+    background: none;
+    border: none;
+    padding: 0.75rem 0;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: #64748b;
+    cursor: pointer;
+    position: relative;
+    transition: color 0.2s;
+}
+
+.tab-button:hover {
+    color: #334155;
+}
+
+.tab-button.active {
+    color: #10b981;
+}
+
+.tab-button.active::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: #10b981;
+}
+
+.profile-section {
+    padding: 1.5rem 0;
+}
+
+.profile-section-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #0f172a;
+    margin-bottom: 1rem;
+}
+
+.profile-section-desc {
+    font-size: 0.875rem;
+    color: #64748b;
+    margin-bottom: 1.5rem;
+}
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: 3rem 2rem;
+    color: #94a3b8;
+}
+
+.empty-state-icon {
+    font-size: 3.5rem;
+    opacity: 0.3;
+    margin-bottom: 1rem;
+}
+
+.empty-state-title {
+    font-size: 1rem;
+    font-weight: 500;
+    color: #64748b;
+    margin-bottom: 0.5rem;
+}
+
+.empty-state-desc {
+    font-size: 0.875rem;
+    color: #94a3b8;
+}
+
+
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .stats-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .driver-welcome {
+        font-size: 1.5rem;
+    }
+
+    .stat-value {
+        font-size: 1.75rem;
+    }
+
+    .ride-footer {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: stretch;
+    }
+
+    .btn-start-ride {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .navbar-brand {
+        font-size: 1.25rem;
+    }
+
+    .status-toggle {
+        flex-direction: column;
+        align-items: flex-end;
+    }
+}
+
+@media (max-width: 576px) {
+    .ride-card-header {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .rider-phone {
+        margin-left: 0;
+    }
+
+    .rider-info {
+        flex-wrap: wrap;
+    }
+}

@@ -1,0 +1,191 @@
+/* Login Page Specific Styles */
+/* This file contains styles specific to the login page */
+
+body {
+    background-color: #f8f9fa;
+    font-family: 'Poppins', sans-serif;
+    color: #333;
+}
+
+.min-vh-100 {
+    min-height: 100vh;
+}
+
+.card {
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.card-header {
+    background: linear-gradient(135deg, #4b6cb7, #182848);
+    color: white;
+    text-align: center;
+    padding: 1.5rem;
+    border-bottom: none;
+}
+
+.card-header h3 {
+    margin: 0;
+    font-weight: 700;
+}
+
+.card-body {
+    padding: 2rem;
+}
+
+.form-control {
+    border-radius: 8px;
+    padding: 12px 15px;
+    border: 1px solid #e0e0e0;
+    transition: all 0.3s;
+}
+
+.form-control:focus {
+    border-color: #4b6cb7;
+    box-shadow: 0 0 0 0.2rem rgba(75, 108, 183, 0.25);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #4b6cb7, #182848);
+    border: none;
+    padding: 12px 30px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border-radius: 8px;
+    transition: all 0.3s;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(75, 108, 183, 0.3);
+}
+
+.back-link {
+    color: #4b6cb7;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    font-weight: 500;
+    transition: all 0.3s;
+}
+
+.back-link:hover {
+    color: #182848;
+    transform: translateX(-5px);
+}
+
+.back-link i {
+    margin-right: 8px;
+    transition: all 0.3s;
+}
+
+.form-text {
+    font-size: 0.85rem;
+    color: #6c757d;
+}
+
+.form-check-label {
+    font-size: 0.9rem;
+    color: #555;
+}
+
+.forgot-password {
+    font-size: 0.9rem;
+    color: #4b6cb7;
+    text-decoration: none;
+    transition: all 0.3s;
+}
+
+.forgot-password:hover {
+    color: #182848;
+    text-decoration: underline;
+}
+
+.divider {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
+    margin: 1.5rem 0 !important;
+    color: #6c757d !important;
+    font-size: 14px !important;
+    position: relative !important;
+    width: 100% !important;
+}
+
+.divider::before,
+.divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: #dee2e6;
+}
+
+.divider::before {
+    margin-right: 1rem !important;
+}
+
+.divider::after {
+    margin-left: 1rem !important;
+}
+
+.social-login .btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+    border-radius: 8px;
+    font-weight: 500;
+    margin-bottom: 10px;
+    transition: all 0.3s;
+}
+
+.social-login .btn i {
+    margin-right: 10px;
+    font-size: 1.2rem;
+}
+
+.btn-google {
+    background-color: #fff;
+    color: #757575;
+    border: 1px solid #e0e0e0;
+}
+
+.btn-google:hover {
+    background-color: #f8f9fa;
+    border-color: #d2d2d2;
+}
+
+.btn-facebook {
+    background-color: #3b5998;
+    color: white;
+    border: 1px solid #3b5998;
+}
+
+.btn-facebook:hover {
+    background-color: #344e86;
+    border-color: #344e86;
+    color: white;
+}
+
+.signup-link {
+    text-align: center;
+    margin-top: 1.5rem;
+    font-size: 0.95rem;
+}
+
+.signup-link a {
+    color: #4b6cb7;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s;
+}
+
+.signup-link a:hover {
+    color: #182848;
+    text-decoration: underline;
+}

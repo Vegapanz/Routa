@@ -1,0 +1,122 @@
+/* Variables */
+:root {
+    --primary: #00b96b;
+    --primary-dark: #009d5a;
+    --primary-light: rgba(0, 185, 107, 0.1);
+    --secondary: #6c757d;
+    --success: #00b96b;
+    --warning: #ffc107;
+    --white: #fff;
+    --gray-100: #f8f9fa;
+    --gray-200: #e9ecef;
+    --gray-300: #dee2e6;
+    --gray-600: #6c757d;
+    --dark: #212529;
+}
+
+/* Base Styles */
+body {
+    font-family: 'DM Sans', sans-serif;
+    background-color: var(--white);
+    color: var(--dark);
+}
+
+/* Card Styles */
+.card {
+    border-radius: 16px;
+}
+
+.shadow-sm {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05) !important;
+}
+
+/* Form Styles */
+.form-label {
+    font-weight: 500;
+    color: var(--dark);
+    margin-bottom: 0.5rem;
+}
+
+.form-control {
+    padding: 0.75rem 1rem;
+    border-color: var(--gray-300);
+}
+
+.form-control:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--primary-light);
+}
+
+.input-group-text {
+    padding: 0.75rem 1rem;
+    border-color: var(--gray-300);
+    color: var(--secondary);
+}
+
+/* Button Styles */
+.btn {
+    font-weight: 500;
+}
+
+.btn-success {
+    background-color: var(--primary);
+    border-color: var(--primary);
+}
+
+.btn-success:hover {
+    background-color: var(--primary-dark);
+    border-color: var(--primary-dark);
+}
+
+.btn-outline-light {
+    border-color: var(--gray-300);
+}
+
+.btn-outline-light:hover {
+    background-color: var(--gray-100);
+    border-color: var(--gray-300);
+    color: var(--dark);
+}
+
+/* Form Check */
+.form-check-input:checked {
+    background-color: var(--primary);
+    border-color: var(--primary);
+}
+
+/* Links */
+a {
+    color: var(--primary);
+    text-decoration: none;
+}
+
+a:hover {
+    color: var(--primary-dark);
+}
+
+.text-success {
+    color: var(--success) !important;
+}
+
+/* Responsive */
+@media (min-width: 992px) {
+    .container {
+        max-width: 1140px;
+    }
+}
+
+/* Icons */
+.bi {
+    font-size: 1.25rem;
+}
+
+/* Star Rating */
+.text-warning {
+    color: var(--warning) !important;
+}
+
+/* Features List */
+.feature-item i {
+    color: var(--success);
+    font-size: 1.25rem;
+}
