@@ -1,6 +1,57 @@
 // Dashboard Initialization
 console.log('Admin.js loaded successfully');
 
+// Utility function to show alert modal
+function showAlert(message, title = 'Notice', type = 'info') {
+    const modal = new bootstrap.Modal(document.getElementById('alertModal'));
+    document.getElementById('alertModalTitle').textContent = title;
+    document.getElementById('alertModalBody').innerHTML = message;
+    
+    // Change button color based on type
+    const okBtn = document.querySelector('#alertModal .btn-primary');
+    okBtn.className = 'btn';
+    if (type === 'success') {
+        okBtn.classList.add('btn-success');
+    } else if (type === 'error' || type === 'danger') {
+        okBtn.classList.add('btn-danger');
+    } else if (type === 'warning') {
+        okBtn.classList.add('btn-warning');
+    } else {
+        okBtn.classList.add('btn-primary');
+    }
+    
+    modal.show();
+}
+
+// Utility function to show confirm modal
+function showConfirm(message, title = 'Confirm Action', onConfirm) {
+    return new Promise((resolve, reject) => {
+        const modal = new bootstrap.Modal(document.getElementById('confirmModal'));
+        document.getElementById('confirmModalTitle').textContent = title;
+        document.getElementById('confirmModalBody').innerHTML = message;
+        
+        const confirmBtn = document.getElementById('confirmModalBtn');
+        
+        // Remove old event listeners
+        const newConfirmBtn = confirmBtn.cloneNode(true);
+        confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
+        
+        // Add new event listener
+        newConfirmBtn.addEventListener('click', function() {
+            modal.hide();
+            resolve(true);
+            if (onConfirm) onConfirm();
+        });
+        
+        // Handle modal dismiss
+        document.getElementById('confirmModal').addEventListener('hidden.bs.modal', function() {
+            resolve(false);
+        }, { once: true });
+        
+        modal.show();
+    });
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     console.log('DOM Content Loaded');
     console.log('Available drivers:', window.availableDrivers);
@@ -28,7 +79,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const driverId = select.value;
 
             if (!driverId) {
-                alert('Please select a driver first');
+                showAlert('Please select a driver first', 'Warning', 'warning');
                 return;
             }
 
@@ -38,9 +89,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Handle booking rejection
     document.querySelectorAll('.reject-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
+        btn.addEventListener('click', async function() {
             const bookingId = this.dataset.bookingId;
-            if (confirm('Are you sure you want to reject this booking?')) {
+            const confirmed = await showConfirm(
+                'Are you sure you want to reject this booking?',
+                'Reject Booking'
+            );
+            if (confirmed) {
                 rejectBooking(bookingId);
             }
         });
@@ -104,12 +159,15 @@ function confirmBooking(bookingId) {
     showDriverAssignmentModal(bookingId);
 }
 
-function rejectBooking(bookingId) {
+async function rejectBooking(bookingId) {
     console.log('rejectBooking called with ID:', bookingId);
     
-    if (!confirm('Are you sure you want to reject this booking?')) {
-        return;
-    }
+    const confirmed = await showConfirm(
+        'Are you sure you want to reject this booking?',
+        'Reject Booking'
+    );
+    
+    if (!confirmed) return;
 
     console.log('Sending reject request...');
     
@@ -127,15 +185,15 @@ function rejectBooking(bookingId) {
     .then(data => {
         console.log('Response data:', data);
         if (data.success) {
-            alert('Booking rejected successfully');
-            location.reload();
+            showAlert('Booking rejected successfully', 'Success', 'success');
+            setTimeout(() => location.reload(), 1500);
         } else {
-            alert('Error: ' + data.message);
+            showAlert(data.message, 'Error', 'error');
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        alert('An error occurred while rejecting the booking: ' + error.message);
+        showAlert('An error occurred while rejecting the booking: ' + error.message, 'Error', 'error');
     });
 }
 
@@ -201,7 +259,7 @@ function showDriverAssignmentModal(bookingId) {
         console.log('Booking ID:', bookingId, 'Driver ID:', driverId);
 
         if (!driverId) {
-            alert('Please select a driver');
+            showAlert('Please select a driver', 'Warning', 'warning');
             return;
         }
 
@@ -258,32 +316,23 @@ function assignBookingToDriver(bookingId, driverId) {
     .then(data => {
         console.log('Response data:', data);
         if (data.success) {
-            alert('Booking assigned successfully!');
+            showAlert('Booking assigned successfully!', 'Success', 'success');
             // Close modal
             const modal = bootstrap.Modal.getInstance(document.getElementById('assignDriverModal'));
             if (modal) {
                 modal.hide();
             }
             // Reload page to show updated data
-            location.reload();
+            setTimeout(() => location.reload(), 1500);
         } else {
-            alert('Error: ' + data.message);
+            showAlert(data.message, 'Error', 'error');
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        alert('An error occurred while assigning the booking: ' + error.message);
+        showAlert('An error occurred while assigning the booking: ' + error.message, 'Error', 'error');
     });
 }
-
-// Driver Management
-document.getElementById('addDriverForm')?.addEventListener('submit', function(e) {
-    e.preventDefault();
-    const formData = new FormData(this);
-    // Add driver creation logic here
-    alert('Driver added successfully!');
-    bootstrap.Modal.getInstance(document.getElementById('addDriverModal')).hide();
-});
 
 // Sidebar Navigation
 document.querySelectorAll('.sidebar .nav-link').forEach(link => {
@@ -297,6 +346,344 @@ document.querySelectorAll('.sidebar .nav-link').forEach(link => {
 function searchBookings(query) {
     // Add search logic here
 }
+
+// View Driver Details
+function viewDriverDetails(driverId) {
+    const modal = new bootstrap.Modal(document.getElementById('viewDriverModal'));
+    const contentDiv = document.getElementById('driverDetailsContent');
+    
+    // Show loading
+    contentDiv.innerHTML = `
+        <div class="text-center py-4">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+    `;
+    
+    modal.show();
+    
+    // Fetch driver details
+    fetch('admin.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: `action=get_driver_details&driver_id=${driverId}`
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const driver = data.data;
+            contentDiv.innerHTML = `
+                <div class="row g-4">
+                    <div class="col-12">
+                        <div class="text-center mb-4">
+                            <div class="avatar mx-auto mb-3" style="width: 80px; height: 80px; font-size: 2rem;">
+                                ${driver.name.substring(0, 2).toUpperCase()}
+                            </div>
+                            <h4 class="mb-1">${driver.name}</h4>
+                            <p class="text-muted">DRV-${String(driver.id).padStart(3, '0')}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <h6 class="fw-bold mb-3"><i class="bi bi-person-circle me-2"></i>Personal Information</h6>
+                        <div class="mb-2">
+                            <strong>Email:</strong><br>
+                            <span class="text-muted">${driver.email || 'N/A'}</span>
+                        </div>
+                        <div class="mb-2">
+                            <strong>Phone:</strong><br>
+                            <span class="text-muted">${driver.phone || 'N/A'}</span>
+                        </div>
+                        <div class="mb-2">
+                            <strong>License Number:</strong><br>
+                            <span class="text-muted">${driver.license_number || 'N/A'}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <h6 class="fw-bold mb-3"><i class="bi bi-car-front me-2"></i>Vehicle Information</h6>
+                        <div class="mb-2">
+                            <strong>Tricycle Number:</strong><br>
+                            <span class="text-muted">${driver.tricycle_number || 'N/A'}</span>
+                        </div>
+                        <div class="mb-2">
+                            <strong>Status:</strong><br>
+                            <span class="badge ${driver.status === 'available' ? 'bg-success' : 'bg-secondary'}">
+                                ${driver.status === 'available' ? 'Active' : 'Offline'}
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="col-12">
+                        <h6 class="fw-bold mb-3"><i class="bi bi-graph-up me-2"></i>Statistics</h6>
+                        <div class="row text-center">
+                            <div class="col-4">
+                                <div class="p-3 bg-light rounded">
+                                    <h4 class="mb-0 text-primary">${driver.total_trips || 0}</h4>
+                                    <small class="text-muted">Total Trips</small>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="p-3 bg-light rounded">
+                                    <h4 class="mb-0 text-warning">
+                                        <i class="bi bi-star-fill"></i> ${driver.rating || '0.0'}
+                                    </h4>
+                                    <small class="text-muted">Rating</small>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="p-3 bg-light rounded">
+                                    <h4 class="mb-0 text-success">
+                                        ${new Date(driver.created_at).toLocaleDateString()}
+                                    </h4>
+                                    <small class="text-muted">Joined</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        } else {
+            contentDiv.innerHTML = `
+                <div class="alert alert-danger">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    ${data.message || 'Failed to load driver details'}
+                </div>
+            `;
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        contentDiv.innerHTML = `
+            <div class="alert alert-danger">
+                <i class="bi bi-exclamation-triangle me-2"></i>
+                An error occurred while loading driver details
+            </div>
+        `;
+    });
+}
+
+// View Application Details
+function viewApplicationDetails(applicationId) {
+    const modal = new bootstrap.Modal(document.getElementById('viewApplicationModal'));
+    const contentDiv = document.getElementById('applicationDetailsContent');
+    
+    // Show loading
+    contentDiv.innerHTML = `
+        <div class="text-center py-4">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+    `;
+    
+    modal.show();
+    
+    // Store application ID for approve/reject buttons
+    document.getElementById('approveApplicationBtn').dataset.applicationId = applicationId;
+    document.getElementById('rejectApplicationBtn').dataset.applicationId = applicationId;
+    
+    // Fetch application details
+    fetch('admin.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: `action=get_application_details&application_id=${applicationId}`
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const app = data.data;
+            contentDiv.innerHTML = `
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <h6 class="fw-bold mb-3"><i class="bi bi-person-circle me-2"></i>Personal Information</h6>
+                        <div class="mb-2"><strong>Name:</strong> ${app.first_name} ${app.middle_name || ''} ${app.last_name}</div>
+                        <div class="mb-2"><strong>Date of Birth:</strong> ${app.date_of_birth}</div>
+                        <div class="mb-2"><strong>Email:</strong> ${app.email}</div>
+                        <div class="mb-2"><strong>Phone:</strong> ${app.phone}</div>
+                        <div class="mb-2"><strong>Address:</strong> ${app.address}, ${app.barangay}, ${app.city} ${app.zip_code}</div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <h6 class="fw-bold mb-3"><i class="bi bi-file-text me-2"></i>Driver Information</h6>
+                        <div class="mb-2"><strong>License #:</strong> ${app.license_number}</div>
+                        <div class="mb-2"><strong>License Expiry:</strong> ${app.license_expiry}</div>
+                        <div class="mb-2"><strong>Driving Experience:</strong> ${app.driving_experience} years</div>
+                        <div class="mb-2"><strong>Emergency Contact:</strong> ${app.emergency_name} (${app.emergency_phone})</div>
+                        <div class="mb-2"><strong>Relationship:</strong> ${app.relationship}</div>
+                    </div>
+                    
+                    <div class="col-12">
+                        <h6 class="fw-bold mb-3"><i class="bi bi-car-front me-2"></i>Vehicle Information</h6>
+                        <div class="row">
+                            <div class="col-md-3 mb-2"><strong>Type:</strong> ${app.vehicle_type}</div>
+                            <div class="col-md-3 mb-2"><strong>Make:</strong> ${app.vehicle_make}</div>
+                            <div class="col-md-3 mb-2"><strong>Model:</strong> ${app.vehicle_model}</div>
+                            <div class="col-md-3 mb-2"><strong>Year:</strong> ${app.vehicle_year}</div>
+                            <div class="col-md-4 mb-2"><strong>Plate #:</strong> ${app.plate_number}</div>
+                            <div class="col-md-4 mb-2"><strong>Franchise #:</strong> ${app.franchise_number || 'N/A'}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-12">
+                        <h6 class="fw-bold mb-3"><i class="bi bi-file-earmark me-2"></i>Documents</h6>
+                        <div class="row g-2">
+                            ${generateDocumentButtons(app)}
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Enable/disable buttons based on status
+            const approveBtn = document.getElementById('approveApplicationBtn');
+            const rejectBtn = document.getElementById('rejectApplicationBtn');
+            
+            if (app.status !== 'pending') {
+                approveBtn.disabled = true;
+                rejectBtn.disabled = true;
+            } else {
+                approveBtn.disabled = false;
+                rejectBtn.disabled = false;
+            }
+        } else {
+            contentDiv.innerHTML = `
+                <div class="alert alert-danger">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    ${data.message || 'Failed to load application details'}
+                </div>
+            `;
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        contentDiv.innerHTML = `
+            <div class="alert alert-danger">
+                <i class="bi bi-exclamation-triangle me-2"></i>
+                An error occurred while loading application details
+            </div>
+        `;
+    });
+}
+
+function generateDocumentButtons(app) {
+    const documents = [
+        { name: "Driver's License", file: app.license_document, icon: 'bi-card-heading' },
+        { name: "Government ID", file: app.government_id_document, icon: 'bi-person-badge' },
+        { name: "Vehicle Registration", file: app.registration_document, icon: 'bi-file-text' },
+        { name: "Franchise Permit", file: app.franchise_document, icon: 'bi-file-earmark-check' },
+        { name: "Insurance", file: app.insurance_document, icon: 'bi-shield-check' },
+        { name: "Barangay Clearance", file: app.clearance_document, icon: 'bi-file-earmark-text' },
+        { name: "ID Photo", file: app.photo_document, icon: 'bi-image' }
+    ];
+    
+    return documents.map(doc => {
+        if (doc.file) {
+            return `
+                <div class="col-md-4">
+                    <a href="${doc.file}" target="_blank" class="btn btn-outline-primary btn-sm w-100">
+                        <i class="${doc.icon} me-2"></i>${doc.name}
+                    </a>
+                </div>
+            `;
+        }
+        return '';
+    }).join('');
+}
+
+// Approve Application
+document.getElementById('approveApplicationBtn')?.addEventListener('click', async function() {
+    const applicationId = this.dataset.applicationId;
+    
+    console.log('Approve button clicked, applicationId:', applicationId);
+    
+    if (!applicationId || applicationId === 'undefined') {
+        showAlert('No application ID found. Please close and reopen the application details.', 'Error', 'error');
+        return;
+    }
+    
+    const confirmed = await showConfirm(
+        'Are you sure you want to approve this application? The driver will be added to the system.',
+        'Approve Application'
+    );
+    
+    if (!confirmed) return;
+    
+    fetch('admin.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: `action=approve_application&application_id=${applicationId}`
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('Approve response:', data);
+        if (data.success) {
+            showAlert(data.message, 'Success', 'success');
+            setTimeout(() => {
+                const modal = bootstrap.Modal.getInstance(document.getElementById('viewApplicationModal'));
+                if (modal) modal.hide();
+                location.reload();
+            }, 1500);
+        } else {
+            showAlert(data.message, 'Error', 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showAlert('An error occurred while approving the application', 'Error', 'error');
+    });
+});
+
+// Reject Application
+document.getElementById('rejectApplicationBtn')?.addEventListener('click', async function() {
+    const applicationId = this.dataset.applicationId;
+    
+    console.log('Reject button clicked, applicationId:', applicationId);
+    
+    if (!applicationId || applicationId === 'undefined') {
+        showAlert('No application ID found. Please close and reopen the application details.', 'Error', 'error');
+        return;
+    }
+    
+    const confirmed = await showConfirm(
+        'Are you sure you want to reject this application? This action cannot be undone.',
+        'Reject Application'
+    );
+    
+    if (!confirmed) return;
+    
+    fetch('admin.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: `action=reject_application&application_id=${applicationId}`
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('Reject response:', data);
+        if (data.success) {
+            showAlert(data.message, 'Success', 'success');
+            setTimeout(() => {
+                const modal = bootstrap.Modal.getInstance(document.getElementById('viewApplicationModal'));
+                if (modal) modal.hide();
+                location.reload();
+            }, 1500);
+        } else {
+            showAlert(data.message, 'Error', 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showAlert('An error occurred while rejecting the application', 'Error', 'error');
+    });
+});
 
 // Export Functionality
 function exportData(type) {

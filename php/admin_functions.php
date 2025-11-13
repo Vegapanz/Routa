@@ -186,3 +186,130 @@ function getBookingHistory($pdo, $limit = 10) {
         return false;
     }
 }
+
+function generateUniqueTricycleNumber($pdo) {
+    $maxAttempts = 100;
+    $attempt = 0;
+    
+    while ($attempt < $maxAttempts) {
+        // Get the highest existing tricycle number
+        $stmt = $pdo->prepare("SELECT tricycle_number FROM tricycle_drivers WHERE tricycle_number LIKE 'TRY-%' ORDER BY CAST(SUBSTRING(tricycle_number, 5) AS UNSIGNED) DESC LIMIT 1");
+        $stmt->execute();
+        $lastTricycle = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        if ($lastTricycle && preg_match('/TRY-(\d+)/', $lastTricycle['tricycle_number'], $matches)) {
+            // Increment from last number
+            $nextNumber = intval($matches[1]) + 1;
+        } else {
+            // Start from 001 if no tricycles exist
+            $nextNumber = 1;
+        }
+        
+        // Format as TRY-XXX (3 digits)
+        $tricycleNumber = 'TRY-' . str_pad($nextNumber, 3, '0', STR_PAD_LEFT);
+        
+        // Check if this number already exists
+        $stmt = $pdo->prepare("SELECT COUNT(*) as count FROM tricycle_drivers WHERE tricycle_number = ?");
+        $stmt->execute([$tricycleNumber]);
+        $exists = $stmt->fetch(PDO::FETCH_ASSOC)['count'] > 0;
+        
+        if (!$exists) {
+            return $tricycleNumber;
+        }
+        
+        $attempt++;
+    }
+    
+    // Fallback: use timestamp-based unique number if all attempts fail
+    return 'TRY-' . substr(time(), -6);
+}
+
+function approveDriverApplication($pdo, $applicationId) {
+    try {
+        $pdo->beginTransaction();
+        
+        // Get application details
+        $stmt = $pdo->prepare("SELECT * FROM driver_applications WHERE id = ? AND status = 'pending'");
+        $stmt->execute([$applicationId]);
+        $application = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        if (!$application) {
+            error_log("Application not found or not pending: " . $applicationId);
+            $pdo->rollBack();
+            return false;
+        }
+        
+        // Generate unique tricycle number
+        $tricycleNumber = generateUniqueTricycleNumber($pdo);
+        
+        // Combine first, middle, and last name
+        $fullName = trim($application['first_name'] . ' ' . ($application['middle_name'] ? $application['middle_name'] . ' ' : '') . $application['last_name']);
+        
+        // Insert into tricycle_drivers table with password
+        $stmt = $pdo->prepare("
+            INSERT INTO tricycle_drivers 
+            (name, email, password, phone, license_number, plate_number, tricycle_number, status, rating, average_rating, total_trips_completed, created_at) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, 'offline', 5.00, 5.00, 0, NOW())
+        ");
+        $result = $stmt->execute([
+            $fullName,
+            $application['email'],
+            $application['password'], // Transfer hashed password
+            $application['phone'],
+            $application['license_number'],
+            $application['plate_number'],
+            $tricycleNumber
+        ]);
+        
+        if (!$result) {
+            error_log("Failed to insert driver");
+            $pdo->rollBack();
+            return false;
+        }
+        
+        // Update application status to approved
+        $stmt = $pdo->prepare("UPDATE driver_applications SET status = 'approved', updated_at = NOW() WHERE id = ?");
+        $stmt->execute([$applicationId]);
+        
+        $pdo->commit();
+        error_log("Successfully approved application $applicationId and created driver account");
+        return true;
+        
+    } catch (PDOException $e) {
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
+        error_log("Error in approveDriverApplication: " . $e->getMessage());
+        return false;
+    }
+}
+
+function rejectDriverApplication($pdo, $applicationId) {
+    try {
+        $stmt = $pdo->prepare("UPDATE driver_applications SET status = 'rejected', updated_at = NOW() WHERE id = ? AND status = 'pending'");
+        $result = $stmt->execute([$applicationId]);
+        
+        if ($stmt->rowCount() > 0) {
+            error_log("Successfully rejected application $applicationId");
+            return true;
+        }
+        
+        error_log("No application found or not pending: $applicationId");
+        return false;
+        
+    } catch (PDOException $e) {
+        error_log("Error in rejectDriverApplication: " . $e->getMessage());
+        return false;
+    }
+}
+
+function getApplicationDetails($pdo, $applicationId) {
+    try {
+        $stmt = $pdo->prepare("SELECT * FROM driver_applications WHERE id = ?");
+        $stmt->execute([$applicationId]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        error_log("Error in getApplicationDetails: " . $e->getMessage());
+        return false;
+    }
+}

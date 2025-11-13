@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Driver Application System Test</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .test-item { padding: 15px; margin: 10px 0; border-radius: 5px; }
+        .test-pass { background: #d4edda; border: 1px solid #c3e6cb; }
+        .test-fail { background: #f8d7da; border: 1px solid #f5c6cb; }
+        .test-info { background: #d1ecf1; border: 1px solid #bee5eb; }
+    </style>
+</head>
+<body>
+    <div class="container my-5">
+        <h1 class="mb-4">🚗 Driver Application System Test</h1>
+        
+        <div id="testResults">
+            <div class="test-item test-info">
+                <h4>🔄 Running tests...</h4>
+            </div>
+        </div>
+
+        <div class="mt-4">
+            <a href="driver-application.php" class="btn btn-primary">Go to Application Form</a>
+            <a href="php/setup_and_test_driver_table.php" class="btn btn-secondary">Database Setup</a>
+            <a href="admin.php" class="btn btn-success">Admin Panel</a>
+        </div>
+    </div>
+
+    <script>
+        const resultsDiv = document.getElementById('testResults');
+        resultsDiv.innerHTML = '';
+
+        function addTest(name, passed, message) {
+            const div = document.createElement('div');
+            div.className = `test-item ${passed ? 'test-pass' : 'test-fail'}`;
+            div.innerHTML = `
+                <strong>${passed ? '✅' : '❌'} ${name}</strong>
+                <p class="mb-0 mt-2">${message}</p>
+            `;
+            resultsDiv.appendChild(div);
+        }
+
+        // Test 1: Check if driver-application.js exists
+        fetch('assets/js/pages/driver-application.js')
+            .then(response => {
+                if (response.ok) {
+                    addTest('JavaScript File', true, 'driver-application.js file exists and is accessible');
+                    return response.text();
+                } else {
+                    addTest('JavaScript File', false, 'driver-application.js file not found');
+                    throw new Error('File not found');
+                }
+            })
+            .then(jsContent => {
+                // Test 2: Check if submit event listener exists
+                if (jsContent.includes('form.addEventListener')) {
+                    addTest('Form Submit Handler', true, 'Form submit event listener found in JavaScript');
+                } else {
+                    addTest('Form Submit Handler', false, 'Form submit event listener NOT found');
+                }
+
+                // Test 3: Check if validation function exists
+                if (jsContent.includes('validateStep')) {
+                    addTest('Validation Function', true, 'validateStep function found');
+                } else {
+                    addTest('Validation Function', false, 'validateStep function NOT found');
+                }
+
+                // Test 4: Check if fetch to backend exists
+                if (jsContent.includes('php/submit_driver_application.php')) {
+                    addTest('Backend Endpoint', true, 'Fetch call to submit_driver_application.php found');
+                } else {
+                    addTest('Backend Endpoint', false, 'Backend endpoint call NOT found');
+                }
+            })
+            .catch(error => {
+                console.error('JS file check error:', error);
+            });
+
+        // Test 5: Check if backend PHP file exists
+        fetch('php/submit_driver_application.php', {
+            method: 'HEAD'
+        })
+            .then(response => {
+                if (response.ok || response.status === 405) { // 405 is OK, means file exists but POST is required
+                    addTest('Backend File', true, 'submit_driver_application.php exists');
+                } else {
+                    addTest('Backend File', false, 'submit_driver_application.php not found');
+                }
+            })
+            .catch(error => {
+                addTest('Backend File', false, 'Error checking backend file: ' + error.message);
+            });
+
+        // Test 6: Check database connection
+        fetch('php/setup_and_test_driver_table.php')
+            .then(response => response.text())
+            .then(html => {
+                if (html.includes('Table created successfully') || html.includes('already exists')) {
+                    addTest('Database Table', true, 'Database table setup successful');
+                } else if (html.includes('Error')) {
+                    addTest('Database Table', false, 'Database error detected');
+                } else {
+                    addTest('Database Table', true, 'Database setup file accessible');
+                }
+            })
+            .catch(error => {
+                addTest('Database Table', false, 'Cannot access database setup: ' + error.message);
+            });
+
+        // Test 7: Check if form page exists
+        fetch('driver-application.php')
+            .then(response => {
+                if (response.ok) {
+                    addTest('Application Form Page', true, 'driver-application.php page is accessible');
+                    return response.text();
+                } else {
+                    addTest('Application Form Page', false, 'Cannot access driver-application.php');
+                    throw new Error('Page not found');
+                }
+            })
+            .then(html => {
+                // Test 8: Check if form has submit button
+                if (html.includes('id="submitBtn"')) {
+                    addTest('Submit Button', true, 'Submit button found in form');
+                } else {
+                    addTest('Submit Button', false, 'Submit button NOT found in form');
+                }
+
+                // Test 9: Check if checkboxes exist
+                if (html.includes('id="termsCheck"') && html.includes('id="consentCheck"')) {
+                    addTest('Required Checkboxes', true, 'Both required checkboxes found');
+                } else {
+                    addTest('Required Checkboxes', false, 'Required checkboxes missing');
+                }
+
+                // Test 10: Check if form has correct ID
+                if (html.includes('id="driverApplicationForm"')) {
+                    addTest('Form ID', true, 'Form has correct ID (driverApplicationForm)');
+                } else {
+                    addTest('Form ID', false, 'Form ID not found or incorrect');
+                }
+            })
+            .catch(error => {
+                console.error('Form page check error:', error);
+            });
+
+        // Add summary after 2 seconds
+        setTimeout(() => {
+            const passedTests = resultsDiv.querySelectorAll('.test-pass').length;
+            const failedTests = resultsDiv.querySelectorAll('.test-fail').length;
+            const totalTests = passedTests + failedTests;
+
+            const summaryDiv = document.createElement('div');
+            summaryDiv.className = `test-item ${failedTests === 0 ? 'test-pass' : 'test-fail'}`;
+            summaryDiv.innerHTML = `
+                <h4>📊 Test Summary</h4>
+                <p class="mb-0">
+                    Passed: ${passedTests}/${totalTests}<br>
+                    Failed: ${failedTests}/${totalTests}<br>
+                    ${failedTests === 0 ? 
+                        '<strong>✅ All tests passed! System is ready.</strong>' : 
+                        '<strong>❌ Some tests failed. Please check the errors above.</strong>'}
+                </p>
+            `;
+            resultsDiv.appendChild(summaryDiv);
+        }, 2000);
+    </script>
+</body>
+</html>

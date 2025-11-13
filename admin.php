@@ -59,6 +59,69 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                 $response['message'] = 'Missing booking_id';
             }
             break;
+
+        case 'approve_application':
+            if (isset($_POST['application_id'])) {
+                error_log("Attempting to approve application " . $_POST['application_id']);
+                if (approveDriverApplication($pdo, $_POST['application_id'])) {
+                    $response['success'] = true;
+                    $response['message'] = 'Application approved successfully. Driver added to system.';
+                } else {
+                    $response['message'] = 'Failed to approve application. Please check error logs.';
+                }
+            } else {
+                $response['message'] = 'Missing application_id';
+            }
+            break;
+
+        case 'reject_application':
+            if (isset($_POST['application_id'])) {
+                error_log("Attempting to reject application " . $_POST['application_id']);
+                if (rejectDriverApplication($pdo, $_POST['application_id'])) {
+                    $response['success'] = true;
+                    $response['message'] = 'Application rejected successfully.';
+                } else {
+                    $response['message'] = 'Failed to reject application. Please check error logs.';
+                }
+            } else {
+                $response['message'] = 'Missing application_id';
+            }
+            break;
+
+        case 'get_application_details':
+            if (isset($_POST['application_id'])) {
+                $details = getApplicationDetails($pdo, $_POST['application_id']);
+                if ($details) {
+                    $response['success'] = true;
+                    $response['data'] = $details;
+                } else {
+                    $response['message'] = 'Application not found';
+                }
+            } else {
+                $response['message'] = 'Missing application_id';
+            }
+            break;
+
+        case 'get_driver_details':
+            if (isset($_POST['driver_id'])) {
+                $stmt = $pdo->prepare("SELECT d.*, COUNT(r.id) as total_trips 
+                    FROM tricycle_drivers d 
+                    LEFT JOIN ride_history r ON d.id = r.driver_id AND r.status = 'completed'
+                    WHERE d.id = ?
+                    GROUP BY d.id");
+                $stmt->execute([$_POST['driver_id']]);
+                $driver = $stmt->fetch(PDO::FETCH_ASSOC);
+                
+                if ($driver) {
+                    $response['success'] = true;
+                    $response['data'] = $driver;
+                } else {
+                    $response['message'] = 'Driver not found';
+                }
+            } else {
+                $response['message'] = 'Missing driver_id';
+            }
+            break;
     }
 
     echo json_encode($response);
@@ -105,6 +168,11 @@ $stmt = $pdo->prepare("SELECT u.*, COUNT(r.id) as total_trips
     ORDER BY u.created_at DESC");
 $stmt->execute();
 $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+// Fetch driver applications
+$stmt = $pdo->prepare("SELECT * FROM driver_applications ORDER BY application_date DESC");
+$stmt->execute();
+$driver_applications = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 // Fetch available drivers for assignment
 $available_drivers = getAvailableDrivers($pdo) ?: [];
@@ -262,6 +330,11 @@ $avg_fare = $stmt->fetch(PDO::FETCH_ASSOC)['avg_fare'] ?? 0;
             <li class="nav-item" role="presentation">
                 <button class="nav-link" id="users-tab" data-bs-toggle="tab" data-bs-target="#users" type="button" role="tab">
                     Users
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="applications-tab" data-bs-toggle="tab" data-bs-target="#applications" type="button" role="tab">
+                    Driver Applications
                 </button>
             </li>
         </ul>
@@ -472,10 +545,7 @@ $avg_fare = $stmt->fetch(PDO::FETCH_ASSOC)['avg_fare'] ?? 0;
                         <p class="section-subtitle">Monitor and manage all registered drivers</p>
                     </div>
                     <div>
-                        <input type="text" class="form-control search-input d-inline-block me-2" placeholder="Search drivers..." style="width: 250px;">
-                        <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addDriverModal">
-                            <i class="bi bi-plus-circle me-1"></i> Add
-                        </button>
+                        <input type="text" class="form-control search-input d-inline-block me-2" placeholder="Search drivers..." style="width: 250px;" id="searchDrivers">
                     </div>
                 </div>
 
@@ -515,7 +585,9 @@ $avg_fare = $stmt->fetch(PDO::FETCH_ASSOC)['avg_fare'] ?? 0;
                                     <?php endif; ?>
                                 </td>
                                 <td>
-                                    <button class="btn btn-sm btn-link text-muted"><i class="bi bi-three-dots-vertical"></i></button>
+                                    <button class="btn btn-sm btn-outline-primary" onclick="viewDriverDetails(<?= $driver['id'] ?>)">
+                                        <i class="bi bi-eye"></i> View
+                                    </button>
                                 </td>
                             </tr>
                             <?php endforeach; ?>
@@ -569,41 +641,165 @@ $avg_fare = $stmt->fetch(PDO::FETCH_ASSOC)['avg_fare'] ?? 0;
                 </div>
             </div>
 
+            <!-- Driver Applications Tab -->
+            <div class="tab-pane fade" id="applications" role="tabpanel">
+                <div class="section-header mb-4">
+                    <h5 class="section-title">Driver Applications</h5>
+                    <p class="section-subtitle">Review and manage driver applications</p>
+                    <input type="text" class="form-control search-input" placeholder="Search applications..." id="searchApplications">
+                </div>
+
+                <?php if (empty($driver_applications)): ?>
+                    <div class="empty-state">
+                        <i class="bi bi-inbox" style="font-size: 48px; color: #cbd5e1;"></i>
+                        <p class="text-muted mt-3">No driver applications yet</p>
+                    </div>
+                <?php else: ?>
+                    <div class="table-responsive">
+                        <table class="table data-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Phone</th>
+                                    <th>License #</th>
+                                    <th>Vehicle</th>
+                                    <th>Status</th>
+                                    <th>Applied</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($driver_applications as $app): ?>
+                                <tr>
+                                    <td class="fw-semibold">APP-<?= str_pad($app['id'], 3, '0', STR_PAD_LEFT) ?></td>
+                                    <td>
+                                        <div class="avatar-name">
+                                            <span class="avatar"><?= strtoupper(substr($app['first_name'], 0, 1) . substr($app['last_name'], 0, 1)) ?></span>
+                                            <?= htmlspecialchars($app['first_name'] . ' ' . $app['last_name']) ?>
+                                        </div>
+                                    </td>
+                                    <td class="text-muted"><?= htmlspecialchars($app['email']) ?></td>
+                                    <td><?= htmlspecialchars($app['phone']) ?></td>
+                                    <td><?= htmlspecialchars($app['license_number']) ?></td>
+                                    <td><?= htmlspecialchars($app['vehicle_make'] . ' ' . $app['vehicle_model']) ?></td>
+                                    <td>
+                                        <?php 
+                                        $statusClass = '';
+                                        $statusText = ucfirst(str_replace('_', ' ', $app['status']));
+                                        switch($app['status']) {
+                                            case 'pending':
+                                                $statusClass = 'bg-warning text-dark';
+                                                break;
+                                            case 'under_review':
+                                                $statusClass = 'bg-info text-white';
+                                                break;
+                                            case 'approved':
+                                                $statusClass = 'bg-success';
+                                                break;
+                                            case 'rejected':
+                                                $statusClass = 'bg-danger';
+                                                break;
+                                        }
+                                        ?>
+                                        <span class="badge <?= $statusClass ?> px-3 py-2"><?= $statusText ?></span>
+                                    </td>
+                                    <td class="text-muted"><?= date('M d, Y', strtotime($app['application_date'])) ?></td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-primary" onclick="viewApplicationDetails(<?= $app['id'] ?>)">
+                                            <i class="bi bi-eye"></i> View
+                                        </button>
+                                    </td>
+                                </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                <?php endif; ?>
+            </div>
+
         </div>
     </div>
 
-    <!-- Add Driver Modal -->
-    <div class="modal fade" id="addDriverModal" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered">
+    <!-- View Application Details Modal -->
+    <div class="modal fade" id="viewApplicationModal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header border-0">
-                    <h5 class="modal-title fw-bold">Add New Driver</h5>
+                    <h5 class="modal-title fw-bold">Application Details</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="modal-body">
-                    <p class="text-muted small mb-4">Add a new driver to the system</p>
-                    <form id="addDriverForm">
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">Full Name <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" placeholder="Pedro Santos" required>
+                <div class="modal-body" id="applicationDetailsContent">
+                    <div class="text-center py-4">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">Tricycle Number <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" placeholder="TRY-123" required>
+                    </div>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-danger" id="rejectApplicationBtn">Reject</button>
+                    <button type="button" class="btn btn-success" id="approveApplicationBtn">Approve</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- View Driver Details Modal -->
+    <div class="modal fade" id="viewDriverModal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header border-0">
+                    <h5 class="modal-title fw-bold">Driver Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="driverDetailsContent">
+                    <div class="text-center py-4">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">Phone Number</label>
-                            <input type="tel" class="form-control" placeholder="+63 912 345 6789">
-                        </div>
-                        <div class="mb-4">
-                            <label class="form-label fw-semibold">Email</label>
-                            <input type="email" class="form-control" placeholder="driver@email.com">
-                        </div>
-                        <div class="d-flex gap-2">
-                            <button type="button" class="btn btn-outline-secondary flex-fill" data-bs-dismiss="modal">Cancel</button>
-                            <button type="submit" class="btn btn-success flex-fill">Add Driver</button>
-                        </div>
-                    </form>
+                    </div>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alert Modal -->
+    <div class="modal fade" id="alertModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content">
+                <div class="modal-header border-0 pb-0">
+                    <h6 class="modal-title fw-bold" id="alertModalTitle">Notice</h6>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="alertModalBody">
+                    Message here
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirm Modal -->
+    <div class="modal fade" id="confirmModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header border-0 pb-0">
+                    <h6 class="modal-title fw-bold" id="confirmModalTitle">Confirm Action</h6>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="confirmModalBody">
+                    Are you sure?
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="confirmModalBtn">Confirm</button>
                 </div>
             </div>
         </div>
@@ -801,6 +997,183 @@ $avg_fare = $stmt->fetch(PDO::FETCH_ASSOC)['avg_fare'] ?? 0;
                 }
             });
         }
+
+        // View application details function
+        function viewApplicationDetails(id) {
+            const modal = new bootstrap.Modal(document.getElementById('viewApplicationModal'));
+            const contentDiv = document.getElementById('applicationDetailsContent');
+            
+            // Show loading
+            contentDiv.innerHTML = `
+                <div class="text-center py-4">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            `;
+            
+            // Store application ID for approve/reject buttons
+            document.getElementById('approveApplicationBtn').dataset.applicationId = id;
+            document.getElementById('rejectApplicationBtn').dataset.applicationId = id;
+            
+            modal.show();
+            
+            // Fetch application details using admin.php endpoint
+            fetch('admin.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `action=get_application_details&application_id=${id}`
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        displayApplicationDetails(data.data);
+                    } else {
+                        contentDiv.innerHTML = 
+                            '<div class="alert alert-danger">Failed to load application details: ' + (data.message || 'Unknown error') + '</div>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    contentDiv.innerHTML = 
+                        '<div class="alert alert-danger">Error loading application details</div>';
+                });
+        }
+
+        function displayApplicationDetails(app) {
+            const html = `
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <h6 class="fw-bold mb-3"><i class="bi bi-person me-2"></i>Personal Information</h6>
+                        <p class="mb-2"><strong>Name:</strong> ${app.first_name} ${app.middle_name || ''} ${app.last_name}</p>
+                        <p class="mb-2"><strong>Date of Birth:</strong> ${app.date_of_birth}</p>
+                        <p class="mb-2"><strong>Email:</strong> ${app.email}</p>
+                        <p class="mb-2"><strong>Phone:</strong> ${app.phone}</p>
+                        <p class="mb-2"><strong>Address:</strong> ${app.address}, ${app.barangay}, ${app.city} ${app.zip_code}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="fw-bold mb-3"><i class="bi bi-card-text me-2"></i>Driver Information</h6>
+                        <p class="mb-2"><strong>License #:</strong> ${app.license_number}</p>
+                        <p class="mb-2"><strong>License Expiry:</strong> ${app.license_expiry}</p>
+                        <p class="mb-2"><strong>Driving Experience:</strong> ${app.driving_experience}</p>
+                        <p class="mb-2"><strong>Emergency Contact:</strong> ${app.emergency_name} (${app.emergency_phone})</p>
+                        <p class="mb-2"><strong>Relationship:</strong> ${app.relationship}</p>
+                    </div>
+                    <div class="col-12">
+                        <hr>
+                        <h6 class="fw-bold mb-3"><i class="bi bi-truck me-2"></i>Vehicle Information</h6>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p class="mb-2"><strong>Type:</strong> ${app.vehicle_type}</p>
+                                <p class="mb-2"><strong>Plate #:</strong> ${app.plate_number}</p>
+                                <p class="mb-2"><strong>Franchise #:</strong> ${app.franchise_number}</p>
+                            </div>
+                            <div class="col-md-6">
+                                <p class="mb-2"><strong>Make:</strong> ${app.vehicle_make}</p>
+                                <p class="mb-2"><strong>Model:</strong> ${app.vehicle_model}</p>
+                                <p class="mb-2"><strong>Year:</strong> ${app.vehicle_year}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <hr>
+                        <h6 class="fw-bold mb-3"><i class="bi bi-file-earmark-text me-2"></i>Documents</h6>
+                        <div class="row g-2">
+                            ${app.license_document ? `<div class="col-md-4"><a href="${app.license_document}" target="_blank" class="btn btn-sm btn-outline-primary w-100"><i class="bi bi-file-pdf me-1"></i> Driver's License</a></div>` : ''}
+                            ${app.government_id_document ? `<div class="col-md-4"><a href="${app.government_id_document}" target="_blank" class="btn btn-sm btn-outline-primary w-100"><i class="bi bi-file-pdf me-1"></i> Government ID</a></div>` : ''}
+                            ${app.registration_document ? `<div class="col-md-4"><a href="${app.registration_document}" target="_blank" class="btn btn-sm btn-outline-primary w-100"><i class="bi bi-file-pdf me-1"></i> Vehicle Registration</a></div>` : ''}
+                            ${app.franchise_document ? `<div class="col-md-4"><a href="${app.franchise_document}" target="_blank" class="btn btn-sm btn-outline-primary w-100"><i class="bi bi-file-pdf me-1"></i> Franchise Permit</a></div>` : ''}
+                            ${app.insurance_document ? `<div class="col-md-4"><a href="${app.insurance_document}" target="_blank" class="btn btn-sm btn-outline-primary w-100"><i class="bi bi-file-pdf me-1"></i> Insurance</a></div>` : ''}
+                            ${app.clearance_document ? `<div class="col-md-4"><a href="${app.clearance_document}" target="_blank" class="btn btn-sm btn-outline-primary w-100"><i class="bi bi-file-pdf me-1"></i> Barangay Clearance</a></div>` : ''}
+                            ${app.photo_document ? `<div class="col-md-4"><a href="${app.photo_document}" target="_blank" class="btn btn-sm btn-outline-primary w-100"><i class="bi bi-image me-1"></i> ID Photo</a></div>` : ''}
+                        </div>
+                    </div>
+                    ${app.previous_experience ? `
+                    <div class="col-12">
+                        <hr>
+                        <h6 class="fw-bold mb-3"><i class="bi bi-chat-left-text me-2"></i>Previous Experience</h6>
+                        <p class="text-muted">${app.previous_experience}</p>
+                    </div>
+                    ` : ''}
+                </div>
+            `;
+            document.getElementById('applicationDetailsContent').innerHTML = html;
+            
+            // Enable/disable buttons based on application status
+            const approveBtn = document.getElementById('approveApplicationBtn');
+            const rejectBtn = document.getElementById('rejectApplicationBtn');
+            
+            if (app.status !== 'pending') {
+                approveBtn.disabled = true;
+                rejectBtn.disabled = true;
+                approveBtn.textContent = 'Already ' + app.status.charAt(0).toUpperCase() + app.status.slice(1);
+            } else {
+                approveBtn.disabled = false;
+                rejectBtn.disabled = false;
+                approveBtn.textContent = 'Approve';
+            }
+        }
+
+        // Search functionality - Wait for DOM to be ready
+        document.addEventListener('DOMContentLoaded', function() {
+            // Search functionality for bookings
+            const searchBookings = document.getElementById('searchBookings');
+            if (searchBookings) {
+                searchBookings.addEventListener('input', function(e) {
+                    const searchTerm = e.target.value.toLowerCase();
+                    const rows = document.querySelectorAll('#all-bookings table tbody tr');
+                    
+                    rows.forEach(row => {
+                        const text = row.textContent.toLowerCase();
+                        row.style.display = text.includes(searchTerm) ? '' : 'none';
+                    });
+                });
+            }
+
+            // Search functionality for drivers
+            const searchDrivers = document.getElementById('searchDrivers');
+            if (searchDrivers) {
+                searchDrivers.addEventListener('input', function(e) {
+                    const searchTerm = e.target.value.toLowerCase();
+                    const rows = document.querySelectorAll('#drivers table tbody tr');
+                    
+                    rows.forEach(row => {
+                        const text = row.textContent.toLowerCase();
+                        row.style.display = text.includes(searchTerm) ? '' : 'none';
+                    });
+                });
+            }
+
+            // Search functionality for users
+            const searchUsers = document.getElementById('searchUsers');
+            if (searchUsers) {
+                searchUsers.addEventListener('input', function(e) {
+                    const searchTerm = e.target.value.toLowerCase();
+                    const rows = document.querySelectorAll('#users table tbody tr');
+                    
+                    rows.forEach(row => {
+                        const text = row.textContent.toLowerCase();
+                        row.style.display = text.includes(searchTerm) ? '' : 'none';
+                    });
+                });
+            }
+
+            // Search functionality for applications
+            const searchApplications = document.getElementById('searchApplications');
+            if (searchApplications) {
+                searchApplications.addEventListener('input', function(e) {
+                    const searchTerm = e.target.value.toLowerCase();
+                    const rows = document.querySelectorAll('#applications table tbody tr');
+                    
+                    rows.forEach(row => {
+                        const text = row.textContent.toLowerCase();
+                        row.style.display = text.includes(searchTerm) ? '' : 'none';
+                    });
+                });
+            }
+        });
     </script>
 </body>
 </html>

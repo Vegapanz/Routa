@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bug Fix Test - Upload & Checkbox</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        body { padding: 40px; background: #f8fafc; }
+        .test-box { background: white; padding: 30px; border-radius: 12px; margin-bottom: 30px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        
+        /* Upload Box Styling */
+        .upload-box {
+            border: 2px dashed #cbd5e1;
+            border-radius: 12px;
+            padding: 2rem 1.5rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            background: #f8fafc;
+            min-height: 200px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .upload-box:hover {
+            border-color: #94a3b8;
+            background: #f1f5f9;
+        }
+        
+        .upload-box.active {
+            border-color: #10b981 !important;
+            background: #dcfce7 !important;
+            border-style: solid !important;
+        }
+        
+        .upload-box i {
+            font-size: 2.5rem;
+            color: #94a3b8;
+            margin-bottom: 1rem;
+        }
+        
+        .upload-box.active i {
+            color: #10b981;
+        }
+        
+        .file-name {
+            display: block;
+            margin-top: 0.75rem;
+            font-size: 0.8125rem;
+            color: #10b981;
+            font-weight: 500;
+        }
+        
+        /* Checkbox Styling */
+        input[type="checkbox"].custom-checkbox {
+            -webkit-appearance: none !important;
+            -moz-appearance: none !important;
+            appearance: none !important;
+            width: 22px !important;
+            height: 22px !important;
+            border: 2px solid #cbd5e1 !important;
+            border-radius: 4px !important;
+            background-color: white !important;
+            cursor: pointer !important;
+            position: relative !important;
+            display: inline-block !important;
+            vertical-align: middle !important;
+            margin-right: 10px !important;
+        }
+        
+        input[type="checkbox"].custom-checkbox:hover {
+            border-color: #10b981 !important;
+        }
+        
+        input[type="checkbox"].custom-checkbox:checked {
+            background-color: #10b981 !important;
+            border-color: #10b981 !important;
+        }
+        
+        input[type="checkbox"].custom-checkbox:checked::after {
+            content: '' !important;
+            position: absolute !important;
+            display: block !important;
+            left: 6px !important;
+            top: 2px !important;
+            width: 5px !important;
+            height: 10px !important;
+            border: solid white !important;
+            border-width: 0 3px 3px 0 !important;
+            transform: rotate(45deg) !important;
+        }
+        
+        .status { 
+            margin-top: 15px; 
+            padding: 15px; 
+            border-radius: 8px; 
+            font-weight: 600;
+        }
+        .status.waiting { background: #fff3cd; color: #856404; }
+        .status.success { background: #d4edda; color: #155724; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="mb-4">🐛 Bug Fix Verification</h1>
+        
+        <!-- Test 1: Upload Box -->
+        <div class="test-box">
+            <h3>Test 1: Upload Box (Should NOT be green without file)</h3>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="upload-box" id="testUploadBox">
+                        <i class="bi bi-cloud-upload"></i>
+                        <h5>Test Document</h5>
+                        <p>Should only turn green AFTER uploading a file</p>
+                        <input type="file" id="testFile" accept=".jpg,.jpeg,.png,.pdf" hidden>
+                        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="document.getElementById('testFile').click()">Choose File</button>
+                        <span class="file-name" id="testFileName"></span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="status waiting" id="uploadStatus">
+                        <strong>Status:</strong> No file uploaded<br>
+                        <strong>Expected:</strong> Gray border, light gray background<br>
+                        <strong>Bug (if exists):</strong> Green on hover without file
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Test 2: Checkboxes -->
+        <div class="test-box">
+            <h3>Test 2: Checkboxes (Should show checkmark AND fill background)</h3>
+            
+            <div style="display: flex; align-items: flex-start; margin-bottom: 20px;">
+                <input type="checkbox" class="custom-checkbox" id="testCheck1">
+                <label for="testCheck1" style="cursor: pointer; flex: 1;">
+                    I agree to the <span style="color: #10b981; font-weight: 600;">Terms and Conditions</span> and <span style="color: #10b981; font-weight: 600;">Privacy Policy</span> of Routa.
+                </label>
+            </div>
+
+            <div style="display: flex; align-items: flex-start;">
+                <input type="checkbox" class="custom-checkbox" id="testCheck2">
+                <label for="testCheck2" style="cursor: pointer; flex: 1;">
+                    I consent to a background check and verification of all submitted documents and information.
+                </label>
+            </div>
+
+            <div class="status waiting" id="checkboxStatus" style="margin-top: 20px;">
+                <strong>Expected when checked:</strong><br>
+                ✅ Green filled background (#10b981)<br>
+                ✅ White checkmark (✓) visible inside<br>
+                ✅ Green border<br><br>
+                
+                <strong>Current Status:</strong><br>
+                Checkbox 1: <span id="check1State">Unchecked</span><br>
+                Checkbox 2: <span id="check2State">Unchecked</span>
+            </div>
+        </div>
+
+        <div class="alert alert-info">
+            <h5>✅ Expected Results:</h5>
+            <ul class="mb-0">
+                <li><strong>Upload Box:</strong> Only turns green AFTER you select a file</li>
+                <li><strong>Checkboxes:</strong> Show WHITE checkmark on GREEN background when clicked</li>
+            </ul>
+        </div>
+
+        <div class="text-center mt-4">
+            <a href="driver-application.php" class="btn btn-success btn-lg">Test on Real Form</a>
+        </div>
+    </div>
+
+    <script>
+        // Test 1: File Upload
+        const testFile = document.getElementById('testFile');
+        const uploadBox = document.getElementById('testUploadBox');
+        const testFileName = document.getElementById('testFileName');
+        const uploadStatus = document.getElementById('uploadStatus');
+
+        testFile.addEventListener('change', function(e) {
+            const fileName = e.target.files[0]?.name;
+            
+            if (fileName) {
+                testFileName.textContent = fileName;
+                uploadBox.classList.add('active');
+                uploadStatus.className = 'status success';
+                uploadStatus.innerHTML = `
+                    <strong>Status:</strong> File uploaded! ✅<br>
+                    <strong>File:</strong> ${fileName}<br>
+                    <strong>Result:</strong> Box is now GREEN
+                `;
+            } else {
+                testFileName.textContent = '';
+                uploadBox.classList.remove('active');
+                uploadStatus.className = 'status waiting';
+                uploadStatus.innerHTML = `
+                    <strong>Status:</strong> No file uploaded<br>
+                    <strong>Expected:</strong> Gray border, light gray background
+                `;
+            }
+        });
+
+        // Test 2: Checkboxes
+        const check1 = document.getElementById('testCheck1');
+        const check2 = document.getElementById('testCheck2');
+        const check1State = document.getElementById('check1State');
+        const check2State = document.getElementById('check2State');
+        const checkboxStatus = document.getElementById('checkboxStatus');
+
+        function updateCheckboxStatus() {
+            const checked1 = check1.checked;
+            const checked2 = check2.checked;
+            
+            check1State.textContent = checked1 ? '✅ Checked' : '⬜ Unchecked';
+            check1State.style.color = checked1 ? '#10b981' : '#6c757d';
+            check1State.style.fontWeight = checked1 ? 'bold' : 'normal';
+            
+            check2State.textContent = checked2 ? '✅ Checked' : '⬜ Unchecked';
+            check2State.style.color = checked2 ? '#10b981' : '#6c757d';
+            check2State.style.fontWeight = checked2 ? 'bold' : 'normal';
+            
+            if (checked1 && checked2) {
+                checkboxStatus.className = 'status success';
+            } else {
+                checkboxStatus.className = 'status waiting';
+            }
+        }
+
+        check1.addEventListener('change', updateCheckboxStatus);
+        check2.addEventListener('change', updateCheckboxStatus);
+
+        // Log on load
+        console.log('✅ Test page loaded');
+        console.log('📦 Upload box should be gray (not green)');
+        console.log('☑️ Checkboxes should show checkmark when clicked');
+    </script>
+</body>
+</html>

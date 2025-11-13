@@ -1,0 +1,366 @@
+/* Be a Driver Page Styles */
+
+/* Hero Section */
+.driver-hero-section {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    padding: 140px 0 80px;
+    color: white;
+    min-height: 600px;
+    display: flex;
+    align-items: center;
+}
+
+.driver-hero-title {
+    font-size: 3.5rem;
+    font-weight: 800;
+    margin-bottom: 1.5rem;
+    line-height: 1.2;
+    font-family: 'Sora', sans-serif;
+}
+
+.driver-hero-subtitle {
+    font-size: 1.25rem;
+    margin-bottom: 2rem;
+    opacity: 0.95;
+    line-height: 1.6;
+}
+
+.driver-hero-section .btn-warning {
+    background: #fbbf24;
+    border: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    color: #1e293b;
+}
+
+.driver-hero-section .btn-warning:hover {
+    background: #f59e0b;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(251, 191, 36, 0.3);
+    color: #1e293b;
+}
+
+.driver-hero-section .btn-outline-light {
+    border: 2px solid white;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    color: white;
+}
+
+.driver-hero-section .btn-outline-light:hover {
+    background: white;
+    color: #10b981;
+    transform: translateY(-2px);
+}
+
+/* Benefits Section */
+.driver-benefits-section {
+    padding: 80px 0;
+    background: #ffffff;
+}
+
+.section-title {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: #1e293b;
+    margin-bottom: 1rem;
+    font-family: 'Sora', sans-serif;
+}
+
+.section-subtitle {
+    font-size: 1.125rem;
+    color: #64748b;
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+.benefit-card {
+    background: #f8fafc;
+    padding: 2.5rem 2rem;
+    border-radius: 16px;
+    transition: all 0.3s ease;
+    height: 100%;
+    text-align: center;
+    border: 1px solid #e2e8f0;
+}
+
+.benefit-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08);
+    background: white;
+}
+
+.benefit-icon {
+    width: 80px;
+    height: 80px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+    font-size: 2.25rem;
+}
+
+.mint-bg {
+    background: #d1fae5;
+    color: #10b981;
+}
+
+.yellow-bg {
+    background: #fef3c7;
+    color: #f59e0b;
+}
+
+.peach-bg {
+    background: #fef5e7;
+    color: #f97316;
+}
+
+.benefit-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 0.75rem;
+    font-family: 'Sora', sans-serif;
+}
+
+.benefit-description {
+    color: #64748b;
+    margin-bottom: 0;
+    line-height: 1.6;
+    font-size: 0.9375rem;
+}
+
+/* Requirements Section */
+.driver-requirements-section {
+    padding: 80px 0;
+    background: #f8fafc;
+}
+
+.requirements-heading {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 2rem;
+    font-family: 'Sora', sans-serif;
+}
+
+.requirements-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.requirements-list li {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.25rem 0;
+    border-bottom: 1px solid #e2e8f0;
+    font-size: 1.0625rem;
+    color: #334155;
+}
+
+.requirements-list li:last-child {
+    border-bottom: none;
+}
+
+.requirement-icon {
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 1.5rem;
+}
+
+.requirement-icon.green {
+    color: #10b981;
+}
+
+.requirement-icon.yellow {
+    color: #f59e0b;
+}
+
+/* Getting Started Section */
+.getting-started-section {
+    padding: 80px 0;
+    background: #ffffff;
+}
+
+.step-card {
+    background: white;
+    padding: 2.5rem 2rem;
+    border-radius: 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    text-align: center;
+    height: 100%;
+    transition: all 0.3s ease;
+    border: 1px solid #e2e8f0;
+}
+
+.step-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+}
+
+.step-number {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+    font-size: 2.5rem;
+    font-weight: 800;
+    font-family: 'Sora', sans-serif;
+}
+
+.step-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 1rem;
+    font-family: 'Sora', sans-serif;
+}
+
+.step-description {
+    color: #64748b;
+    margin-bottom: 0;
+    line-height: 1.6;
+    font-size: 0.9375rem;
+}
+
+/* Statistics Section */
+.statistics-section {
+    padding: 80px 0;
+    background: #ffffff;
+    border-top: 1px solid #e2e8f0;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.stat-card {
+    padding: 2rem;
+}
+
+.stat-number {
+    font-size: 3.5rem;
+    font-weight: 800;
+    color: #10b981;
+    margin-bottom: 0.75rem;
+    line-height: 1;
+    font-family: 'Sora', sans-serif;
+}
+
+.stat-label {
+    font-size: 1.125rem;
+    color: #64748b;
+    margin-bottom: 0;
+    font-weight: 500;
+}
+
+/* CTA Section */
+.driver-cta-section {
+    padding: 100px 0;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+}
+
+.cta-title {
+    font-size: 3rem;
+    font-weight: 800;
+    margin-bottom: 1rem;
+    font-family: 'Sora', sans-serif;
+}
+
+.cta-subtitle {
+    font-size: 1.25rem;
+    opacity: 0.95;
+    margin-bottom: 2rem;
+    line-height: 1.6;
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.driver-cta-section .btn-warning {
+    background: #fbbf24;
+    border: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    color: #1e293b;
+    font-size: 1.125rem;
+}
+
+.driver-cta-section .btn-warning:hover {
+    background: #f59e0b;
+    transform: translateY(-3px);
+    box-shadow: 0 15px 30px rgba(251, 191, 36, 0.4);
+    color: #1e293b;
+}
+
+/* Navbar adjustments for driver page */
+.navbar .btn-success {
+    background: #10b981;
+    border: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.navbar .btn-success:hover {
+    background: #059669;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+/* Responsive Design */
+@media (max-width: 991px) {
+    .driver-hero-title {
+        font-size: 2.5rem;
+    }
+    
+    .section-title {
+        font-size: 2rem;
+    }
+    
+    .cta-title {
+        font-size: 2.25rem;
+    }
+}
+
+@media (max-width: 767px) {
+    .driver-hero-section {
+        padding: 120px 0 60px;
+        min-height: auto;
+    }
+    
+    .driver-hero-title {
+        font-size: 2rem;
+    }
+    
+    .driver-hero-subtitle {
+        font-size: 1.0625rem;
+    }
+    
+    .section-title {
+        font-size: 1.75rem;
+    }
+    
+    .stat-number {
+        font-size: 2.5rem;
+    }
+    
+    .cta-title {
+        font-size: 1.875rem;
+    }
+    
+    .benefit-icon {
+        width: 70px;
+        height: 70px;
+        font-size: 2rem;
+    }
+}

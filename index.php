@@ -38,6 +38,7 @@
                     <li class="nav-item"><a class="nav-link" href="#services">Services</a></li>
                     <li class="nav-item"><a class="nav-link" href="#download">Download App</a></li>
                     <li class="nav-item"><a class="nav-link" href="#contact">Contact</a></li>
+                    <li class="nav-item"><a class="nav-link" href="be-a-driver.php">Be a Driver</a></li>
                     <li class="nav-item"><a class="nav-link btn-book-ride" href="login.php">Book a Ride</a></li>
                 </ul>
             </div>
