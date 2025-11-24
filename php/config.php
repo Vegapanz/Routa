@@ -53,7 +53,7 @@ try {
 // Google OAuth Configuration
 define('GOOGLE_CLIENT_ID', '941913119965-kld04cl0a3ugka2b0est8l022ji6b8ur.apps.googleusercontent.com');
 define('GOOGLE_CLIENT_SECRET', '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');
-define('GOOGLE_REDIRECT_URI', 'http://localhost/Routas/php/google-callback.php');
+define('GOOGLE_REDIRECT_URI', 'http://localhost/Routa/php/google-callback.php');
 
 // Facebook OAuth Configuration
 define('FACEBOOK_APP_ID', 'YOUR_FACEBOOK_APP_ID');
@@ -62,4 +62,5 @@ define('FACEBOOK_REDIRECT_URI', 'http://localhost/Routa/php/facebook-callback.ph
 
 // Base URL
 define('BASE_URL', 'http://localhost/Routa');
+
 ?>
