@@ -83,6 +83,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         echo json_encode([
             'success' => true, 
             'message' => 'Phone verified successfully',
+            'phone' => $normalizedPhone, // Return normalized phone to JavaScript
             'debug' => [
                 'phone_sent' => $phone,
                 'phone_normalized' => $normalizedPhone,
