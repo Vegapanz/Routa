@@ -17,7 +17,7 @@ Before installing, ensure you have:
 ### Option A: Clone from GitHub
 
 ```bash
-git clone https://github.com/vegapanz/routa
+git clone https://github.com/vegapanz/routa.git
 cd routa
 ```
 
@@ -59,14 +59,14 @@ Import the SQL file using one of these methods:
 
 **Option B: MySQL Command Line**
 ```bash
-mysql -u root -p routa_db < database/routa_db.sql
+mysql -u root -p routa_db < database/routa_database.sql
 ```
 
 **Option C: MySQL Workbench**
 1. Open MySQL Workbench
 2. Server → Data Import
 3. Import from Self-Contained File
-4. Select `database/routa_db.sql`
+4. Select `database/routa_database.sql`
 5. Start Import
 
 ### Verify Tables
@@ -287,4 +287,3 @@ If you encounter issues:
 2. Enable error reporting in development
 3. Review `TROUBLESHOOTING.md`
 4. Open an issue on GitHub
-
