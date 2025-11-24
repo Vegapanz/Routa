@@ -1,265 +1,169 @@
-# 🚖 ROUTA - Tricycle Booking System
+# Routa - Tricycle Booking System
 
-A complete ride-hailing platform for tricycle services with real-time booking, GPS tracking, and admin management.
+A modern, responsive web-based tricycle booking system built with PHP, MySQL, and Bootstrap.
+
+## 🚀 Features
+
+- **User Dashboard** - Book rides, view history, rate drivers
+- **Driver Dashboard** - Accept rides, manage trips, view earnings
+- **Admin Dashboard** - Manage users, drivers, bookings, and analytics
+- **Real-time Updates** - AJAX polling for live booking status
+- **Responsive Design** - Works on desktop, tablet, and mobile
+- **Email Notifications** - PHPMailer integration
+- **OAuth Login** - Google and Facebook authentication
+- **Rating System** - Rate drivers after completed trips
+- **Secure** - PDO prepared statements, password hashing, session management
+
+## 📋 Requirements
+
+- PHP 7.4 or higher
+- MySQL 8.0 or higher
+- Apache/Nginx web server
+- Composer (for dependencies)
+
+## 🛠️ Installation
+
+### 1. Clone Repository
+
+```bash
+git clone https://github.com/yourusername/routa.git
+cd routa
+```
+
+### 2. Install Dependencies
+
+```bash
+composer install
+```
+
+### 3. Database Setup
+
+1. Create a MySQL database
+2. Import `database/routa_database.sql`
+3. Configure database connection in `includes/config/database.php`
+
+### 4. Configuration
+
+1. Copy `includes/config/production.example.php` to `includes/config/production.php`
+2. Update configuration:
+   - Database credentials
+   - Base URL
+   - Email settings (PHPMailer)
+   - OAuth credentials (Google/Facebook)
+
+### 5. File Permissions
+
+```bash
+chmod 755 uploads/
+chmod 755 logs/
+```
 
 ## 📁 Project Structure
 
 ```
-Routa/
-├── index.php                    # Landing page
-├── login.php                    # Login page (User/Driver/Admin)
-├── register.php                 # User registration
-├── userdashboard.php            # User dashboard & booking
-├── driver_dashboard.php         # Driver dashboard & trip management
-├── admin.php                    # Admin dashboard & management
-│
-├── assets/                      # Frontend assets
-│   ├── css/                     # Stylesheets
-│   │   ├── style.css           # Global styles
-│   │   ├── auth.css            # Login/Register styles
-│   │   ├── admin.css           # Admin dashboard styles
-│   │   ├── userdashboard-clean.css
-│   │   ├── components/         # Component styles
-│   │   └── pages/              # Page-specific styles
-│   ├── images/                  # Images and icons
-│   └── js/                      # JavaScript files
-│       ├── main.js             # Global JS
-│       ├── dashboard.js        # User dashboard JS
-│       ├── admin.js            # Admin dashboard JS
-│       └── pages/              # Page-specific JS
-│           ├── home.js
-│           ├── login.js
-│           ├── register.js
-│           └── driver-dashboard.js
-│
-├── php/                         # Backend PHP scripts
-│   ├── config.php              # Database configuration
-│   ├── login.php               # Login handler
-│   ├── register.php            # Registration handler
-│   ├── logout.php              # Logout handler
-│   ├── book_ride.php           # Ride booking API
-│   ├── booking_api.php         # Booking management API
-│   ├── send_otp.php            # OTP sending
-│   ├── verify_otp.php          # OTP verification
-│   ├── admin_functions.php     # Admin utilities
-│   ├── check_admin.php         # Admin authentication
-│   └── includes/               # Reusable PHP components
-│       ├── header.php
-│       └── footer.php
-│
-├── database/                    # Database files
-│   ├── routa_database.sql      # 🌟 MAIN DATABASE (Use this!)
-│   ├── database.sql            # Original schema (reference)
-│   └── seed.sql                # Additional seed data
-│
-├── docs/                        # Documentation
-│   ├── QUICK_START.md          # Quick start guide
-│   ├── API_QUICK_GUIDE.md      # API documentation
-│   ├── SETUP_CHECKLIST.md      # Setup instructions
-│   ├── FILE_STRUCTURE.md       # This file structure
-│   └── [Other guides...]       # Feature-specific docs
-│
-├── tests/                       # Test files
-│   ├── test_*.php              # PHP test scripts
-│   └── test_*.html             # HTML test pages
-│
-└── _old_migrations/            # Archived SQL migrations
-    ├── add_*.sql               # Old addition scripts
-    ├── update_*.sql            # Old update scripts
-    └── [Other migrations...]   # No longer needed
+routa/
+├── assets/           # CSS, JS, images
+├── components/       # Reusable components
+├── database/         # SQL files
+├── includes/         # Configuration & functions
+│   ├── config/      # Database, constants, session
+│   ├── functions/   # Validation, helpers
+│   └── handlers/    # Request handlers
+├── php/             # Backend logic
+├── uploads/         # User uploaded files
+├── vendor/          # Composer dependencies
+└── *.php            # Main pages
 ```
 
-## 🚀 Quick Setup
+## 🔧 Configuration Files
 
-### 1. Database Setup (IMPORTANT!)
+- `includes/config/database.php` - Database connection
+- `includes/config/constants.php` - Application constants
+- `includes/config/session.php` - Session management
+- `includes/config/production.php` - Production settings
 
-**Use the clean consolidated database:**
+## 📖 Usage
 
-```bash
-# In phpMyAdmin or MySQL terminal:
-1. Open: database/routa_database.sql
-2. Execute the entire file
-3. Done! ✓
-```
+### For Users
+1. Register/Login
+2. Book a ride by entering pickup and destination
+3. Wait for driver acceptance
+4. Track ride status
+5. Rate driver after completion
 
-This single file includes:
-- ✅ All tables with proper structure
-- ✅ Sample users, drivers, admin
-- ✅ All features (OAuth, OTP, ratings, tracking)
-- ✅ Proper indexes and foreign keys
-- ✅ Clean, commented structure
+### For Drivers
+1. Apply through driver application form
+2. Login with approved credentials
+3. View available ride requests
+4. Accept and complete rides
+5. View earnings and statistics
 
-**Login Credentials:**
-- **User:** juan@email.com / password
-- **Driver:** pedro@driver.com / password
-- **Admin:** admin@routa.com / admin123
+### For Admins
+1. Login with admin credentials
+2. Manage users and drivers
+3. View all bookings and analytics
+4. Approve/reject driver applications
 
-### 2. Configure Database Connection
+## 🌐 Deployment
 
-Edit `php/config.php`:
-```php
-$host = 'localhost';
-$dbname = 'routa_db';
-$username = 'root';
-$password = '';  // Your MySQL password
-```
+See deployment guides:
+- `QUICK_START_DEPLOY.md` - Quick 10-minute guide
+- `DEPLOYMENT_FINAL_CHECKLIST.md` - Complete checklist
+- `INFINITYFREE_DEPLOYMENT_GUIDE.md` - Free hosting guide
 
-### 3. Start XAMPP
+## 🔒 Security Features
 
-```bash
-1. Start Apache
-2. Start MySQL
-3. Open: http://localhost/Routa
-```
+- Password hashing with `password_hash()`
+- PDO prepared statements for SQL injection prevention
+- Session security (httpOnly, SameSite)
+- Input validation and sanitization
+- CSRF protection
+- File upload validation
 
-## 📊 Database Schema Overview
+## 📧 Email Configuration
 
-### Core Tables
-- **users** - Passenger/customer accounts
-- **tricycle_drivers** - Driver accounts with location
-- **admins** - Admin accounts
-- **ride_history** - All bookings and trips
+Configure PHPMailer in `includes/config/constants.php`:
+- SMTP settings
+- Email credentials
+- From address
 
-### Features
-- **sessions** - User session management
-- **otp_verifications** - Phone verification
-- **driver_locations** - Real-time GPS tracking
-- **driver_earnings** - Financial tracking
-- **fare_settings** - Pricing configuration
-- **ride_notifications** - Push notifications
+## 🗺️ Google Maps Integration
 
-### Views
-- **active_rides** - Quick access to ongoing trips
+1. Get API key from Google Cloud Console
+2. Update `GOOGLE_MAPS_API_KEY` in `includes/config/constants.php`
 
-## 🎯 Key Features
+## 🔑 OAuth Setup
 
-### User Features
-- ✅ Book rides with pickup/destination
-- ✅ Real-time driver tracking
-- ✅ Rate drivers after trip
-- ✅ View trip history
-- ✅ OAuth login (Google/Facebook)
-- ✅ Phone verification with OTP
+### Google OAuth
+1. Create project in Google Cloud Console
+2. Configure OAuth consent screen
+3. Update `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET`
 
-### Driver Features
-- ✅ Accept/reject ride requests
-- ✅ Start/complete trips
-- ✅ View earnings and statistics
-- ✅ Online/offline status
-- ✅ Trip history
+### Facebook OAuth
+1. Create app in Facebook Developers
+2. Update `FACEBOOK_APP_ID` and `FACEBOOK_APP_SECRET`
 
-### Admin Features
-- ✅ View all bookings
-- ✅ Assign drivers to pending bookings
-- ✅ Monitor active rides
-- ✅ View analytics and statistics
-- ✅ Manage users and drivers
-- ✅ Configure fare settings
+## 🐛 Troubleshooting
 
-## 📝 Important Files
+- **Database connection errors**: Check credentials in `includes/config/database.php`
+- **Email not sending**: Verify SMTP settings and credentials
+- **Session issues**: Check PHP session configuration
+- **Upload errors**: Verify folder permissions (755 or 777)
 
-### Must Configure
-1. `php/config.php` - Database connection
-2. `database/routa_database.sql` - Main database file
+## 📝 License
 
-### Main Entry Points
-- `index.php` - Homepage
-- `login.php` - Universal login
-- `userdashboard.php` - User interface
-- `driver_dashboard.php` - Driver interface
-- `admin.php` - Admin interface
+MIT License - See LICENSE file
 
-### API Endpoints
-- `php/book_ride.php` - Create booking
-- `php/booking_api.php` - Booking management
-- `php/send_otp.php` - Send OTP code
-- `php/verify_otp.php` - Verify OTP
+## 👨‍💻 Author
 
-## 🗂️ File Organization
+Your Name - [@yourusername](https://github.com/yourusername)
 
-### Clean Structure Benefits
-✅ All documentation in `/docs`
-✅ All tests in `/tests`
-✅ One main database file in `/database`
-✅ Old migrations archived in `/_old_migrations`
-✅ Easy to navigate and maintain
+## 🤝 Contributing
 
-### What Got Cleaned Up
-- 🗑️ 10+ SQL migration files → 1 clean database file
-- 🗑️ 15+ MD documentation files → Organized in `/docs`
-- 🗑️ Test files → Moved to `/tests`
-- 🗑️ Debug files → Archived
+Contributions welcome! Please open an issue or submit a pull request.
 
-## 🔧 Development
+## 📞 Support
 
-### Adding New Features
-1. Database changes: Update `database/routa_database.sql`
-2. Backend: Add PHP files in `php/`
-3. Frontend: Add JS in `assets/js/`, CSS in `assets/css/`
-4. Document: Add guide in `docs/`
-
-### Testing
-1. Use files in `/tests` folder
-2. Or create new test files there
-3. Never commit test files to production
-
-## 📖 Documentation
-
-All guides are in `/docs`:
-- `QUICK_START.md` - Get started quickly
-- `API_QUICK_GUIDE.md` - API reference
-- `GOOGLE_OAUTH_SETUP.md` - OAuth setup
-- `OTP_SETUP_GUIDE.md` - OTP configuration
-- `COMPLETE_TRIP_FLOW.md` - Trip completion flow
-- And more...
-
-## 🆘 Troubleshooting
-
-**Database won't import?**
-- Use `database/routa_database.sql` (the clean one)
-- Make sure MySQL is running
-- Check for existing `routa_db` database (it will be dropped)
-
-**Login doesn't work?**
-- Verify database is imported
-- Check `php/config.php` credentials
-- Ensure Apache and MySQL are running
-
-**Missing tables?**
-- Re-import `database/routa_database.sql`
-- Don't use old migration files from `_old_migrations/`
-
-## 📦 Deployment Checklist
-
-- [ ] Import `database/routa_database.sql`
-- [ ] Configure `php/config.php`
-- [ ] Set proper file permissions
-- [ ] Enable error logging
-- [ ] Test all login types (user/driver/admin)
-- [ ] Test booking flow
-- [ ] Verify OTP (if using)
-- [ ] Test OAuth (if using)
-
-## 🎓 Learning Resources
-
-Check `/docs` folder for detailed guides on:
-- Setting up OAuth
-- Implementing OTP
-- Understanding the booking flow
-- API documentation
-- Database schema details
-
-## 📄 License
-
-[Your License Here]
-
-## 👥 Credits
-
-Developed for tricycle booking services
-
----
-
-**Version:** 2.0 (Cleaned & Organized)
-**Last Updated:** November 2025
-
-🎉 **Everything is now organized and clean!**
+For issues and questions:
+- GitHub Issues: https://github.com/yourusername/routa/issues
+- Email: your.email@example.com
