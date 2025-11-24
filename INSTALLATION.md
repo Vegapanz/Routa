@@ -17,7 +17,7 @@ Before installing, ensure you have:
 ### Option A: Clone from GitHub
 
 ```bash
-git clone https://github.com/yourusername/routa.git
+git clone https://github.com/vegapanz/routa
 cd routa
 ```
 
@@ -54,19 +54,19 @@ Import the SQL file using one of these methods:
 1. Open phpMyAdmin
 2. Select `routa_db` database
 3. Click "Import" tab
-4. Choose `database/routa_database.sql`
+4. Choose `database/routa_db.sql`
 5. Click "Go"
 
 **Option B: MySQL Command Line**
 ```bash
-mysql -u root -p routa_db < database/routa_database.sql
+mysql -u root -p routa_db < database/routa_db.sql
 ```
 
 **Option C: MySQL Workbench**
 1. Open MySQL Workbench
 2. Server → Data Import
 3. Import from Self-Contained File
-4. Select `database/routa_database.sql`
+4. Select `database/routa_db.sql`
 5. Start Import
 
 ### Verify Tables
@@ -209,25 +209,11 @@ try {
 
 Visit: `http://localhost/routa/test_connection.php`
 
-### Create Admin Account
 
-Run this SQL query to create an admin account:
-
-```sql
-INSERT INTO users (email, password, full_name, phone, role, created_at) 
-VALUES (
-    'admin@routa.com',
-    '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', -- password: password
-    'Admin User',
-    '09123456789',
-    'admin',
-    NOW()
-);
-```
 
 **Login Credentials:**
 - Email: `admin@routa.com`
-- Password: `password`
+- Password: `admin123`
 
 ⚠️ **Change this password immediately after first login!**
 
@@ -301,3 +287,4 @@ If you encounter issues:
 2. Enable error reporting in development
 3. Review `TROUBLESHOOTING.md`
 4. Open an issue on GitHub
+
