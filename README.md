@@ -149,7 +149,7 @@ MIT License - See LICENSE file
 
 ## 👨‍💻 Author
 
-Your Name - [@Vegapanz](https://github.com/Vegapanz)
+[@Vegapanz](https://github.com/Vegapanz)
 
 ## 🤝 Contributing
 
@@ -158,7 +158,8 @@ Contributions welcome! Please open an issue or submit a pull request.
 ## 📞 Support
 
 For issues and questions:
-- GitHub Issues: https://github.com/yourusername/routa/issues
+- GitHub Issues: https://github.com/vegapanz/routa/issues
 - Email: monroyojohnpatrick@gmail.com
+
 
 
