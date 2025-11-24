@@ -1,4 +1,5 @@
 // Dashboard Initialization
+console.log('Admin.js loaded successfully');
 
 // Real-time update intervals
 let dashboardStatsInterval;
@@ -15,7 +16,8 @@ function showAlert(message, title = 'Notice', type = 'info') {
     const bodyElement = document.getElementById('alertModalBody');
     
     if (!modalElement || !titleElement || !bodyElement) {
-                // Fallback to SweetAlert2
+        console.error('Alert modal elements not found');
+        // Fallback to SweetAlert2
         Swal.fire({
             title: title,
             html: message,
@@ -77,7 +79,9 @@ function showConfirm(message, title = 'Confirm Action', onConfirm) {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-            
+    console.log('DOM Content Loaded');
+    console.log('Available drivers:', window.availableDrivers);
+    
     // Initialize tooltips
     var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
     tooltipTriggerList.map(function (tooltipTriggerEl) {
@@ -186,12 +190,14 @@ function loadPendingBookings() {
 
 // Booking Actions
 function confirmBooking(bookingId) {
-        // Show modal to select driver
+    console.log('confirmBooking called with ID:', bookingId);
+    // Show modal to select driver
     showDriverAssignmentModal(bookingId);
 }
 
 async function rejectBooking(bookingId) {
-        
+    console.log('rejectBooking called with ID:', bookingId);
+    
     const confirmed = await showConfirm(
         'Are you sure you want to reject this booking?',
         'Reject Booking'
@@ -199,7 +205,8 @@ async function rejectBooking(bookingId) {
     
     if (!confirmed) return;
 
-        
+    console.log('Sending reject request...');
+    
     fetch('admin.php', {
         method: 'POST',
         headers: {
@@ -209,10 +216,12 @@ async function rejectBooking(bookingId) {
         body: `action=reject_booking&booking_id=${bookingId}`
     })
     .then(response => {
-                return response.json();
+        console.log('Response status:', response.status);
+        return response.json();
     })
     .then(data => {
-                if (data.success) {
+        console.log('Response data:', data);
+        if (data.success) {
             showAlert('Booking rejected successfully', 'Success', 'success');
             setTimeout(() => location.reload(), 1500);
         } else {
@@ -220,12 +229,14 @@ async function rejectBooking(bookingId) {
         }
     })
     .catch(error => {
-                showAlert('An error occurred while rejecting the booking: ' + error.message, 'Error', 'error');
+        console.error('Error:', error);
+        showAlert('An error occurred while rejecting the booking: ' + error.message, 'Error', 'error');
     });
 }
 
 function showDriverAssignmentModal(bookingId) {
-        
+    console.log('showDriverAssignmentModal called with ID:', bookingId);
+    
     // Create and show assignment modal
     const modalHTML = `
         <div class="modal fade" id="assignDriverModal" tabindex="-1">
@@ -264,7 +275,8 @@ function showDriverAssignmentModal(bookingId) {
 
     // Add modal to body
     document.body.insertAdjacentHTML('beforeend', modalHTML);
-    
+    console.log('Modal HTML added to page');
+
     // Load available drivers
     loadAvailableDrivers();
 
@@ -272,14 +284,17 @@ function showDriverAssignmentModal(bookingId) {
     const modalElement = document.getElementById('assignDriverModal');
     const modal = new bootstrap.Modal(modalElement);
     modal.show();
-    
+    console.log('Modal shown');
+
     // Handle form submission
     document.getElementById('assignDriverForm').addEventListener('submit', function(e) {
         e.preventDefault();
-                const bookingId = document.getElementById('assignBookingId').value;
+        console.log('Form submitted');
+        const bookingId = document.getElementById('assignBookingId').value;
         const driverId = document.getElementById('driverSelect').value;
 
-        
+        console.log('Booking ID:', bookingId, 'Driver ID:', driverId);
+
         if (!driverId) {
             showAlert('Please select a driver', 'Warning', 'warning');
             return;
@@ -290,33 +305,40 @@ function showDriverAssignmentModal(bookingId) {
 }
 
 function loadAvailableDrivers() {
-            
+    console.log('loadAvailableDrivers called');
+    console.log('Available drivers from window:', window.availableDrivers);
+    
     // Use the drivers data from the page
     const driverData = window.availableDrivers || [];
     const select = document.getElementById('driverSelect');
     
     if (!select) {
-                return;
+        console.error('Driver select element not found!');
+        return;
     }
     
     select.innerHTML = '<option value="">Choose a driver</option>';
     
     if (driverData.length === 0) {
-                select.innerHTML += '<option value="" disabled>No drivers available</option>';
+        console.warn('No available drivers found');
+        select.innerHTML += '<option value="" disabled>No drivers available</option>';
         return;
     }
     
-        
+    console.log('Loading', driverData.length, 'drivers');
+    
     driverData.forEach(driver => {
         const option = document.createElement('option');
         option.value = driver.id;
         option.textContent = `${driver.name}`;
         select.appendChild(option);
-            });
+        console.log('Added driver:', driver.name);
+    });
 }
 
 function assignBookingToDriver(bookingId, driverId) {
-        
+    console.log('assignBookingToDriver called - Booking:', bookingId, 'Driver:', driverId);
+    
     fetch('admin.php', {
         method: 'POST',
         headers: {
@@ -326,20 +348,24 @@ function assignBookingToDriver(bookingId, driverId) {
         body: `action=assign_booking&booking_id=${bookingId}&driver_id=${driverId}`
     })
     .then(response => {
-                );
+        console.log('Response status:', response.status);
+        console.log('Response content type:', response.headers.get('content-type'));
         
         // Clone the response to read it as text first
         return response.text().then(text => {
-                        try {
+            console.log('Raw response:', text);
+            try {
                 return JSON.parse(text);
             } catch (e) {
-                                );
+                console.error('JSON parse error:', e);
+                console.error('Response was:', text.substring(0, 500));
                 throw new Error('Server returned invalid JSON. Check PHP error logs.');
             }
         });
     })
     .then(data => {
-                
+        console.log('Response data:', data);
+        
         // Check if session expired
         // if (data.redirect) {
         //     showAlert(data.message || 'Session expired. Please login again.', 'Session Expired', 'warning');
@@ -363,7 +389,8 @@ function assignBookingToDriver(bookingId, driverId) {
         }
     })
     .catch(error => {
-                showAlert('An error occurred while assigning the booking: ' + error.message, 'Error', 'error');
+        console.error('Error:', error);
+        showAlert('An error occurred while assigning the booking: ' + error.message, 'Error', 'error');
     });
 }
 
@@ -407,7 +434,8 @@ async function deleteDriver(driverId) {
         }
     })
     .catch(error => {
-                showAlert('An error occurred while deleting the driver', 'Error', 'error');
+        console.error('Error:', error);
+        showAlert('An error occurred while deleting the driver', 'Error', 'error');
     });
 }
 
@@ -438,7 +466,8 @@ async function deleteUser(userId) {
         }
     })
     .catch(error => {
-                showAlert('An error occurred while deleting the user', 'Error', 'error');
+        console.error('Error:', error);
+        showAlert('An error occurred while deleting the user', 'Error', 'error');
     });
 }
 
@@ -552,7 +581,8 @@ function viewDriverDetails(driverId) {
         }
     })
     .catch(error => {
-                contentDiv.innerHTML = `
+        console.error('Error:', error);
+        contentDiv.innerHTML = `
             <div class="alert alert-danger">
                 <i class="bi bi-exclamation-triangle me-2"></i>
                 An error occurred while loading driver details
@@ -656,7 +686,8 @@ function viewApplicationDetails(applicationId) {
         }
     })
     .catch(error => {
-                contentDiv.innerHTML = `
+        console.error('Error:', error);
+        contentDiv.innerHTML = `
             <div class="alert alert-danger">
                 <i class="bi bi-exclamation-triangle me-2"></i>
                 An error occurred while loading application details
@@ -694,7 +725,8 @@ function generateDocumentButtons(app) {
 document.getElementById('approveApplicationBtn')?.addEventListener('click', async function() {
     const applicationId = this.dataset.applicationId;
     
-        
+    console.log('Approve button clicked, applicationId:', applicationId);
+    
     if (!applicationId || applicationId === 'undefined') {
         showAlert('No application ID found. Please close and reopen the application details.', 'Error', 'error');
         return;
@@ -717,7 +749,8 @@ document.getElementById('approveApplicationBtn')?.addEventListener('click', asyn
     })
     .then(response => response.json())
     .then(data => {
-                if (data.success) {
+        console.log('Approve response:', data);
+        if (data.success) {
             showAlert(data.message, 'Success', 'success');
             setTimeout(() => {
                 const modal = bootstrap.Modal.getInstance(document.getElementById('viewApplicationModal'));
@@ -729,7 +762,8 @@ document.getElementById('approveApplicationBtn')?.addEventListener('click', asyn
         }
     })
     .catch(error => {
-                showAlert('An error occurred while approving the application', 'Error', 'error');
+        console.error('Error:', error);
+        showAlert('An error occurred while approving the application', 'Error', 'error');
     });
 });
 
@@ -737,7 +771,8 @@ document.getElementById('approveApplicationBtn')?.addEventListener('click', asyn
 document.getElementById('rejectApplicationBtn')?.addEventListener('click', async function() {
     const applicationId = this.dataset.applicationId;
     
-        
+    console.log('Reject button clicked, applicationId:', applicationId);
+    
     if (!applicationId || applicationId === 'undefined') {
         showAlert('No application ID found. Please close and reopen the application details.', 'Error', 'error');
         return;
@@ -760,7 +795,8 @@ document.getElementById('rejectApplicationBtn')?.addEventListener('click', async
     })
     .then(response => response.json())
     .then(data => {
-                if (data.success) {
+        console.log('Reject response:', data);
+        if (data.success) {
             showAlert(data.message, 'Success', 'success');
             setTimeout(() => {
                 const modal = bootstrap.Modal.getInstance(document.getElementById('viewApplicationModal'));
@@ -772,7 +808,8 @@ document.getElementById('rejectApplicationBtn')?.addEventListener('click', async
         }
     })
     .catch(error => {
-                showAlert('An error occurred while rejecting the application', 'Error', 'error');
+        console.error('Error:', error);
+        showAlert('An error occurred while rejecting the application', 'Error', 'error');
     });
 });
 
@@ -850,7 +887,7 @@ function updateDashboardStats() {
             if (pendingEl) pendingEl.textContent = stats.pending_bookings || 0;
         }
     })
-    .catch(error => );
+    .catch(error => console.error('Error updating dashboard stats:', error));
 }
 
 // Pending Bookings Update
@@ -911,7 +948,7 @@ function updatePendingBookings() {
             `).join('');
         }
     })
-    .catch(error => );
+    .catch(error => console.error('Error updating pending bookings:', error));
 }
 
 // All Bookings Update
@@ -964,7 +1001,7 @@ function updateAllBookings() {
             `).join('');
         }
     })
-    .catch(error => );
+    .catch(error => console.error('Error updating all bookings:', error));
 }
 
 // Drivers Update
@@ -1027,7 +1064,7 @@ function updateDrivers() {
             `).join('');
         }
     })
-    .catch(error => );
+    .catch(error => console.error('Error updating drivers:', error));
 }
 
 // Users Update
@@ -1082,7 +1119,7 @@ function updateUsers() {
             `).join('');
         }
     })
-    .catch(error => );
+    .catch(error => console.error('Error updating users:', error));
 }
 
 // Applications Update
@@ -1142,7 +1179,7 @@ function updateApplications() {
             `).join('');
         }
     })
-    .catch(error => );
+    .catch(error => console.error('Error updating applications:', error));
 }
 
 // ========== UTILITY FUNCTIONS ==========

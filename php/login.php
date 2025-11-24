@@ -59,6 +59,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             error_log("Driver found, comparing passwords...");
             error_log("Stored password in DB: " . $driver['password']);
             error_log("Entered password: " . $password);
+            error_log("Driver status value: " . ($driver['status'] ?? 'NULL/NOT SET'));
+            error_log("Status isset: " . (isset($driver['status']) ? 'YES' : 'NO'));
+            error_log("Status equals archived: " . (($driver['status'] ?? '') === 'archived' ? 'YES' : 'NO'));
+            
+            // Check if driver is archived
+            if (isset($driver['status']) && $driver['status'] === 'archived') {
+                error_log("❌ BLOCKING LOGIN - Driver account is archived");
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'This account has been deactivated. Please contact support.'
+                ]);
+                exit;
+            }
             
             // Check both hashed and plain text passwords
             if (password_verify($password, $driver['password']) || $password === $driver['password']) {
@@ -86,6 +99,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             error_log("User found, comparing passwords...");
             error_log("Stored password in DB: " . $user['password']);
             error_log("Entered password: " . $password);
+            
+            // Check if user is archived
+            if (isset($user['status']) && $user['status'] === 'archived') {
+                error_log("User account is archived");
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'This account has been deactivated. Please contact support.'
+                ]);
+                exit;
+            }
             
             // Check both hashed and plain text passwords
             if (password_verify($password, $user['password']) || $password === $user['password']) {

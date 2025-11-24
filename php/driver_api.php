@@ -429,17 +429,23 @@ function completeTrip($pdo, $driverId) {
     ");
     $stmt->execute([$finalFare, $rideId]);
     
-    // Calculate driver earnings (assuming 80% goes to driver, 20% platform fee)
-    $platformCommission = $finalFare * 0.20;
-    $netEarnings = $finalFare * 0.80;
-    
-    // Record earnings
-    $stmt = $pdo->prepare("
-        INSERT INTO driver_earnings 
-        (driver_id, ride_id, gross_fare, platform_commission, net_earnings) 
-        VALUES (?, ?, ?, ?, ?)
-    ");
-    $stmt->execute([$driverId, $rideId, $finalFare, $platformCommission, $netEarnings]);
+    // Only record earnings if ride was not cancelled
+    if (empty($ride['cancelled_by'])) {
+        // Calculate driver earnings (assuming 80% goes to driver, 20% platform fee)
+        $platformCommission = $finalFare * 0.20;
+        $netEarnings = $finalFare * 0.80;
+        
+        // Record earnings
+        $stmt = $pdo->prepare("
+            INSERT INTO driver_earnings 
+            (driver_id, ride_id, gross_fare, platform_commission, net_earnings) 
+            VALUES (?, ?, ?, ?, ?)
+        ");
+        $stmt->execute([$driverId, $rideId, $finalFare, $platformCommission, $netEarnings]);
+    } else {
+        // Ride was cancelled, no earnings
+        $netEarnings = 0;
+    }
     
     // Update driver status and stats
     $stmt = $pdo->prepare("

@@ -70,7 +70,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 })
                 .catch(error => {
-                                        Swal.fire({
+                    console.error('Error:', error);
+                    Swal.fire({
                         title: 'Error',
                         text: 'An error occurred. Please try again.',
                         icon: 'error',
@@ -113,7 +114,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 })
                 .catch(error => {
-                                        Swal.fire({
+                    console.error('Error:', error);
+                    Swal.fire({
                         title: 'Error',
                         text: 'An error occurred. Please try again.',
                         icon: 'error',

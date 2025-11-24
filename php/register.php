@@ -73,15 +73,40 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Use the verified phone from hidden field if available, otherwise normalize the submitted phone
         $phoneToUse = !empty($verifiedPhone) ? $verifiedPhone : $phone;
         
-        // Normalize both phones for comparison (remove spaces, dashes, etc.)
-        $normalizedSubmittedPhone = preg_replace('/[\s\-\(\)]/', '', $phoneToUse);
-        $normalizedVerifiedPhone = preg_replace('/[\s\-\(\)]/', '', $_SESSION['phone_verified']);
+        // Function to normalize phone to +639XXXXXXXXX format
+        function normalizePhoneNumber($phone) {
+            // Remove all spaces, dashes, parentheses
+            $cleaned = preg_replace('/[\s\-\(\)]/', '', $phone);
+            
+            // Convert to +639XXXXXXXXX format
+            if (preg_match('/^\+639\d{9}$/', $cleaned)) {
+                return $cleaned; // Already in correct format
+            } elseif (preg_match('/^639\d{9}$/', $cleaned)) {
+                return '+' . $cleaned; // Add +
+            } elseif (preg_match('/^09\d{9}$/', $cleaned)) {
+                return '+63' . substr($cleaned, 1); // Replace 0 with +63
+            } elseif (preg_match('/^9\d{9}$/', $cleaned)) {
+                return '+63' . $cleaned; // Add +63
+            }
+            
+            return $cleaned; // Return as-is if no pattern matches
+        }
+        
+        // Normalize both phones for comparison
+        $normalizedSubmittedPhone = normalizePhoneNumber($phoneToUse);
+        $normalizedVerifiedPhone = normalizePhoneNumber($_SESSION['phone_verified']);
         
         // Verify the phone matches the verified one
         if ($normalizedVerifiedPhone !== $normalizedSubmittedPhone) {
             echo json_encode([
                 'success' => false, 
-                'message' => 'Phone number does not match verified number'
+                'message' => 'Phone number does not match verified number',
+                'debug' => [
+                    'submitted' => $normalizedSubmittedPhone,
+                    'verified' => $normalizedVerifiedPhone,
+                    'original_submitted' => $phoneToUse,
+                    'original_verified' => $_SESSION['phone_verified']
+                ]
             ]);
             exit;
         }

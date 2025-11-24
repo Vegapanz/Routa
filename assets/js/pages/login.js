@@ -64,7 +64,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             })
             .catch(error => {
-                                showAlert('An error occurred. Please try again.', 'danger');
+                console.error('Error:', error);
+                showAlert('An error occurred. Please try again.', 'danger');
                 submitButton.disabled = false;
                 submitButton.innerHTML = originalButtonText;
             });
@@ -90,7 +91,8 @@ document.addEventListener('DOMContentLoaded', function() {
         button.addEventListener('click', function(e) {
             e.preventDefault();
             const provider = this.getAttribute('data-provider');
-                        // Here you would typically redirect to the OAuth provider
+            console.log(`Logging in with ${provider}`);
+            // Here you would typically redirect to the OAuth provider
             // window.location.href = `/auth/${provider}`;
             
             // For demo purposes, show a message
@@ -142,7 +144,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
                 
                 // Here you would typically send a password reset email
-                                
+                console.log('Sending password reset to:', resetEmail);
+                
                 // Show success message and restore form
                 showAlert('Password reset link has been sent to your email', 'success');
                 formContainer.innerHTML = originalForm;

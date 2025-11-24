@@ -85,7 +85,8 @@ function initBookingMap() {
                     }
                 }
             } catch (error) {
-                            }
+                console.error('Error reverse geocoding:', error);
+            }
         });
     } else {
         // If map exists, invalidate size to fix display issues
@@ -196,12 +197,15 @@ async function drawRoute() {
             // Fit map to show the entire route
             bookingMap.fitBounds(routeLine.getBounds(), { padding: [50, 50] });
             
-                    } else {
+            console.log(`Route calculated: ${distanceKm} km, ~${durationMin} mins, Fare: ₱${fare}`);
+        } else {
             // Fallback to straight line if routing fails
-                        drawStraightLineRoute(pickupLatLng, dropoffLatLng);
+            console.log('OSRM routing failed, using straight line');
+            drawStraightLineRoute(pickupLatLng, dropoffLatLng);
         }
     } catch (error) {
-                // Fallback to straight line on error
+        console.error('Error fetching route:', error);
+        // Fallback to straight line on error
         drawStraightLineRoute(pickupLatLng, dropoffLatLng);
     }
 }
@@ -261,7 +265,8 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
 async function searchLocation(query, isPickup) {
     if (query.length < 3) return;
     
-        
+    console.log('Searching location:', query, 'isPickup:', isPickup);
+    
     const type = isPickup ? 'pickup' : 'dropoff';
     
     // Add Philippines to search query for better results
@@ -293,7 +298,8 @@ async function searchLocation(query, isPickup) {
     
     for (const api of apis) {
         try {
-                        
+            console.log(`Trying ${api.name} API:`, api.url);
+            
             const controller = new AbortController();
             const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
             
@@ -308,13 +314,15 @@ async function searchLocation(query, isPickup) {
             clearTimeout(timeoutId);
             
             if (!response.ok) {
-                                continue; // Try next API
+                console.log(`${api.name} returned status:`, response.status);
+                continue; // Try next API
             }
             
             const data = await response.json();
             const results = api.parseResults(data);
             
-                        
+            console.log(`${api.name} results:`, results);
+            
             if (results && results.length > 0) {
                 if (isPickup) {
                     pickupSuggestions = results;
@@ -326,12 +334,14 @@ async function searchLocation(query, isPickup) {
                 return; // Success, stop trying other APIs
             }
         } catch (error) {
-                        continue; // Try next API
+            console.log(`${api.name} failed:`, error.message);
+            continue; // Try next API
         }
     }
     
     // All APIs failed
-        showErrorMessage(type, 'Unable to search locations. Please try again.');
+    console.error('All geocoding APIs failed');
+    showErrorMessage(type, 'Unable to search locations. Please try again.');
 }
 
 // Format Photon API address for display
@@ -406,7 +416,7 @@ function showSuggestions(results, type) {
     
     if (results.length === 0) return;
     
-     // Debug log
+    console.log('Showing suggestions for', type, ':', results); // Debug log
     
     // Create suggestions dropdown
     const suggestionsDiv = document.createElement('div');
@@ -471,7 +481,7 @@ function showSuggestions(results, type) {
     container.style.position = 'relative';
     container.appendChild(suggestionsDiv);
     
-     // Debug log
+    console.log('Suggestions dropdown appended to:', container); // Debug log
 }
 
 // Select a location from suggestions
@@ -534,7 +544,7 @@ function initializeLocationSearch() {
         pickupInput.parentNode.replaceChild(newPickupInput, pickupInput);
         
         newPickupInput.addEventListener('input', function(e) {
-             // Debug log
+            console.log('Pickup input:', this.value); // Debug log
             clearTimeout(pickupTimeout);
             pickupSelected = false;
             
@@ -549,7 +559,7 @@ function initializeLocationSearch() {
             
             pickupTimeout = setTimeout(() => {
                 if (this.value.length >= 3) {
-                     // Debug log
+                    console.log('Searching for:', this.value); // Debug log
                     searchLocation(this.value, true);
                 }
             }, 500);
@@ -569,7 +579,7 @@ function initializeLocationSearch() {
         dropoffInput.parentNode.replaceChild(newDropoffInput, dropoffInput);
         
         newDropoffInput.addEventListener('input', function() {
-             // Debug log
+            console.log('Dropoff input:', this.value); // Debug log
             clearTimeout(dropoffTimeout);
             dropoffSelected = false;
             
@@ -584,7 +594,7 @@ function initializeLocationSearch() {
             
             dropoffTimeout = setTimeout(() => {
                 if (this.value.length >= 3) {
-                     // Debug log
+                    console.log('Searching for:', this.value); // Debug log
                     searchLocation(this.value, false);
                 }
             }, 500);
@@ -627,7 +637,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const bookModal = document.getElementById('bookRideModal');
     if (bookModal) {
         bookModal.addEventListener('shown.bs.modal', function() {
-             // Debug log
+            console.log('Modal shown, initializing location search and map'); // Debug log
             initializeLocationSearch();
             // Initialize map when modal is shown
             initBookingMap();
@@ -716,7 +726,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     });
                 }
             } catch (error) {
-                                Swal.fire({
+                console.error('Error:', error);
+                Swal.fire({
                     title: 'Error',
                     text: 'An error occurred while booking the ride. Please try again.',
                     icon: 'error',
@@ -948,7 +959,8 @@ function startRideStatusPolling(bookingId) {
                 }
             }
         } catch (error) {
-                    }
+            console.error('Error polling ride status:', error);
+        }
     }, 5000);
     */
 }
@@ -976,7 +988,8 @@ async function checkActiveBooking() {
             });
         }
     } catch (error) {
-            }
+        console.error('Error checking active booking:', error);
+    }
 }
 
 // Cancel ride
@@ -1032,7 +1045,8 @@ async function cancelRide() {
             });
         }
     } catch (error) {
-                Swal.fire({
+        console.error('Error:', error);
+        Swal.fire({
             icon: 'error',
             title: 'Error',
             text: 'An error occurred while cancelling the ride',
@@ -1058,9 +1072,11 @@ async function confirmCancelRide() {
 
 // Show rating modal after trip completion
 function showRatingModal(bookingId) {
-        
+    console.log('Showing rating modal for booking:', bookingId);
+    
     if (!bookingId) {
-                location.reload();
+        console.error('No booking ID provided for rating');
+        location.reload();
         return;
     }
     
@@ -1169,7 +1185,8 @@ async function submitRating(bookingId) {
     const rating = document.querySelectorAll('#ratingStars i.bi-star-fill').length;
     const review = document.getElementById('ratingReview').value.trim();
     
-        
+    console.log('Submitting rating:', {bookingId, rating, review});
+    
     if (rating === 0) {
         Swal.fire({
             icon: 'warning',
@@ -1199,7 +1216,8 @@ async function submitRating(bookingId) {
         });
         
         const data = await response.json();
-                
+        console.log('Rating response:', data);
+        
         if (data.success) {
             // Show success message
             const modalBody = document.querySelector('#ratingModal .modal-body');
@@ -1230,7 +1248,8 @@ async function submitRating(bookingId) {
             submitBtn.innerHTML = '<i class="bi bi-star-fill me-2"></i>Submit Rating';
         }
     } catch (error) {
-                Swal.fire({
+        console.error('Error:', error);
+        Swal.fire({
             icon: 'error',
             title: 'Error',
             text: 'An error occurred while submitting your rating. Please try again.',
@@ -1358,7 +1377,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
                 
                 const data = await response.json();
-                                
+                console.log('Send OTP response:', data);
+                
                 if (data.success) {
                     // Store normalized phone for verification
                     const normalizedPhone = data.phone || phone;
@@ -1374,7 +1394,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     
                     // If debug OTP is present (development), show it prominently
                     if (data.debug_otp) {
-                                                showAlert('OTP sent! Check console for code (dev mode)', 'success');
+                        console.log('%c OTP CODE: ' + data.debug_otp, 'background: #10b981; color: white; font-size: 20px; padding: 10px; font-weight: bold;');
+                        showAlert('OTP sent! Check console for code (dev mode)', 'success');
                     } else {
                         showAlert('OTP sent successfully to your phone', 'success');
                     }
@@ -1382,7 +1403,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     showAlert(data.message || 'Failed to send OTP', 'danger');
                 }
             } catch (error) {
-                                showAlert('An error occurred. Please try again.', 'danger');
+                console.error('Error sending OTP:', error);
+                showAlert('An error occurred. Please try again.', 'danger');
             } finally {
                 sendOtpEditBtn.disabled = false;
                 sendOtpEditBtn.innerHTML = '<i class="bi bi-shield-check me-1"></i>Send OTP';
@@ -1474,14 +1496,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 formData.append('phone', normalizedPhone);
                 formData.append('otp', otp);
                 
-                                
+                console.log('Verifying OTP:', { phone: normalizedPhone, otp: otp });
+                
                 const response = await fetch('php/verify_otp.php', {
                     method: 'POST',
                     body: formData
                 });
                 
                 const data = await response.json();
-                                
+                console.log('Verify OTP response:', data);
+                
                 if (data.success) {
                     phoneVerified = true;
                     
@@ -1514,7 +1538,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     });
                 }
             } catch (error) {
-                                const errorDiv = document.getElementById('otpEditError');
+                console.error('Error verifying OTP:', error);
+                const errorDiv = document.getElementById('otpEditError');
                 errorDiv.textContent = 'An error occurred. Please try again.';
                 errorDiv.style.display = 'block';
             } finally {
@@ -1543,7 +1568,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
                 
                 const data = await response.json();
-                                
+                console.log('Resend OTP response:', data);
+                
                 if (data.success) {
                     // Update normalized phone
                     const normalizedPhone = data.phone || phone;
@@ -1563,7 +1589,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     document.getElementById('otpEdit1').focus();
                     
                     if (data.debug_otp) {
-                                            }
+                        console.log('%c NEW OTP CODE: ' + data.debug_otp, 'background: #10b981; color: white; font-size: 20px; padding: 10px; font-weight: bold;');
+                    }
                     
                     setTimeout(() => {
                         this.textContent = originalText;
@@ -1575,7 +1602,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     errorDiv.style.display = 'block';
                 }
             } catch (error) {
-                                this.textContent = originalText;
+                console.error('Error resending OTP:', error);
+                this.textContent = originalText;
                 const errorDiv = document.getElementById('otpEditError');
                 errorDiv.textContent = 'An error occurred. Please try again.';
                 errorDiv.style.display = 'block';
@@ -1669,7 +1697,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 showAlert(data.message || 'Failed to update profile', 'danger');
             }
         } catch (error) {
-                        showAlert('An error occurred while updating your profile. Please try again.', 'danger');
+            console.error('Error updating profile:', error);
+            showAlert('An error occurred while updating your profile. Please try again.', 'danger');
         } finally {
             saveProfileBtn.disabled = false;
             saveProfileBtn.innerHTML = '<i class="bi bi-check-circle me-1"></i>Save Changes';

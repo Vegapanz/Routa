@@ -15,7 +15,8 @@ const DriverDashboard = {
         this.bindEvents();
         this.setupAutoRefresh();
         this.initializeMap();
-            },
+        console.log('Driver Dashboard initialized');
+    },
 
     /**
      * Bind event listeners
@@ -39,7 +40,8 @@ const DriverDashboard = {
                 const dropoffLat = btn.dataset.dropoffLat;
                 const dropoffLng = btn.dataset.dropoffLng;
                 
-                                
+                console.log('View Map clicked:', { rideId, pickupLat, pickupLng, dropoffLat, dropoffLng });
+                
                 this.showRideOnMap(rideId, pickupLocation, dropoffLocation, pickupLat, pickupLng, dropoffLat, dropoffLng);
             });
         });
@@ -126,7 +128,8 @@ const DriverDashboard = {
                 return false;
             }
         } catch (error) {
-                        this.showNotification('Network error. Please try again.', 'error');
+            console.error('Error updating status:', error);
+            this.showNotification('Network error. Please try again.', 'error');
             return false;
         }
     },
@@ -135,7 +138,8 @@ const DriverDashboard = {
      * Accept a ride request
      */
     async acceptRide(bookingId) {
-                
+        console.log('acceptRide called with bookingId:', bookingId);
+        
         const confirmed = await this.showConfirmModal(
             'Accept Ride',
             'Do you want to accept this ride request?',
@@ -144,11 +148,13 @@ const DriverDashboard = {
         );
         
         if (!confirmed) {
-                        return;
+            console.log('User cancelled confirmation');
+            return;
         }
 
         try {
-                        const response = await fetch('php/driver_api.php?action=accept_ride', {
+            console.log('Sending accept request...');
+            const response = await fetch('php/driver_api.php?action=accept_ride', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -156,8 +162,10 @@ const DriverDashboard = {
                 body: JSON.stringify({ ride_id: bookingId })
             });
 
-                        const data = await response.json();
-                        
+            console.log('Response status:', response.status);
+            const data = await response.json();
+            console.log('Response data:', data);
+            
             if (data.success) {
                 this.showNotification('Ride accepted! Navigate to pickup location.', 'success');
                 setTimeout(() => window.location.reload(), 1500);
@@ -165,7 +173,8 @@ const DriverDashboard = {
                 this.showNotification('Failed to accept ride: ' + data.message, 'error');
             }
         } catch (error) {
-                        this.showNotification('Network error. Please try again.', 'error');
+            console.error('Error accepting ride:', error);
+            this.showNotification('Network error. Please try again.', 'error');
         }
     },
 
@@ -173,7 +182,8 @@ const DriverDashboard = {
      * Reject a ride request
      */
     async rejectRide(bookingId) {
-                
+        console.log('rejectRide called with bookingId:', bookingId);
+        
         const confirmed = await this.showConfirmModal(
             'Reject Ride',
             'Are you sure you want to reject this ride request?',
@@ -183,13 +193,15 @@ const DriverDashboard = {
         );
         
         if (!confirmed) {
-                        return;
+            console.log('User cancelled rejection');
+            return;
         }
         
         const reason = 'Driver declined';
 
         try {
-                        const response = await fetch('php/driver_api.php?action=reject_ride', {
+            console.log('Sending reject request...');
+            const response = await fetch('php/driver_api.php?action=reject_ride', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -200,8 +212,10 @@ const DriverDashboard = {
                 })
             });
 
-                        const data = await response.json();
-                        
+            console.log('Response status:', response.status);
+            const data = await response.json();
+            console.log('Response data:', data);
+            
             if (data.success) {
                 this.showNotification('Ride rejected.', 'info');
                 setTimeout(() => window.location.reload(), 1500);
@@ -209,7 +223,8 @@ const DriverDashboard = {
                 this.showNotification('Failed to reject ride: ' + data.message, 'error');
             }
         } catch (error) {
-                        this.showNotification('Network error. Please try again.', 'error');
+            console.error('Error rejecting ride:', error);
+            this.showNotification('Network error. Please try again.', 'error');
         }
     },
 
@@ -244,7 +259,8 @@ const DriverDashboard = {
                 this.showNotification('Failed to update status: ' + data.message, 'error');
             }
         } catch (error) {
-                        this.showNotification('Network error. Please try again.', 'error');
+            console.error('Error marking as arrived:', error);
+            this.showNotification('Network error. Please try again.', 'error');
         }
     },
 
@@ -279,7 +295,8 @@ const DriverDashboard = {
                 this.showNotification('Failed to start trip: ' + data.message, 'error');
             }
         } catch (error) {
-                        this.showNotification('Network error. Please try again.', 'error');
+            console.error('Error starting trip:', error);
+            this.showNotification('Network error. Please try again.', 'error');
         }
     },
 
@@ -315,7 +332,8 @@ const DriverDashboard = {
                 this.showNotification('Failed to complete trip: ' + data.message, 'error');
             }
         } catch (error) {
-                        this.showNotification('Network error. Please try again.', 'error');
+            console.error('Error completing trip:', error);
+            this.showNotification('Network error. Please try again.', 'error');
         }
     },
 
@@ -425,7 +443,8 @@ const DriverDashboard = {
                 this.playNotificationSound();
             }
         } catch (error) {
-                    }
+            console.error('Error checking for new rides:', error);
+        }
     },
 
     /**
@@ -435,7 +454,7 @@ const DriverDashboard = {
         // Create audio element for notification sound
         const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBTGH0fPTgjMGHm7A7+OZQA0PVa7n77BdGAg+ltryxnMpBSh+zPLaizsIGGS57OihUBELTKXh8bllHAU2jdXzz3swBSJ0xO/glEILElyx6OyrWBUIOpvY88p5LQUZD');
         audio.volume = 0.3;
-        audio.play().catch(err => );
+        audio.play().catch(err => console.log('Audio play failed:', err));
     },
 
     /**
@@ -482,7 +501,8 @@ const DriverDashboard = {
     initializeMap() {
         const mapElement = document.getElementById('driverMap');
         if (!mapElement) {
-                        return;
+            console.log('Map element not found - no active rides');
+            return;
         }
 
         // Default center: Manila, Philippines
@@ -505,7 +525,8 @@ const DriverDashboard = {
         // Load all active rides onto map
         this.loadAllRidesOnMap();
         
-            },
+        console.log('Driver map initialized');
+    },
 
     /**
      * Load all active rides onto the map
@@ -517,7 +538,8 @@ const DriverDashboard = {
         const viewMapButtons = document.querySelectorAll('.view-map-btn');
         const bounds = [];
         
-                
+        console.log(`Found ${viewMapButtons.length} rides to display on map`);
+        
         viewMapButtons.forEach(btn => {
             try {
                 const pickupLat = btn.dataset.pickupLat;
@@ -567,28 +589,41 @@ const DriverDashboard = {
                     this.currentMarkers.push(dropoffMarker);
                 }
             } catch (error) {
-                            }
+                console.error('Error adding marker:', error);
+            }
         });
         
         // Fit map to show all markers
         if (bounds.length > 0) {
             this.driverMap.fitBounds(bounds, { padding: [50, 50] });
-                    } else {
-                    }
+            console.log(`Map fitted to ${bounds.length} locations`);
+        } else {
+            console.log('No valid coordinates found - rides may not have location data');
+        }
     },
 
     /**
      * Show specific ride on map
      */
     async showRideOnMap(rideId, pickupLocation, dropoffLocation, pickupLat, pickupLng, dropoffLat, dropoffLng) {
-                
+        console.log('showRideOnMap called with data:', { 
+            rideId, 
+            pickupLocation, 
+            dropoffLocation,
+            pickupLat, 
+            pickupLng, 
+            dropoffLat, 
+            dropoffLng 
+        });
+        
         // Validate and convert coordinates
         const validPickupLat = pickupLat && pickupLat !== '' && pickupLat !== 'null' && !isNaN(parseFloat(pickupLat)) ? parseFloat(pickupLat) : null;
         const validPickupLng = pickupLng && pickupLng !== '' && pickupLng !== 'null' && !isNaN(parseFloat(pickupLng)) ? parseFloat(pickupLng) : null;
         const validDropoffLat = dropoffLat && dropoffLat !== '' && dropoffLat !== 'null' && !isNaN(parseFloat(dropoffLat)) ? parseFloat(dropoffLat) : null;
         const validDropoffLng = dropoffLng && dropoffLng !== '' && dropoffLng !== 'null' && !isNaN(parseFloat(dropoffLng)) ? parseFloat(dropoffLng) : null;
         
-                
+        console.log('Validated coordinates:', { validPickupLat, validPickupLng, validDropoffLat, validDropoffLng });
+        
         if (!validPickupLat || !validPickupLng || !validDropoffLat || !validDropoffLng) {
             this.showNotification('Location coordinates are missing. Please ensure locations were selected from the map when booking.', 'warning');
             return;
@@ -596,13 +631,15 @@ const DriverDashboard = {
         
         // Initialize map if not already done
         if (!this.driverMap) {
-                        this.initializeMap();
+            console.log('Map not initialized, initializing now...');
+            this.initializeMap();
             // Wait for map to be ready
             await new Promise(resolve => setTimeout(resolve, 300));
         }
         
         if (!this.driverMap) {
-                        this.showNotification('Map failed to load', 'error');
+            console.error('Failed to initialize map');
+            this.showNotification('Map failed to load', 'error');
             return;
         }
         
@@ -699,9 +736,11 @@ const DriverDashboard = {
                 `)
                 .addTo(this.driverMap);
                 
-                            }
+                console.log(`Route drawn: ${distanceKm} km, ~${durationMin} mins`);
+            }
         } catch (error) {
-                        // Draw straight line as fallback
+            console.error('Error drawing route:', error);
+            // Draw straight line as fallback
             this.currentRoute = L.polyline([
                 [pickupLat, pickupLng],
                 [dropoffLat, dropoffLng]

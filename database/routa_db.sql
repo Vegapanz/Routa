@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Nov 23, 2025 at 03:01 PM
+-- Generation Time: Nov 24, 2025 at 03:39 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -183,7 +183,8 @@ INSERT INTO `driver_applications` (`id`, `first_name`, `middle_name`, `last_name
 (10, 'mema', '', 'lang', '2000-01-21', '09123456789', 'jpmonroyo@kld.edu.ph', '$2y$10$7xFl578Hb4j5XZKeRRP/2ujMfioKj8Ha9cAeXoqhtO4z7ak0khGgS', 'asdadasda', 'adasdas', 'adsafasd', '2131', 'A23-12-312314', '2026-01-12', '1', 'asda', '09231312312', 'sibling', '', 'tricycle', 'ASD1231', '', 'honda', 'click', '2000', 'uploads/driver_applications/license_1763397374_691b4efe2cb2d.jpg', 'uploads/driver_applications/govid_1763397374_691b4efe2ce53.jpg', 'uploads/driver_applications/registration_1763397374_691b4efe2d14f.png', 'uploads/driver_applications/franchise_1763397374_691b4efe2d43d.png', 'uploads/driver_applications/insurance_1763397374_691b4efe2d6fb.png', 'uploads/driver_applications/clearance_1763397374_691b4efe2d98a.png', 'uploads/driver_applications/photo_1763397374_691b4efe2dc42.png', 'rejected', '2025-11-18 00:36:14', NULL, NULL, NULL, NULL, '2025-11-17 16:36:14', '2025-11-17 16:40:00'),
 (11, 'lolipop', '', 'dwayne', '2000-03-12', '09231231233', '67@mailinator.com', '$2y$10$f9yQ3dvXlY9PpP6N.zXZhu.LrSo27sR1q51C2.kipCdkTY6eOpmYm', 'asdadawdasdasd', 'asdasdasd', 'asdasdasd', '3123', 'A12-31-312333', '2222-03-12', '2', 'asddsasda', '09231231231', 'child', '', 'tricycle', 'ASX1351', '', 'adasd', 'sadasdasd', '2025', 'uploads/driver_applications/license_1763400434_691b5af2457e3.png', 'uploads/driver_applications/govid_1763400434_691b5af245b50.png', 'uploads/driver_applications/registration_1763400434_691b5af245dde.png', 'uploads/driver_applications/franchise_1763400434_691b5af24608d.png', 'uploads/driver_applications/insurance_1763400434_691b5af24636b.png', 'uploads/driver_applications/clearance_1763400434_691b5af246694.png', 'uploads/driver_applications/photo_1763400434_691b5af246954.png', 'approved', '2025-11-18 01:27:14', NULL, NULL, NULL, NULL, '2025-11-17 17:27:14', '2025-11-17 17:27:54'),
 (12, 'Dansel', '', 'Fox', '2000-05-13', '09345374234', 'dansel@email.com', '$2y$10$oVaDruDmuLU162eIndoR.uf4dR80TqLckHC25cviDpectX2637wYK', 'kasdlkajskldjl', 'ahdklfghaskjlf', 'aksjdfaslkdf', '4141', 'F21-31-234124', '2026-02-02', '2', 'asdasda', '09235124353', 'parent', '', 'tricycle', 'AVZ5753', '', 'Honda', 'Click', '2025', 'uploads/driver_applications/license_1763480883_691c9533303eb.png', 'uploads/driver_applications/govid_1763480883_691c953346000.png', 'uploads/driver_applications/registration_1763480883_691c953346342.png', 'uploads/driver_applications/franchise_1763480883_691c9533467e7.png', 'uploads/driver_applications/insurance_1763480883_691c953346b34.png', 'uploads/driver_applications/clearance_1763480883_691c953347315.png', 'uploads/driver_applications/photo_1763480883_691c95334788b.png', 'rejected', '2025-11-18 23:48:03', NULL, NULL, NULL, NULL, '2025-11-18 15:48:03', '2025-11-18 16:08:03'),
-(13, 'Jadeski', '', 'Orense', '2000-01-05', '09345463452', 'jrorense@kld.edu.ph', '$2y$10$is3xIWOislkD5T5ajuUJb.oApELd5PyvpuyVe.7P0H7.g5.SZScEe', '1adasdagvasdasda', 'asdasdasd', 'asdadsasda', '1312', 'A51-25-681235', '2025-12-05', '2', 'adasdasdasd', '09512341512', 'friend', '', 'tricycle', 'ASB2513', '', 'Gonda', 'click', '2025', 'uploads/driver_applications/license_1763481139_691c96339408a.png', 'uploads/driver_applications/govid_1763481139_691c9633948d4.png', 'uploads/driver_applications/registration_1763481139_691c963394b81.png', 'uploads/driver_applications/franchise_1763481139_691c963395026.png', 'uploads/driver_applications/insurance_1763481139_691c9633953b1.png', 'uploads/driver_applications/clearance_1763481139_691c9633956e8.png', 'uploads/driver_applications/photo_1763481139_691c963395989.png', 'approved', '2025-11-18 23:52:19', NULL, NULL, NULL, NULL, '2025-11-18 15:52:19', '2025-11-18 15:53:24');
+(13, 'Jadeski', '', 'Orense', '2000-01-05', '09345463452', 'jrorense@kld.edu.ph', '$2y$10$is3xIWOislkD5T5ajuUJb.oApELd5PyvpuyVe.7P0H7.g5.SZScEe', '1adasdagvasdasda', 'asdasdasd', 'asdadsasda', '1312', 'A51-25-681235', '2025-12-05', '2', 'adasdasdasd', '09512341512', 'friend', '', 'tricycle', 'ASB2513', '', 'Gonda', 'click', '2025', 'uploads/driver_applications/license_1763481139_691c96339408a.png', 'uploads/driver_applications/govid_1763481139_691c9633948d4.png', 'uploads/driver_applications/registration_1763481139_691c963394b81.png', 'uploads/driver_applications/franchise_1763481139_691c963395026.png', 'uploads/driver_applications/insurance_1763481139_691c9633953b1.png', 'uploads/driver_applications/clearance_1763481139_691c9633956e8.png', 'uploads/driver_applications/photo_1763481139_691c963395989.png', 'approved', '2025-11-18 23:52:19', NULL, NULL, NULL, NULL, '2025-11-18 15:52:19', '2025-11-18 15:53:24'),
+(14, 'Ishi', 'Harvard', 'Oxford', '2000-04-23', '09979230412', 'datuismael123@gmail.com', '$2y$10$Lpx701m8snigSMzt1/J8JezwArz7Dl5HBytqrVdOOcraXoH0.3gbO', 'afsawefawdfasfawefwaf', 'asdfawfasdfawe', 'asdfawefsdf', '2131', 'A94-12-351923', '2027-03-01', '3', 'adasdasdas', '09231231232', 'friend', '', 'tricycle', 'AGX1234', '', 'Yamaha', 'Mio', '2025', 'uploads/driver_applications/license_1763991255_69245ed778434.jpg', 'uploads/driver_applications/govid_1763991255_69245ed77873e.jpg', 'uploads/driver_applications/registration_1763991255_69245ed7789d1.jpg', 'uploads/driver_applications/franchise_1763991255_69245ed778c24.jpg', 'uploads/driver_applications/insurance_1763991255_69245ed778e50.jpg', 'uploads/driver_applications/clearance_1763991255_69245ed77906b.jpg', 'uploads/driver_applications/photo_1763991255_69245ed77931c.jpg', 'approved', '2025-11-24 21:34:15', NULL, NULL, NULL, NULL, '2025-11-24 13:34:15', '2025-11-24 13:35:46');
 
 -- --------------------------------------------------------
 
@@ -247,7 +248,10 @@ INSERT INTO `driver_earnings` (`id`, `driver_id`, `ride_id`, `gross_fare`, `plat
 (37, 11, 105, 455.95, 91.19, 364.76, 'pending', NULL, '2025-11-18 15:56:40'),
 (38, 1, 111, 211.35, 42.27, 169.08, 'pending', NULL, '2025-11-19 11:57:19'),
 (39, 1, 112, 211.35, 42.27, 169.08, 'pending', NULL, '2025-11-19 12:24:32'),
-(40, 1, 113, 792.40, 158.48, 633.92, 'pending', NULL, '2025-11-23 13:53:14');
+(40, 1, 113, 792.40, 158.48, 633.92, 'pending', NULL, '2025-11-23 13:53:14'),
+(41, 1, 115, 140.35, 28.07, 112.28, 'pending', NULL, '2025-11-24 12:27:34'),
+(42, 12, 119, 268.60, 53.72, 214.88, 'pending', NULL, '2025-11-24 14:10:09'),
+(43, 12, 120, 121.30, 24.26, 97.04, 'pending', NULL, '2025-11-24 14:18:02');
 
 -- --------------------------------------------------------
 
@@ -325,14 +329,18 @@ INSERT INTO `otp_verifications` (`id`, `phone`, `otp_code`, `is_verified`, `expi
 (6, '+639123123113', '264168', 0, '2025-11-14 22:03:14', '2025-11-14 13:58:14'),
 (7, '+639123123412', '470929', 1, '2025-11-14 22:11:31', '2025-11-14 14:06:31'),
 (9, '+639231324151', '681640', 0, '2025-11-18 01:18:35', '2025-11-17 17:13:35'),
-(10, '+639123123123', '579197', 0, '2025-11-18 01:21:50', '2025-11-17 17:16:50'),
 (12, '+639123123131', '619434', 0, '2025-11-18 01:27:15', '2025-11-17 17:22:15'),
 (16, '+639231231233', '284194', 1, '2025-11-18 01:30:11', '2025-11-17 17:25:11'),
 (21, '+639231321312', '660534', 0, '2025-11-18 23:01:35', '2025-11-18 14:56:35'),
 (22, '+639312312312', '195299', 0, '2025-11-18 23:02:46', '2025-11-18 14:57:46'),
 (24, '+639231231231', '624530', 1, '2025-11-18 23:48:21', '2025-11-18 15:43:21'),
 (25, '+639345374234', '744043', 1, '2025-11-18 23:51:38', '2025-11-18 15:46:38'),
-(26, '+639345463452', '410237', 1, '2025-11-18 23:55:37', '2025-11-18 15:50:37');
+(26, '+639345463452', '410237', 1, '2025-11-18 23:55:37', '2025-11-18 15:50:37'),
+(27, '+639123123121', '456153', 0, '2025-11-24 16:10:11', '2025-11-24 08:05:11'),
+(32, '+639231321231', '566187', 1, '2025-11-24 16:53:03', '2025-11-24 08:48:03'),
+(35, '+639913123123', '869689', 1, '2025-11-24 21:30:56', '2025-11-24 13:25:56'),
+(38, '+639979230412', '140843', 1, '2025-11-24 21:36:17', '2025-11-24 13:31:17'),
+(39, '+639123123123', '098775', 1, '2025-11-24 22:03:07', '2025-11-24 13:58:07');
 
 -- --------------------------------------------------------
 
@@ -351,9 +359,9 @@ CREATE TABLE `realtime_connections` (
 --
 
 INSERT INTO `realtime_connections` (`user_id`, `role`, `connected_at`) VALUES
-(1, 'admin', '2025-11-23 21:56:50'),
+(1, 'admin', '2025-11-24 22:17:42'),
 (2, 'rider', '2025-11-14 13:04:29'),
-(6, 'rider', '2025-11-23 21:53:22');
+(6, 'rider', '2025-11-24 22:24:32');
 
 -- --------------------------------------------------------
 
@@ -713,7 +721,46 @@ INSERT INTO `realtime_notifications` (`id`, `target_type`, `target_id`, `data`, 
 (333, 'user', '6', '{\"type\":\"booking_assigned\",\"booking_id\":\"113\",\"driver_id\":\"1\",\"driver_name\":\"Pedro Santos\",\"driver_phone\":\"+63 917 111 2222\",\"tricycle_number\":\"TRY-001\",\"timestamp\":1763905971}', 'sent', '2025-11-23 21:52:51', '2025-11-23 21:52:51'),
 (334, 'user', '6', '{\"type\":\"status_update\",\"ride_id\":113,\"status\":\"confirmed\",\"message\":\"Driver is on the way!\",\"timestamp\":1763905977}', 'sent', '2025-11-23 21:52:57', '2025-11-23 21:52:57'),
 (335, 'user', '6', '{\"type\":\"status_update\",\"ride_id\":\"113\",\"status\":\"in_progress\",\"message\":\"Your trip has started!\",\"timestamp\":1763905987}', 'sent', '2025-11-23 21:53:07', '2025-11-23 21:53:07'),
-(336, 'user', '6', '{\"type\":\"ride_completed\",\"ride_id\":\"113\",\"status\":\"completed\",\"fare\":\"792.40\",\"message\":\"Trip completed! Please rate your driver.\",\"timestamp\":1763905995}', 'sent', '2025-11-23 21:53:15', '2025-11-23 21:53:15');
+(336, 'user', '6', '{\"type\":\"ride_completed\",\"ride_id\":\"113\",\"status\":\"completed\",\"fare\":\"792.40\",\"message\":\"Trip completed! Please rate your driver.\",\"timestamp\":1763905995}', 'sent', '2025-11-23 21:53:15', '2025-11-23 21:53:15'),
+(337, 'role', 'admin', '{\"type\":\"new_booking\",\"booking_id\":\"114\",\"user_id\":6,\"user_name\":\"Patrick\",\"user_phone\":\"+639123456789\",\"user_email\":\"patrick@email.com\",\"pickup\":{\"address\":\"Kolehiyo ng Lungsod ng Dasmari\\u00f1as, Bedford Street, Dasmari\\u00f1as, Cavite, Philippines\",\"lat\":14.33402235,\"lng\":120.95126220986008},\"dropoff\":{\"address\":\"Lola Nena\'s, Adelina Street, Manila, Sampaloc, Metro Manila, Philippines\",\"lat\":14.6060614,\"lng\":120.9884691},\"fare\":786.65,\"distance\":\"35.11 km\",\"payment_method\":\"cash\",\"timestamp\":1763971895}', 'sent', '2025-11-24 16:11:35', '2025-11-24 16:11:36'),
+(338, 'role', 'admin', '{\"type\":\"booking_cancelled\",\"booking_id\":\"114\",\"status\":\"cancelled\",\"cancelled_by\":\"user\",\"timestamp\":1763971912}', 'sent', '2025-11-24 16:11:52', '2025-11-24 16:11:52'),
+(339, 'role', 'admin', '{\"type\":\"new_booking\",\"booking_id\":\"115\",\"user_id\":6,\"user_name\":\"Patrick\",\"user_phone\":\"+639123456789\",\"user_email\":\"patrick@email.com\",\"pickup\":{\"address\":\"Mendiola Extension, Barangay 831, Paco, Fifth District, Manila, Capital District, Metro Manila, 1007, Philippines\",\"lat\":14.590810021139205,\"lng\":121.00101470947267},\"dropoff\":{\"address\":\"Pacific Commercial Company Building, Muelle del Banco Nacional, Binondo, Third District, Manila, Capital District, Metro Manila, 1006, Philippines\",\"lat\":14.595793721519836,\"lng\":120.97646713256837},\"fare\":140.35,\"distance\":\"4.29 km\",\"payment_method\":\"cash\",\"timestamp\":1763987213}', 'sent', '2025-11-24 20:26:53', '2025-11-24 20:26:53'),
+(340, 'user', '1', '{\"type\":\"booking_assigned\",\"booking_id\":\"115\",\"pickup\":{\"address\":\"Mendiola Extension, Barangay 831, Paco, Fifth District, Manila, Capital District, Metro Manila, 1007, Philippines\",\"lat\":\"14.5908100\",\"lng\":\"121.0010147\"},\"dropoff\":{\"address\":\"Pacific Commercial Company Building, Muelle del Banco Nacional, Binondo, Third District, Manila, Capital District, Metro Manila, 1006, Philippines\",\"lat\":\"14.5957937\",\"lng\":\"120.9764671\"},\"fare\":\"140.35\",\"distance\":\"4.29 km\",\"timestamp\":1763987237}', 'sent', '2025-11-24 20:27:17', '2025-11-24 20:27:17'),
+(341, 'user', '6', '{\"type\":\"booking_assigned\",\"booking_id\":\"115\",\"driver_id\":\"1\",\"driver_name\":\"Pedro Santos\",\"driver_phone\":\"+63 917 111 2222\",\"tricycle_number\":\"TRY-001\",\"timestamp\":1763987237}', 'sent', '2025-11-24 20:27:17', '2025-11-24 20:27:18'),
+(342, 'user', '6', '{\"type\":\"status_update\",\"ride_id\":115,\"status\":\"confirmed\",\"message\":\"Driver is on the way!\",\"timestamp\":1763987244}', 'sent', '2025-11-24 20:27:24', '2025-11-24 20:27:24'),
+(343, 'user', '6', '{\"type\":\"status_update\",\"ride_id\":\"115\",\"status\":\"in_progress\",\"message\":\"Your trip has started!\",\"timestamp\":1763987249}', 'sent', '2025-11-24 20:27:29', '2025-11-24 20:27:29'),
+(344, 'user', '6', '{\"type\":\"ride_completed\",\"ride_id\":\"115\",\"status\":\"completed\",\"fare\":\"140.35\",\"message\":\"Trip completed! Please rate your driver.\",\"timestamp\":1763987254}', 'sent', '2025-11-24 20:27:34', '2025-11-24 20:27:34'),
+(345, 'role', 'admin', '{\"type\":\"new_booking\",\"booking_id\":\"116\",\"user_id\":6,\"user_name\":\"Patrick\",\"user_phone\":\"+639123456789\",\"user_email\":\"patrick@email.com\",\"pickup\":{\"address\":\"Pope Pius XII Catholic Center, 1175, United Nations Avenue, Paco, Fifth District, Manila, Capital District, Metro Manila, 1007, Philippines\",\"lat\":14.58449717200028,\"lng\":120.99071502685547},\"dropoff\":{\"address\":\"Uno High School, 1440, Alvarado Street, Barangay 254, Tondo, Second District, Manila, Capital District, Metro Manila, 1003, Philippines\",\"lat\":14.610411924648545,\"lng\":120.97681045532228},\"fare\":147.75,\"distance\":\"4.65 km\",\"payment_method\":\"cash\",\"timestamp\":1763992389}', 'sent', '2025-11-24 21:53:09', '2025-11-24 21:53:09'),
+(346, 'user', '1', '{\"type\":\"booking_assigned\",\"booking_id\":\"116\",\"pickup\":{\"address\":\"Pope Pius XII Catholic Center, 1175, United Nations Avenue, Paco, Fifth District, Manila, Capital District, Metro Manila, 1007, Philippines\",\"lat\":\"14.5844972\",\"lng\":\"120.9907150\"},\"dropoff\":{\"address\":\"Uno High School, 1440, Alvarado Street, Barangay 254, Tondo, Second District, Manila, Capital District, Metro Manila, 1003, Philippines\",\"lat\":\"14.6104119\",\"lng\":\"120.9768105\"},\"fare\":\"147.75\",\"distance\":\"4.65 km\",\"timestamp\":1763992399}', 'sent', '2025-11-24 21:53:19', '2025-11-24 21:53:19'),
+(347, 'user', '6', '{\"type\":\"booking_assigned\",\"booking_id\":\"116\",\"driver_id\":\"1\",\"driver_name\":\"Pedro Santos\",\"driver_phone\":\"+63 917 111 2222\",\"tricycle_number\":\"TRY-001\",\"timestamp\":1763992399}', 'sent', '2025-11-24 21:53:19', '2025-11-24 21:53:19'),
+(348, 'role', 'admin', '{\"type\":\"booking_cancelled\",\"booking_id\":\"116\",\"status\":\"cancelled\",\"cancelled_by\":\"user\",\"timestamp\":1763992590}', 'sent', '2025-11-24 21:56:30', '2025-11-24 21:56:31'),
+(349, 'role', 'admin', '{\"type\":\"new_booking\",\"booking_id\":\"117\",\"user_id\":6,\"user_name\":\"Patrick\",\"user_phone\":\"+639123456789\",\"user_email\":\"patrick@email.com\",\"pickup\":{\"address\":\"Kolehiyo ng Lungsod ng Dasmari\\u00f1as, Bedford Street, Dasmari\\u00f1as, Cavite, Philippines\",\"lat\":14.33402235,\"lng\":120.95126220986008},\"dropoff\":{\"address\":\"Dasmari\\u00f1as, Makati, District I, Metro Manila, Philippines\",\"lat\":14.5369453,\"lng\":121.0302771},\"fare\":555.65,\"distance\":\"24.11 km\",\"payment_method\":\"cash\",\"timestamp\":1763992933}', 'sent', '2025-11-24 22:02:13', '2025-11-24 22:02:13'),
+(350, 'user', '12', '{\"type\":\"booking_assigned\",\"booking_id\":\"117\",\"pickup\":{\"address\":\"Kolehiyo ng Lungsod ng Dasmari\\u00f1as, Bedford Street, Dasmari\\u00f1as, Cavite, Philippines\",\"lat\":\"14.3340224\",\"lng\":\"120.9512622\"},\"dropoff\":{\"address\":\"Dasmari\\u00f1as, Makati, District I, Metro Manila, Philippines\",\"lat\":\"14.5369453\",\"lng\":\"121.0302771\"},\"fare\":\"555.65\",\"distance\":\"24.11 km\",\"timestamp\":1763992947}', 'sent', '2025-11-24 22:02:27', '2025-11-24 22:02:27'),
+(351, 'user', '6', '{\"type\":\"booking_assigned\",\"booking_id\":\"117\",\"driver_id\":\"12\",\"driver_name\":\"Ishi Harvard Oxford\",\"driver_phone\":\"09979230412\",\"tricycle_number\":\"TRY-010\",\"timestamp\":1763992947}', 'sent', '2025-11-24 22:02:27', '2025-11-24 22:02:27'),
+(352, 'user', '6', '{\"type\":\"driver_rejected\",\"ride_id\":117,\"message\":\"Driver declined your booking. Admin will assign another driver shortly...\",\"reason\":\"Driver declined\",\"timestamp\":1763992959}', 'sent', '2025-11-24 22:02:39', '2025-11-24 22:02:39'),
+(353, 'user', '1', '{\"type\":\"driver_rejected\",\"booking_id\":117,\"driver_id\":12,\"message\":\"Driver rejected booking #117. Booking returned to pending.\",\"reason\":\"Driver declined\",\"timestamp\":1763992959}', 'sent', '2025-11-24 22:02:39', '2025-11-24 22:02:39'),
+(354, 'user', '12', '{\"type\":\"booking_assigned\",\"booking_id\":\"117\",\"pickup\":{\"address\":\"Kolehiyo ng Lungsod ng Dasmari\\u00f1as, Bedford Street, Dasmari\\u00f1as, Cavite, Philippines\",\"lat\":\"14.3340224\",\"lng\":\"120.9512622\"},\"dropoff\":{\"address\":\"Dasmari\\u00f1as, Makati, District I, Metro Manila, Philippines\",\"lat\":\"14.5369453\",\"lng\":\"121.0302771\"},\"fare\":\"555.65\",\"distance\":\"24.11 km\",\"timestamp\":1763992971}', 'sent', '2025-11-24 22:02:51', '2025-11-24 22:02:51'),
+(355, 'user', '6', '{\"type\":\"booking_assigned\",\"booking_id\":\"117\",\"driver_id\":\"12\",\"driver_name\":\"Ishi Harvard Oxford\",\"driver_phone\":\"09979230412\",\"tricycle_number\":\"TRY-010\",\"timestamp\":1763992971}', 'sent', '2025-11-24 22:02:51', '2025-11-24 22:02:51'),
+(356, 'user', '6', '{\"type\":\"driver_rejected\",\"ride_id\":117,\"message\":\"Driver declined your booking. Admin will assign another driver shortly...\",\"reason\":\"Driver declined\",\"timestamp\":1763993076}', 'sent', '2025-11-24 22:04:36', '2025-11-24 22:04:36'),
+(357, 'user', '1', '{\"type\":\"driver_rejected\",\"booking_id\":117,\"driver_id\":12,\"message\":\"Driver rejected booking #117. Booking returned to pending.\",\"reason\":\"Driver declined\",\"timestamp\":1763993076}', 'sent', '2025-11-24 22:04:36', '2025-11-24 22:04:36'),
+(358, 'user', '6', '{\"type\":\"booking_rejected\",\"booking_id\":\"117\",\"message\":\"Your booking request has been rejected. Please try booking again.\",\"timestamp\":1763993092}', 'sent', '2025-11-24 22:04:52', '2025-11-24 22:04:53'),
+(359, 'role', 'admin', '{\"type\":\"booking_rejected\",\"booking_id\":\"117\",\"status\":\"rejected\",\"timestamp\":1763993092}', 'sent', '2025-11-24 22:04:52', '2025-11-24 22:04:53'),
+(360, 'role', 'admin', '{\"type\":\"new_booking\",\"booking_id\":\"118\",\"user_id\":6,\"user_name\":\"Patrick\",\"user_phone\":\"+639123456789\",\"user_email\":\"patrick@email.com\",\"pickup\":{\"address\":\"Kolehiyo ng Lungsod ng Dasmari\\u00f1as, Bedford Street, Dasmari\\u00f1as, Cavite, Philippines\",\"lat\":14.33402235,\"lng\":120.95126220986008},\"dropoff\":{\"address\":\"Lola Nena\'s, Adelina Street, Manila, Sampaloc, Metro Manila, Philippines\",\"lat\":14.6060614,\"lng\":120.9884691},\"fare\":786.65,\"distance\":\"35.11 km\",\"payment_method\":\"cash\",\"timestamp\":1763993113}', 'sent', '2025-11-24 22:05:13', '2025-11-24 22:05:13'),
+(361, 'user', '12', '{\"type\":\"booking_assigned\",\"booking_id\":\"118\",\"pickup\":{\"address\":\"Kolehiyo ng Lungsod ng Dasmari\\u00f1as, Bedford Street, Dasmari\\u00f1as, Cavite, Philippines\",\"lat\":\"14.3340224\",\"lng\":\"120.9512622\"},\"dropoff\":{\"address\":\"Lola Nena\'s, Adelina Street, Manila, Sampaloc, Metro Manila, Philippines\",\"lat\":\"14.6060614\",\"lng\":\"120.9884691\"},\"fare\":\"786.65\",\"distance\":\"35.11 km\",\"timestamp\":1763993119}', 'sent', '2025-11-24 22:05:19', '2025-11-24 22:05:20'),
+(362, 'user', '6', '{\"type\":\"booking_assigned\",\"booking_id\":\"118\",\"driver_id\":\"12\",\"driver_name\":\"Ishi Harvard Oxford\",\"driver_phone\":\"09979230412\",\"tricycle_number\":\"TRY-010\",\"timestamp\":1763993120}', 'sent', '2025-11-24 22:05:20', '2025-11-24 22:05:20'),
+(363, 'role', 'admin', '{\"type\":\"booking_cancelled\",\"booking_id\":\"118\",\"status\":\"cancelled\",\"cancelled_by\":\"user\",\"timestamp\":1763993326}', 'sent', '2025-11-24 22:08:46', '2025-11-24 22:08:46'),
+(364, 'role', 'admin', '{\"type\":\"new_booking\",\"booking_id\":\"119\",\"user_id\":6,\"user_name\":\"Patrick\",\"user_phone\":\"+639123456789\",\"user_email\":\"patrick@email.com\",\"pickup\":{\"address\":\"123, Doctor Jose Fabella Road, Mandaluyong, Metro Manila, Philippines\",\"lat\":14.57924065,\"lng\":121.03673713194163},\"dropoff\":{\"address\":\"Buckingham Embroidery, Carlos Palanca Street, Manila, Quiapo, Metro Manila, Philippines\",\"lat\":14.5979156,\"lng\":120.9823488},\"fare\":268.6,\"distance\":\"10.44 km\",\"payment_method\":\"cash\",\"timestamp\":1763993370}', 'sent', '2025-11-24 22:09:30', '2025-11-24 22:09:31'),
+(365, 'user', '12', '{\"type\":\"booking_assigned\",\"booking_id\":\"119\",\"pickup\":{\"address\":\"123, Doctor Jose Fabella Road, Mandaluyong, Metro Manila, Philippines\",\"lat\":\"14.5792407\",\"lng\":\"121.0367371\"},\"dropoff\":{\"address\":\"Buckingham Embroidery, Carlos Palanca Street, Manila, Quiapo, Metro Manila, Philippines\",\"lat\":\"14.5979156\",\"lng\":\"120.9823488\"},\"fare\":\"268.60\",\"distance\":\"10.44 km\",\"timestamp\":1763993379}', 'sent', '2025-11-24 22:09:39', '2025-11-24 22:09:39'),
+(366, 'user', '6', '{\"type\":\"booking_assigned\",\"booking_id\":\"119\",\"driver_id\":\"12\",\"driver_name\":\"Ishi Harvard Oxford\",\"driver_phone\":\"09979230412\",\"tricycle_number\":\"TRY-010\",\"timestamp\":1763993379}', 'sent', '2025-11-24 22:09:39', '2025-11-24 22:09:39'),
+(367, 'user', '6', '{\"type\":\"status_update\",\"ride_id\":119,\"status\":\"confirmed\",\"message\":\"Driver is on the way!\",\"timestamp\":1763993396}', 'sent', '2025-11-24 22:09:56', '2025-11-24 22:09:57'),
+(368, 'user', '6', '{\"type\":\"status_update\",\"ride_id\":\"119\",\"status\":\"in_progress\",\"message\":\"Your trip has started!\",\"timestamp\":1763993401}', 'sent', '2025-11-24 22:10:01', '2025-11-24 22:10:01'),
+(369, 'user', '6', '{\"type\":\"ride_completed\",\"ride_id\":\"119\",\"status\":\"completed\",\"fare\":\"268.60\",\"message\":\"Trip completed! Please rate your driver.\",\"timestamp\":1763993410}', 'sent', '2025-11-24 22:10:10', '2025-11-24 22:10:10'),
+(370, 'role', 'admin', '{\"type\":\"new_booking\",\"booking_id\":\"120\",\"user_id\":6,\"user_name\":\"Patrick\",\"user_phone\":\"+639123456789\",\"user_email\":\"patrick@email.com\",\"pickup\":{\"address\":\"Barangay 859 Hall, Kahilom \\u2161 Street, Barangay 859 Zone 93, Pandacan, Sixth District, Manila, Capital District, Metro Manila, 1011, Philippines\",\"lat\":14.586490722862699,\"lng\":121.00393295288087},\"dropoff\":{\"address\":\"Carlos Palanca Street, San Miguel, Sixth District, Manila, Capital District, Metro Manila, 1005, Philippines\",\"lat\":14.59201442573935,\"lng\":120.98539352416994},\"fare\":121.3,\"distance\":\"3.42 km\",\"payment_method\":\"cash\",\"timestamp\":1763993854}', 'sent', '2025-11-24 22:17:34', '2025-11-24 22:17:34'),
+(371, 'user', '12', '{\"type\":\"booking_assigned\",\"booking_id\":\"120\",\"pickup\":{\"address\":\"Barangay 859 Hall, Kahilom \\u2161 Street, Barangay 859 Zone 93, Pandacan, Sixth District, Manila, Capital District, Metro Manila, 1011, Philippines\",\"lat\":\"14.5864907\",\"lng\":\"121.0039330\"},\"dropoff\":{\"address\":\"Carlos Palanca Street, San Miguel, Sixth District, Manila, Capital District, Metro Manila, 1005, Philippines\",\"lat\":\"14.5920144\",\"lng\":\"120.9853935\"},\"fare\":\"121.30\",\"distance\":\"3.42 km\",\"timestamp\":1763993860}', 'sent', '2025-11-24 22:17:40', '2025-11-24 22:17:40'),
+(372, 'user', '6', '{\"type\":\"booking_assigned\",\"booking_id\":\"120\",\"driver_id\":\"12\",\"driver_name\":\"Ishi Harvard Oxford\",\"driver_phone\":\"09979230412\",\"tricycle_number\":\"TRY-010\",\"timestamp\":1763993860}', 'sent', '2025-11-24 22:17:40', '2025-11-24 22:17:40'),
+(373, 'user', '6', '{\"type\":\"status_update\",\"ride_id\":120,\"status\":\"confirmed\",\"message\":\"Driver is on the way!\",\"timestamp\":1763993869}', 'sent', '2025-11-24 22:17:49', '2025-11-24 22:17:49'),
+(374, 'user', '6', '{\"type\":\"status_update\",\"ride_id\":\"120\",\"status\":\"in_progress\",\"message\":\"Your trip has started!\",\"timestamp\":1763993875}', 'sent', '2025-11-24 22:17:55', '2025-11-24 22:17:56'),
+(375, 'user', '6', '{\"type\":\"ride_completed\",\"ride_id\":\"120\",\"status\":\"completed\",\"fare\":\"121.30\",\"message\":\"Trip completed! Please rate your driver.\",\"timestamp\":1763993883}', 'sent', '2025-11-24 22:18:03', '2025-11-24 22:18:03');
 
 -- --------------------------------------------------------
 
@@ -870,7 +917,15 @@ INSERT INTO `ride_history` (`id`, `user_id`, `driver_id`, `assigned_at`, `accept
 (110, 6, NULL, NULL, NULL, NULL, NULL, 'Kolehiyo ng Lungsod ng Dasmariñas, Bedford Street, Dasmariñas, Cavite, Philippines', 'Lola Nena\'s, Adelina Street, Manila, Sampaloc, Metro Manila, Philippines', 14.3340224, 120.9512622, 14.6060614, 120.9884691, 786.50, '35.10 km', 'cash', '105 mins', 'rejected', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2025-11-18 16:21:53', NULL, '2025-11-18 16:22:56'),
 (111, 6, 1, NULL, NULL, NULL, 'Pedro Santos', 'Kolehiyo ng Lungsod ng Dasmariñas, Bedford Street, Dasmariñas, Cavite, Philippines', 'Paliparan 2, Dasmariñas, Paliparan, Cavite, Philippines', 14.3340224, 120.9512622, 14.3033636, 120.9925479, 211.35, '7.69 km', 'cash', '23 mins', 'completed', 3, 'ambobo mo mag drive', NULL, NULL, '2025-11-19 11:57:06', '2025-11-19 11:57:13', '2025-11-19 11:57:19', NULL, NULL, '2025-11-19 11:56:47', '2025-11-19 11:57:19', '2025-11-19 11:57:28'),
 (112, 6, 1, NULL, NULL, NULL, 'Pedro Santos', 'Kolehiyo ng Lungsod ng Dasmariñas, Bedford Street, Dasmariñas, Cavite, Philippines', 'Paliparan 2, Dasmariñas, Paliparan, Cavite, Philippines', 14.3340224, 120.9512622, 14.3033636, 120.9925479, 211.35, '7.69 km', 'cash', '23 mins', 'completed', 5, 'ambobo mo', NULL, NULL, '2025-11-19 12:24:15', '2025-11-19 12:24:21', '2025-11-19 12:24:31', NULL, NULL, '2025-11-19 12:23:59', '2025-11-19 12:24:31', '2025-11-19 12:24:40'),
-(113, 6, 1, NULL, NULL, NULL, 'Pedro Santos', 'Kolehiyo ng Lungsod ng Dasmariñas, Bedford Street, Dasmariñas, Cavite, Philippines', 'UST Museum, Ampuero Drive, Manila, Sampaloc, Metro Manila, Philippines', 14.3340224, 120.9512622, 14.6101615, 120.9891706, 792.40, '35.36 km', 'cash', '106 mins', 'completed', 3, '', NULL, NULL, '2025-11-23 13:52:57', '2025-11-23 13:53:06', '2025-11-23 13:53:14', NULL, NULL, '2025-11-23 13:52:44', '2025-11-23 13:53:14', '2025-11-23 13:53:19');
+(113, 6, 1, NULL, NULL, NULL, 'Pedro Santos', 'Kolehiyo ng Lungsod ng Dasmariñas, Bedford Street, Dasmariñas, Cavite, Philippines', 'UST Museum, Ampuero Drive, Manila, Sampaloc, Metro Manila, Philippines', 14.3340224, 120.9512622, 14.6101615, 120.9891706, 792.40, '35.36 km', 'cash', '106 mins', 'completed', 3, '', NULL, NULL, '2025-11-23 13:52:57', '2025-11-23 13:53:06', '2025-11-23 13:53:14', NULL, NULL, '2025-11-23 13:52:44', '2025-11-23 13:53:14', '2025-11-23 13:53:19'),
+(114, 6, NULL, NULL, NULL, NULL, NULL, 'Kolehiyo ng Lungsod ng Dasmariñas, Bedford Street, Dasmariñas, Cavite, Philippines', 'Lola Nena\'s, Adelina Street, Manila, Sampaloc, Metro Manila, Philippines', 14.3340224, 120.9512622, 14.6060614, 120.9884691, 786.65, '35.11 km', 'cash', '105 mins', 'cancelled', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'user', 'User cancelled', '2025-11-24 08:11:35', NULL, '2025-11-24 08:11:51'),
+(115, 6, 1, NULL, NULL, NULL, 'Pedro Santos', 'Mendiola Extension, Barangay 831, Paco, Fifth District, Manila, Capital District, Metro Manila, 1007, Philippines', 'Pacific Commercial Company Building, Muelle del Banco Nacional, Binondo, Third District, Manila, Capital District, Metro Manila, 1006, Philippines', 14.5908100, 121.0010147, 14.5957937, 120.9764671, 140.35, '4.29 km', 'cash', '13 mins', 'completed', 4, '', NULL, NULL, '2025-11-24 12:27:23', '2025-11-24 12:27:29', '2025-11-24 12:27:34', NULL, NULL, '2025-11-24 12:26:53', '2025-11-24 12:27:34', '2025-11-24 12:27:46'),
+(116, 6, 1, NULL, NULL, NULL, 'Pedro Santos', 'Pope Pius XII Catholic Center, 1175, United Nations Avenue, Paco, Fifth District, Manila, Capital District, Metro Manila, 1007, Philippines', 'Uno High School, 1440, Alvarado Street, Barangay 254, Tondo, Second District, Manila, Capital District, Metro Manila, 1003, Philippines', 14.5844972, 120.9907150, 14.6104119, 120.9768105, 147.75, '4.65 km', 'cash', '14 mins', 'cancelled', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'user', 'User cancelled', '2025-11-24 13:53:09', NULL, '2025-11-24 13:56:30'),
+(117, 6, NULL, NULL, NULL, NULL, 'Ishi Harvard Oxford', 'Kolehiyo ng Lungsod ng Dasmariñas, Bedford Street, Dasmariñas, Cavite, Philippines', 'Dasmariñas, Makati, District I, Metro Manila, Philippines', 14.3340224, 120.9512622, 14.5369453, 121.0302771, 555.65, '24.11 km', 'cash', '72 mins', 'rejected', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2025-11-24 14:02:12', NULL, '2025-11-24 14:04:52'),
+(118, 6, 12, NULL, NULL, NULL, 'Ishi Harvard Oxford', 'Kolehiyo ng Lungsod ng Dasmariñas, Bedford Street, Dasmariñas, Cavite, Philippines', 'Lola Nena\'s, Adelina Street, Manila, Sampaloc, Metro Manila, Philippines', 14.3340224, 120.9512622, 14.6060614, 120.9884691, 786.65, '35.11 km', 'cash', '105 mins', 'cancelled', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'user', 'User cancelled', '2025-11-24 14:05:13', NULL, '2025-11-24 14:08:46'),
+(119, 6, 12, NULL, NULL, NULL, 'Ishi Harvard Oxford', '123, Doctor Jose Fabella Road, Mandaluyong, Metro Manila, Philippines', 'Buckingham Embroidery, Carlos Palanca Street, Manila, Quiapo, Metro Manila, Philippines', 14.5792407, 121.0367371, 14.5979156, 120.9823488, 268.60, '10.44 km', 'cash', '31 mins', 'completed', 3, '', NULL, NULL, '2025-11-24 14:09:56', '2025-11-24 14:10:01', '2025-11-24 14:10:09', NULL, NULL, '2025-11-24 14:09:30', '2025-11-24 14:10:09', '2025-11-24 14:10:14');
+INSERT INTO `ride_history` (`id`, `user_id`, `driver_id`, `assigned_at`, `accepted_at`, `started_at`, `driver_name`, `pickup_location`, `destination`, `pickup_lat`, `pickup_lng`, `dropoff_lat`, `dropoff_lng`, `fare`, `distance`, `payment_method`, `estimated_duration`, `status`, `user_rating`, `user_review`, `driver_rating`, `driver_review`, `driver_arrival_time`, `trip_start_time`, `trip_end_time`, `cancelled_by`, `cancel_reason`, `created_at`, `completed_at`, `updated_at`) VALUES
+(120, 6, 12, NULL, NULL, NULL, 'Ishi Harvard Oxford', 'Barangay 859 Hall, Kahilom Ⅱ Street, Barangay 859 Zone 93, Pandacan, Sixth District, Manila, Capital District, Metro Manila, 1011, Philippines', 'Carlos Palanca Street, San Miguel, Sixth District, Manila, Capital District, Metro Manila, 1005, Philippines', 14.5864907, 121.0039330, 14.5920144, 120.9853935, 121.30, '3.42 km', 'cash', '10 mins', 'completed', 4, '', NULL, NULL, '2025-11-24 14:17:49', '2025-11-24 14:17:55', '2025-11-24 14:18:02', NULL, NULL, '2025-11-24 14:17:34', '2025-11-24 14:18:02', '2025-11-24 14:18:09');
 
 -- --------------------------------------------------------
 
@@ -1317,7 +1372,44 @@ INSERT INTO `ride_notifications` (`id`, `ride_id`, `recipient_id`, `recipient_ty
 (420, 113, 6, 'user', 'driver_confirmed', 'Your driver is on the way!', 0, '2025-11-23 13:52:57'),
 (421, 113, 6, 'user', 'trip_started', 'Your trip has started!', 0, '2025-11-23 13:53:07'),
 (422, 113, 6, 'user', 'trip_completed', 'Trip completed! Please rate your driver.', 0, '2025-11-23 13:53:14'),
-(423, 113, 1, 'driver', 'rating_received', 'You received a 3-star rating from a passenger!', 0, '2025-11-23 13:53:19');
+(423, 113, 1, 'driver', 'rating_received', 'You received a 3-star rating from a passenger!', 0, '2025-11-23 13:53:19'),
+(424, 114, 1, 'admin', 'new_booking', 'New booking request from Kolehiyo ng Lungsod ng Dasmariñas, Bedford Street, Dasmariñas, Cavite, Philippines to Lola Nena\'s, Adelina Street, Manila, Sampaloc, Metro Manila, Philippines', 0, '2025-11-24 08:11:35'),
+(425, 115, 1, 'admin', 'new_booking', 'New booking request from Mendiola Extension, Barangay 831, Paco, Fifth District, Manila, Capital District, Metro Manila, 1007, Philippines to Pacific Commercial Company Building, Muelle del Banco Nacional, Binondo, Third District, Manila, Capital District, Metro Manila, 1006, Philippines', 0, '2025-11-24 12:26:53'),
+(426, 115, 1, 'driver', 'new_ride', 'New ride assigned: Mendiola Extension, Barangay 831, Paco, Fifth District, Manila, Capital District, Metro Manila, 1007, Philippines to Pacific Commercial Company Building, Muelle del Banco Nacional, Binondo, Third District, Manila, Capital District, Metro Manila, 1006, Philippines', 0, '2025-11-24 12:27:17'),
+(427, 115, 6, 'user', 'driver_assigned', 'Driver Pedro Santos has been assigned. Waiting for driver confirmation...', 0, '2025-11-24 12:27:17'),
+(428, 115, 6, 'user', 'driver_confirmed', 'Your driver is on the way!', 0, '2025-11-24 12:27:24'),
+(429, 115, 6, 'user', 'trip_started', 'Your trip has started!', 0, '2025-11-24 12:27:29'),
+(430, 115, 6, 'user', 'trip_completed', 'Trip completed! Please rate your driver.', 0, '2025-11-24 12:27:34'),
+(431, 115, 1, 'driver', 'rating_received', 'You received a 4-star rating from a passenger!', 0, '2025-11-24 12:27:46'),
+(432, 116, 1, 'admin', 'new_booking', 'New booking request from Pope Pius XII Catholic Center, 1175, United Nations Avenue, Paco, Fifth District, Manila, Capital District, Metro Manila, 1007, Philippines to Uno High School, 1440, Alvarado Street, Barangay 254, Tondo, Second District, Manila, Capital District, Metro Manila, 1003, Philippines', 0, '2025-11-24 13:53:09'),
+(433, 116, 1, 'driver', 'new_ride', 'New ride assigned: Pope Pius XII Catholic Center, 1175, United Nations Avenue, Paco, Fifth District, Manila, Capital District, Metro Manila, 1007, Philippines to Uno High School, 1440, Alvarado Street, Barangay 254, Tondo, Second District, Manila, Capital District, Metro Manila, 1003, Philippines', 0, '2025-11-24 13:53:19'),
+(434, 116, 6, 'user', 'driver_assigned', 'Driver Pedro Santos has been assigned. Waiting for driver confirmation...', 0, '2025-11-24 13:53:19'),
+(435, 116, 1, 'driver', 'ride_cancelled', 'Ride cancelled by passenger', 0, '2025-11-24 13:56:30'),
+(436, 117, 1, 'admin', 'new_booking', 'New booking request from Kolehiyo ng Lungsod ng Dasmariñas, Bedford Street, Dasmariñas, Cavite, Philippines to Dasmariñas, Makati, District I, Metro Manila, Philippines', 0, '2025-11-24 14:02:13'),
+(437, 117, 12, 'driver', 'new_ride', 'New ride assigned: Kolehiyo ng Lungsod ng Dasmariñas, Bedford Street, Dasmariñas, Cavite, Philippines to Dasmariñas, Makati, District I, Metro Manila, Philippines', 0, '2025-11-24 14:02:27'),
+(438, 117, 6, 'user', 'driver_assigned', 'Driver Ishi Harvard Oxford has been assigned. Waiting for driver confirmation...', 0, '2025-11-24 14:02:27'),
+(439, 117, 6, 'user', 'driver_declined', 'Driver declined. Your booking is being reassigned...', 0, '2025-11-24 14:02:39'),
+(440, 117, 12, 'driver', 'new_ride', 'New ride assigned: Kolehiyo ng Lungsod ng Dasmariñas, Bedford Street, Dasmariñas, Cavite, Philippines to Dasmariñas, Makati, District I, Metro Manila, Philippines', 0, '2025-11-24 14:02:51'),
+(441, 117, 6, 'user', 'driver_assigned', 'Driver Ishi Harvard Oxford has been assigned. Waiting for driver confirmation...', 0, '2025-11-24 14:02:51'),
+(442, 117, 6, 'user', 'driver_declined', 'Driver declined. Your booking is being reassigned...', 0, '2025-11-24 14:04:35'),
+(443, 118, 1, 'admin', 'new_booking', 'New booking request from Kolehiyo ng Lungsod ng Dasmariñas, Bedford Street, Dasmariñas, Cavite, Philippines to Lola Nena\'s, Adelina Street, Manila, Sampaloc, Metro Manila, Philippines', 0, '2025-11-24 14:05:13'),
+(444, 118, 12, 'driver', 'new_ride', 'New ride assigned: Kolehiyo ng Lungsod ng Dasmariñas, Bedford Street, Dasmariñas, Cavite, Philippines to Lola Nena\'s, Adelina Street, Manila, Sampaloc, Metro Manila, Philippines', 0, '2025-11-24 14:05:19'),
+(445, 118, 6, 'user', 'driver_assigned', 'Driver Ishi Harvard Oxford has been assigned. Waiting for driver confirmation...', 0, '2025-11-24 14:05:19'),
+(446, 118, 12, 'driver', 'ride_cancelled', 'Ride cancelled by passenger', 0, '2025-11-24 14:08:46'),
+(447, 119, 1, 'admin', 'new_booking', 'New booking request from 123, Doctor Jose Fabella Road, Mandaluyong, Metro Manila, Philippines to Buckingham Embroidery, Carlos Palanca Street, Manila, Quiapo, Metro Manila, Philippines', 0, '2025-11-24 14:09:31'),
+(448, 119, 12, 'driver', 'new_ride', 'New ride assigned: 123, Doctor Jose Fabella Road, Mandaluyong, Metro Manila, Philippines to Buckingham Embroidery, Carlos Palanca Street, Manila, Quiapo, Metro Manila, Philippines', 0, '2025-11-24 14:09:39'),
+(449, 119, 6, 'user', 'driver_assigned', 'Driver Ishi Harvard Oxford has been assigned. Waiting for driver confirmation...', 0, '2025-11-24 14:09:39'),
+(450, 119, 6, 'user', 'driver_confirmed', 'Your driver is on the way!', 0, '2025-11-24 14:09:56'),
+(451, 119, 6, 'user', 'trip_started', 'Your trip has started!', 0, '2025-11-24 14:10:01'),
+(452, 119, 6, 'user', 'trip_completed', 'Trip completed! Please rate your driver.', 0, '2025-11-24 14:10:10'),
+(453, 119, 12, 'driver', 'rating_received', 'You received a 3-star rating from a passenger!', 0, '2025-11-24 14:10:14'),
+(454, 120, 1, 'admin', 'new_booking', 'New booking request from Barangay 859 Hall, Kahilom Ⅱ Street, Barangay 859 Zone 93, Pandacan, Sixth District, Manila, Capital District, Metro Manila, 1011, Philippines to Carlos Palanca Street, San Miguel, Sixth District, Manila, Capital District, Metro Manila, 1005, Philippines', 0, '2025-11-24 14:17:34'),
+(455, 120, 12, 'driver', 'new_ride', 'New ride assigned: Barangay 859 Hall, Kahilom Ⅱ Street, Barangay 859 Zone 93, Pandacan, Sixth District, Manila, Capital District, Metro Manila, 1011, Philippines to Carlos Palanca Street, San Miguel, Sixth District, Manila, Capital District, Metro Manila, 1005, Philippines', 0, '2025-11-24 14:17:40'),
+(456, 120, 6, 'user', 'driver_assigned', 'Driver Ishi Harvard Oxford has been assigned. Waiting for driver confirmation...', 0, '2025-11-24 14:17:40'),
+(457, 120, 6, 'user', 'driver_confirmed', 'Your driver is on the way!', 0, '2025-11-24 14:17:49'),
+(458, 120, 6, 'user', 'trip_started', 'Your trip has started!', 0, '2025-11-24 14:17:55'),
+(459, 120, 6, 'user', 'trip_completed', 'Trip completed! Please rate your driver.', 0, '2025-11-24 14:18:03'),
+(460, 120, 12, 'driver', 'rating_received', 'You received a 4-star rating from a passenger!', 0, '2025-11-24 14:18:09');
 
 -- --------------------------------------------------------
 
@@ -1356,13 +1448,14 @@ CREATE TABLE `tricycle_drivers` (
   `current_lat` decimal(10,7) DEFAULT NULL,
   `current_lng` decimal(10,7) DEFAULT NULL,
   `last_location_update` timestamp NULL DEFAULT NULL,
-  `status` enum('available','on_trip','offline') DEFAULT 'offline',
+  `status` enum('available','on_trip','offline','archived') DEFAULT 'offline',
   `total_trips_completed` int(11) DEFAULT 0,
   `total_earnings` decimal(10,2) DEFAULT 0.00,
   `acceptance_rate` decimal(5,2) DEFAULT 100.00,
   `cancellation_rate` decimal(5,2) DEFAULT 0.00,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `deleted_at` timestamp NULL DEFAULT NULL,
   `current_latitude` decimal(10,8) DEFAULT NULL,
   `current_longitude` decimal(11,8) DEFAULT NULL,
   `location_updated_at` timestamp NULL DEFAULT NULL,
@@ -1373,15 +1466,16 @@ CREATE TABLE `tricycle_drivers` (
 -- Dumping data for table `tricycle_drivers`
 --
 
-INSERT INTO `tricycle_drivers` (`id`, `name`, `email`, `password`, `phone`, `plate_number`, `tricycle_number`, `tricycle_model`, `license_number`, `is_verified`, `rating`, `average_rating`, `total_ratings`, `current_lat`, `current_lng`, `last_location_update`, `status`, `total_trips_completed`, `total_earnings`, `acceptance_rate`, `cancellation_rate`, `created_at`, `updated_at`, `current_latitude`, `current_longitude`, `location_updated_at`, `is_online`) VALUES
-(1, 'Pedro Santos', 'pedro@driver.com', '$2y$10$B5n.rUoOhrVNvnP6lCpBqectTv031mVIOg98jmPU9Fczcy15QdfSy', '+63 917 111 2222', 'TRY-123', 'TRY-001', 'Honda TMX', 'LIC-001', 1, 3.48, 3.48, 23, 14.5995000, 120.9842000, NULL, 'available', 29, 12371.56, 100.00, 0.00, '2025-11-12 15:21:39', '2025-11-23 13:53:19', NULL, NULL, NULL, 0),
-(2, 'Jose Reyes', 'jose@driver.com', '$2y$10$B5n.rUoOhrVNvnP6lCpBqectTv031mVIOg98jmPU9Fczcy15QdfSy', '+63 917 222 3333', 'TRY-456', 'TRY-002', 'Kawasaki', 'LIC-002', 1, 4.90, 4.90, 0, 14.6042000, 120.9822000, NULL, 'available', 0, 0.00, 100.00, 0.00, '2025-11-12 15:21:39', '2025-11-13 17:42:23', NULL, NULL, NULL, 0),
-(3, 'Antonio Cruz', 'antonio@driver.com', '$2y$10$B5n.rUoOhrVNvnP6lCpBqectTv031mVIOg98jmPU9Fczcy15QdfSy', '+63 917 333 4444', 'TRY-789', 'TRY-003', 'Yamaha', 'LIC-003', 1, 4.70, 4.70, 0, 14.5896000, 120.9812000, NULL, 'offline', 0, 0.00, 100.00, 0.00, '2025-11-12 15:21:39', '2025-11-13 17:42:23', NULL, NULL, NULL, 0),
-(4, 'Ricardo Lopez', 'ricardo@driver.com', '$2y$10$B5n.rUoOhrVNvnP6lCpBqectTv031mVIOg98jmPU9Fczcy15QdfSy', '+63 917 444 5555', 'TRY-321', 'TRY-004', 'Honda', 'LIC-004', 1, 5.00, 5.00, 0, 14.5933000, 120.9771000, NULL, 'on_trip', 0, 0.00, 100.00, 0.00, '2025-11-12 15:21:39', '2025-11-13 17:42:23', NULL, NULL, NULL, 0),
-(6, 'asdas asdasdads', 'mica@email.com', '$2y$10$ufvsbWQAJotxWb0jtSHnYONdacxpy.ldWqrWuEbpdmYKHeZv7DqAG', '09231231231', 'ASD3124', 'TRY-006', NULL, 'A41-31-231451', 0, 3.00, 3.00, 1, NULL, NULL, NULL, 'available', 1, 1709.60, 100.00, 0.00, '2025-11-13 17:37:51', '2025-11-14 08:44:49', NULL, NULL, NULL, 0),
-(7, 'Jade Orense', 'jadeorense@email.com', '$2y$10$jgFVkETju7amengkR39rceZG.9bEk3DJEbfAu8pTAOjCuE3OjuXoe', '09123123123', 'ASD1231', 'TRY-007', NULL, 'A91-32-131512', 0, 2.78, 2.78, 9, NULL, NULL, NULL, 'available', 9, 6198.32, 100.00, 0.00, '2025-11-14 08:49:35', '2025-11-18 15:40:22', NULL, NULL, NULL, 0),
-(10, 'lolipop dwayne', '67@mailinator.com', '$2y$10$f9yQ3dvXlY9PpP6N.zXZhu.LrSo27sR1q51C2.kipCdkTY6eOpmYm', '09231231233', 'ASX1351', 'TRY-008', NULL, 'A12-31-312333', 0, 5.00, 5.00, 0, NULL, NULL, NULL, 'offline', 0, 0.00, 100.00, 0.00, '2025-11-17 17:27:54', '2025-11-17 17:27:54', NULL, NULL, NULL, 0),
-(11, 'Jadeski Orense', 'jrorense@kld.edu.ph', '$2y$10$is3xIWOislkD5T5ajuUJb.oApELd5PyvpuyVe.7P0H7.g5.SZScEe', '09345463452', 'ASB2513', 'TRY-009', NULL, 'A51-25-681235', 0, 3.00, 3.00, 1, NULL, NULL, NULL, 'available', 1, 364.76, 100.00, 0.00, '2025-11-18 15:53:24', '2025-11-18 15:56:50', NULL, NULL, NULL, 0);
+INSERT INTO `tricycle_drivers` (`id`, `name`, `email`, `password`, `phone`, `plate_number`, `tricycle_number`, `tricycle_model`, `license_number`, `is_verified`, `rating`, `average_rating`, `total_ratings`, `current_lat`, `current_lng`, `last_location_update`, `status`, `total_trips_completed`, `total_earnings`, `acceptance_rate`, `cancellation_rate`, `created_at`, `updated_at`, `deleted_at`, `current_latitude`, `current_longitude`, `location_updated_at`, `is_online`) VALUES
+(1, 'Pedro Santos', 'pedro@driver.com', '$2y$10$B5n.rUoOhrVNvnP6lCpBqectTv031mVIOg98jmPU9Fczcy15QdfSy', '+63 917 111 2222', 'TRY-123', 'TRY-001', 'Honda TMX', 'LIC-001', 1, 3.50, 3.50, 24, 14.5995000, 120.9842000, NULL, 'available', 30, 12483.84, 100.00, 0.00, '2025-11-12 15:21:39', '2025-11-24 13:59:50', NULL, NULL, NULL, NULL, 0),
+(2, 'Jose Reyes', 'jose@driver.com', '$2y$10$B5n.rUoOhrVNvnP6lCpBqectTv031mVIOg98jmPU9Fczcy15QdfSy', '+63 917 222 3333', 'TRY-456', 'TRY-002', 'Kawasaki', 'LIC-002', 1, 4.90, 4.90, 0, 14.6042000, 120.9822000, NULL, 'available', 0, 0.00, 100.00, 0.00, '2025-11-12 15:21:39', '2025-11-13 17:42:23', NULL, NULL, NULL, NULL, 0),
+(3, 'Antonio Cruz', 'antonio@driver.com', '$2y$10$B5n.rUoOhrVNvnP6lCpBqectTv031mVIOg98jmPU9Fczcy15QdfSy', '+63 917 333 4444', 'TRY-789', 'TRY-003', 'Yamaha', 'LIC-003', 1, 4.70, 4.70, 0, 14.5896000, 120.9812000, NULL, 'offline', 0, 0.00, 100.00, 0.00, '2025-11-12 15:21:39', '2025-11-13 17:42:23', NULL, NULL, NULL, NULL, 0),
+(4, 'Ricardo Lopez', 'ricardo@driver.com', '$2y$10$B5n.rUoOhrVNvnP6lCpBqectTv031mVIOg98jmPU9Fczcy15QdfSy', '+63 917 444 5555', 'TRY-321', 'TRY-004', 'Honda', 'LIC-004', 1, 5.00, 5.00, 0, 14.5933000, 120.9771000, NULL, 'on_trip', 0, 0.00, 100.00, 0.00, '2025-11-12 15:21:39', '2025-11-13 17:42:23', NULL, NULL, NULL, NULL, 0),
+(6, 'asdas asdasdads', 'mica@email.com', '$2y$10$ufvsbWQAJotxWb0jtSHnYONdacxpy.ldWqrWuEbpdmYKHeZv7DqAG', '09231231231', 'ASD3124', 'TRY-006', NULL, 'A41-31-231451', 0, 3.00, 3.00, 1, NULL, NULL, NULL, 'available', 1, 1709.60, 100.00, 0.00, '2025-11-13 17:37:51', '2025-11-14 08:44:49', NULL, NULL, NULL, NULL, 0),
+(7, 'Jade Orense', 'jadeorense@email.com', '$2y$10$jgFVkETju7amengkR39rceZG.9bEk3DJEbfAu8pTAOjCuE3OjuXoe', '09123123123', 'ASD1231', 'TRY-007', NULL, 'A91-32-131512', 0, 2.78, 2.78, 9, NULL, NULL, NULL, 'available', 9, 6198.32, 100.00, 0.00, '2025-11-14 08:49:35', '2025-11-18 15:40:22', NULL, NULL, NULL, NULL, 0),
+(10, 'lolipop dwayne', '67@mailinator.com', '$2y$10$f9yQ3dvXlY9PpP6N.zXZhu.LrSo27sR1q51C2.kipCdkTY6eOpmYm', '09231231233', 'ASX1351', 'TRY-008', NULL, 'A12-31-312333', 0, 5.00, 5.00, 0, NULL, NULL, NULL, '', 0, 0.00, 100.00, 0.00, '2025-11-17 17:27:54', '2025-11-24 10:35:28', NULL, NULL, NULL, NULL, 0),
+(11, 'Jadeski Orense', 'jrorense@kld.edu.ph', '$2y$10$is3xIWOislkD5T5ajuUJb.oApELd5PyvpuyVe.7P0H7.g5.SZScEe', '09345463452', 'ASB2513', 'TRY-009', NULL, 'A51-25-681235', 0, 3.00, 3.00, 1, NULL, NULL, NULL, 'available', 1, 364.76, 100.00, 0.00, '2025-11-18 15:53:24', '2025-11-18 15:56:50', NULL, NULL, NULL, NULL, 0),
+(12, 'Ishi Harvard Oxford', 'datuismael123@gmail.com', '$2y$10$Lpx701m8snigSMzt1/J8JezwArz7Dl5HBytqrVdOOcraXoH0.3gbO', '09979230412', 'AGX1234', 'TRY-010', NULL, 'A94-12-351923', 0, 3.50, 3.50, 2, NULL, NULL, NULL, 'available', 2, 311.92, 100.00, 0.00, '2025-11-24 13:35:46', '2025-11-24 14:18:09', NULL, NULL, NULL, NULL, 0);
 
 -- --------------------------------------------------------
 
@@ -1400,11 +1494,13 @@ CREATE TABLE `users` (
   `current_longitude` decimal(11,8) DEFAULT NULL,
   `location_updated_at` timestamp NULL DEFAULT NULL,
   `phone` varchar(25) DEFAULT NULL,
+  `status` varchar(20) DEFAULT NULL,
   `phone_verified` tinyint(1) DEFAULT 0,
   `google_id` varchar(255) DEFAULT NULL,
   `facebook_id` varchar(255) DEFAULT NULL,
   `email_verified` tinyint(1) DEFAULT 0,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `deleted_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Passenger/Customer accounts';
 
@@ -1412,14 +1508,17 @@ CREATE TABLE `users` (
 -- Dumping data for table `users`
 --
 
-INSERT INTO `users` (`id`, `name`, `email`, `password`, `ws_token`, `ws_token_expires`, `current_latitude`, `current_longitude`, `location_updated_at`, `phone`, `phone_verified`, `google_id`, `facebook_id`, `email_verified`, `created_at`, `updated_at`) VALUES
-(1, 'Juan Dela Cruz', 'juan@email.com', '$2y$10$B5n.rUoOhrVNvnP6lCpBqectTv031mVIOg98jmPU9Fczcy15QdfSy', 'f90d5c9ad3ef7d7786603d8fa6d3e7e1d033bc700d45a47f594f2e51b559304f', '2025-11-21 04:40:04', NULL, NULL, NULL, '+63 912 345 6789', 1, NULL, NULL, 1, '2025-11-12 15:21:39', '2025-11-14 04:40:04'),
-(2, 'Maria Garcia', 'maria@email.com', '$2y$10$B5n.rUoOhrVNvnP6lCpBqectTv031mVIOg98jmPU9Fczcy15QdfSy', '323bfb19299d6aba19e71cc3fb9d44fcb391c1ecba7238d424cbd0add6f3b022', '2025-11-21 04:40:04', 14.60123068, 120.99378980, '2025-11-14 05:04:40', '+63 923 456 7890', 1, NULL, NULL, 1, '2025-11-12 15:21:39', '2025-11-14 05:04:40'),
-(4, 'Anna Bautista', 'anna@email.com', '$2y$10$B5n.rUoOhrVNvnP6lCpBqectTv031mVIOg98jmPU9Fczcy15QdfSy', '6a91291ef63f53e2611e941fd6bb38b973aebd2139aa15c80f66ff82bf782f9f', '2025-11-21 04:40:04', NULL, NULL, NULL, '+63 945 678 9012', 1, NULL, NULL, 1, '2025-11-12 15:21:39', '2025-11-14 04:40:04'),
-(5, 'Miguel Torres', 'miguel@email.com', '$2y$10$B5n.rUoOhrVNvnP6lCpBqectTv031mVIOg98jmPU9Fczcy15QdfSy', '297479bd6656bf5f58d6d17683775c242899509a438d389f75842fa97ee0266a', '2025-11-21 04:40:04', NULL, NULL, NULL, '+63 956 789 0123', 1, NULL, NULL, 1, '2025-11-12 15:21:39', '2025-11-14 04:40:04'),
-(6, 'Patrick', 'patrick@email.com', '$2y$10$Pu56TIDhYUU3wE0YpHUvEOwVpQxGW80r5WGidISHf5xuDUbMCZ6he', 'e04e9dd722de17bf65a9534bab6aa7c44304e12d354a7eba2f70c85d09cfa37b', '2025-11-21 04:40:05', NULL, NULL, NULL, '+639123456789', 1, NULL, NULL, 0, '2025-11-12 15:31:03', '2025-11-14 04:40:05'),
-(7, 'Arcane Legends', 'newaccarcanelegends@gmail.com', '$2y$10$pku9eRgtxE92hA8v.zHW5OctRL3Hyb8ONIYKfdWxB4pzZYED3OxHe', '2961ba37aaae6b076bacd3c21b055f75ee7099de88d27e6a5b29a2275c076a0c', '2025-11-21 04:40:05', NULL, NULL, NULL, NULL, 0, '111873639730778643903', NULL, 1, '2025-11-12 15:36:04', '2025-11-14 04:40:05'),
-(8, 'Datu Ismael', 'datuismael123@gmail.com', '$2y$10$KCZajFXXGnr6cXLeEznUOOXfb91qzoPd7mdZoHwzLzAO8IGQv5lM6', NULL, NULL, NULL, NULL, NULL, '09123123412', 0, '109009373760843575075', NULL, 1, '2025-11-14 13:40:51', '2025-11-14 14:06:46');
+INSERT INTO `users` (`id`, `name`, `email`, `password`, `ws_token`, `ws_token_expires`, `current_latitude`, `current_longitude`, `location_updated_at`, `phone`, `status`, `phone_verified`, `google_id`, `facebook_id`, `email_verified`, `created_at`, `deleted_at`, `updated_at`) VALUES
+(1, 'Juan Dela Cruz', 'juan@email.com', '$2y$10$B5n.rUoOhrVNvnP6lCpBqectTv031mVIOg98jmPU9Fczcy15QdfSy', 'f90d5c9ad3ef7d7786603d8fa6d3e7e1d033bc700d45a47f594f2e51b559304f', '2025-11-21 04:40:04', NULL, NULL, NULL, '+63 912 345 6789', NULL, 1, NULL, NULL, 1, '2025-11-12 15:21:39', NULL, '2025-11-14 04:40:04'),
+(2, 'Maria Garcia', 'maria@email.com', '$2y$10$B5n.rUoOhrVNvnP6lCpBqectTv031mVIOg98jmPU9Fczcy15QdfSy', '323bfb19299d6aba19e71cc3fb9d44fcb391c1ecba7238d424cbd0add6f3b022', '2025-11-21 04:40:04', 14.60123068, 120.99378980, '2025-11-14 05:04:40', '+63 923 456 7890', NULL, 1, NULL, NULL, 1, '2025-11-12 15:21:39', NULL, '2025-11-24 12:40:56'),
+(4, 'Anna Bautista', 'anna@email.com', '$2y$10$B5n.rUoOhrVNvnP6lCpBqectTv031mVIOg98jmPU9Fczcy15QdfSy', '6a91291ef63f53e2611e941fd6bb38b973aebd2139aa15c80f66ff82bf782f9f', '2025-11-21 04:40:04', NULL, NULL, NULL, '+63 945 678 9012', NULL, 1, NULL, NULL, 1, '2025-11-12 15:21:39', NULL, '2025-11-14 04:40:04'),
+(5, 'Miguel Torres', 'miguel@email.com', '$2y$10$B5n.rUoOhrVNvnP6lCpBqectTv031mVIOg98jmPU9Fczcy15QdfSy', '297479bd6656bf5f58d6d17683775c242899509a438d389f75842fa97ee0266a', '2025-11-21 04:40:04', NULL, NULL, NULL, '+63 956 789 0123', NULL, 1, NULL, NULL, 1, '2025-11-12 15:21:39', NULL, '2025-11-14 04:40:04'),
+(6, 'Patrick', 'patrick@email.com', '$2y$10$Pu56TIDhYUU3wE0YpHUvEOwVpQxGW80r5WGidISHf5xuDUbMCZ6he', 'e04e9dd722de17bf65a9534bab6aa7c44304e12d354a7eba2f70c85d09cfa37b', '2025-11-21 04:40:05', NULL, NULL, NULL, '+639123456789', NULL, 1, NULL, NULL, 0, '2025-11-12 15:31:03', NULL, '2025-11-24 12:43:10'),
+(7, 'Arcane Legends', 'newaccarcanelegends@gmail.com', '$2y$10$pku9eRgtxE92hA8v.zHW5OctRL3Hyb8ONIYKfdWxB4pzZYED3OxHe', '2961ba37aaae6b076bacd3c21b055f75ee7099de88d27e6a5b29a2275c076a0c', '2025-11-21 04:40:05', NULL, NULL, NULL, NULL, NULL, 0, '111873639730778643903', NULL, 1, '2025-11-12 15:36:04', NULL, '2025-11-14 04:40:05'),
+(8, 'Datu Ismael', 'datuismael123@gmail.com', '$2y$10$KCZajFXXGnr6cXLeEznUOOXfb91qzoPd7mdZoHwzLzAO8IGQv5lM6', NULL, NULL, NULL, NULL, NULL, '09123123412', NULL, 0, '109009373760843575075', NULL, 1, '2025-11-14 13:40:51', NULL, '2025-11-14 14:06:46'),
+(9, 'John Patrick Monroyo', 'jpmonroyo@kld.edu.ph', '$2y$10$z8cu6eJSDy6wqkyupHyxBuudv9J.IgLL7pMdf9nN9F8kxX.isQi/C', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, '114263499582382083487', NULL, 1, '2025-11-24 08:24:09', NULL, '2025-11-24 11:23:57'),
+(10, 'ishi', 'ishi@email.com', '$2y$10$zr4BwWc8eUG8IEZEW/vgAeRcXmc6udv6MxcgeB/2cnNAXmqxR8XfC', NULL, NULL, NULL, NULL, NULL, '+639123123123', NULL, 1, NULL, NULL, 0, '2025-11-24 13:30:24', NULL, '2025-11-24 13:30:24'),
+(11, 'ishi', 'lolipop@email.com', '$2y$10$Y6P2urHvZinmhw.PKVYZ.uCnfxrN1uaMYh0UYb.dBGCJ.//EmG8Ri', NULL, NULL, NULL, NULL, NULL, '+639123123123', NULL, 1, NULL, NULL, 0, '2025-11-24 13:58:33', NULL, '2025-11-24 13:58:33');
 
 -- --------------------------------------------------------
 
@@ -1707,13 +1806,13 @@ ALTER TABLE `admins`
 -- AUTO_INCREMENT for table `driver_applications`
 --
 ALTER TABLE `driver_applications`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
 
 --
 -- AUTO_INCREMENT for table `driver_earnings`
 --
 ALTER TABLE `driver_earnings`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=41;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=44;
 
 --
 -- AUTO_INCREMENT for table `driver_locations`
@@ -1731,25 +1830,25 @@ ALTER TABLE `fare_settings`
 -- AUTO_INCREMENT for table `otp_verifications`
 --
 ALTER TABLE `otp_verifications`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=27;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=40;
 
 --
 -- AUTO_INCREMENT for table `realtime_notifications`
 --
 ALTER TABLE `realtime_notifications`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=337;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=376;
 
 --
 -- AUTO_INCREMENT for table `ride_history`
 --
 ALTER TABLE `ride_history`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=114;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=121;
 
 --
 -- AUTO_INCREMENT for table `ride_notifications`
 --
 ALTER TABLE `ride_notifications`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=424;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=461;
 
 --
 -- AUTO_INCREMENT for table `sessions`
@@ -1761,13 +1860,13 @@ ALTER TABLE `sessions`
 -- AUTO_INCREMENT for table `tricycle_drivers`
 --
 ALTER TABLE `tricycle_drivers`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- AUTO_INCREMENT for table `ws_connections`

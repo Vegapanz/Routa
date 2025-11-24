@@ -10,18 +10,21 @@ let rideMap = null;
 
 function initRiderRealtime(userId) {
     riderUserId = userId;
-        realtimeRider = new RoutaRealtime('ws://127.0.0.1:8080');
+    console.log('[Rider] Initializing real-time connection for user:', userId);
+    realtimeRider = new RoutaRealtime('ws://127.0.0.1:8080');
     
     // Connect as rider
     realtimeRider.connect(userId, 'rider');
     
     // Setup event handlers
     realtimeRider.on('authenticated', () => {
-                showToast('Real-time updates enabled', 'success');
+        console.log('Rider real-time connected');
+        showToast('Real-time updates enabled', 'success');
     });
     
     realtimeRider.on('booking_assigned', (data) => {
-                
+        console.log('Driver assigned:', data);
+        
         showToast(`Driver ${data.driver_name} assigned!`, 'success');
         playNotificationSound();
         
@@ -30,7 +33,8 @@ function initRiderRealtime(userId) {
     });
     
     realtimeRider.on('driver_accepted', (data) => {
-                
+        console.log('Driver accepted booking:', data);
+        
         showToast('Driver accepted your booking!', 'success');
         playNotificationSound();
         
@@ -39,13 +43,15 @@ function initRiderRealtime(userId) {
     });
     
     realtimeRider.on('driver_location', (data) => {
-                
+        console.log('Driver location update:', data);
+        
         // Update driver marker on map
         updateDriverLocationOnMap(data.lat, data.lng);
     });
     
     realtimeRider.on('status_update', (data) => {
-                
+        console.log('Ride status updated:', data);
+        
         updateRideStatus(data.status);
         
         // Show appropriate notification
@@ -101,7 +107,8 @@ function initRiderRealtime(userId) {
     });
     
     realtimeRider.on('ride_completed', (data) => {
-                
+        console.log('Ride completed:', data);
+        
         showToast('Ride completed! Total: ₱' + data.fare, 'success');
         
         // Re-enable "Book a Ride" button
@@ -118,7 +125,8 @@ function initRiderRealtime(userId) {
     });
     
     realtimeRider.on('booking_rejected', (data) => {
-                
+        console.log('Booking rejected:', data);
+        
         showToast(data.message || 'Your booking has been rejected', 'error');
         playNotificationSound();
         
@@ -145,7 +153,8 @@ function initRiderRealtime(userId) {
     });
     
     realtimeRider.on('driver_rejected', (data) => {
-                
+        console.log('Driver rejected booking:', data);
+        
         showToast(data.message || 'Driver declined your booking. Admin will assign another driver shortly...', 'warning');
         playNotificationSound();
         
@@ -189,11 +198,13 @@ function initRiderRealtime(userId) {
 }
 
 function updateBookingCard(data) {
-        
+    console.log('Updating booking card with driver data:', data);
+    
     // Find the "Your Ride" modal
     const modal = document.getElementById('rideTrackingModal');
     if (!modal) {
-                // Refresh the page to show the updated booking
+        console.log('Modal not found, trying to create or refresh page');
+        // Refresh the page to show the updated booking
         setTimeout(() => location.reload(), 1500);
         return;
     }
@@ -202,7 +213,8 @@ function updateBookingCard(data) {
     const driverNameEl = modal.querySelector('#driverName');
     if (driverNameEl) {
         driverNameEl.textContent = data.driver_name || 'N/A';
-            }
+        console.log('Updated driver name:', data.driver_name);
+    }
     
     // Update driver rating
     const driverRatingEl = modal.querySelector('#driverRating');
@@ -248,7 +260,8 @@ function updateBookingCard(data) {
         bookRideBtn.innerHTML = '<i class="bi bi-clock me-2"></i>Booking in Progress';
     }
     
-    }
+    console.log('Booking card updated successfully');
+}
 
 function updateRideStatus(status) {
     const statusBadge = document.querySelector('.ride-status-badge');
@@ -471,7 +484,8 @@ function submitRating(rideId) {
         }
     })
     .catch(error => {
-                showToast('Network error. Please try again.', 'danger');
+        console.error('Error:', error);
+        showToast('Network error. Please try again.', 'danger');
     });
 }
 
@@ -518,7 +532,8 @@ function playNotificationSound() {
         oscillator.start(audioContext.currentTime);
         oscillator.stop(audioContext.currentTime + 0.3);
     } catch (e) {
-            }
+        console.log('Audio not supported');
+    }
 }
 
 // Add CSS for rider realtime

@@ -11,7 +11,8 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Check if elements exist
     if (!form || !prevBtn || !nextBtn || !submitBtn) {
-                return;
+        console.error('Required form elements not found');
+        return;
     }
     
     // File upload handlers
@@ -34,7 +35,8 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Show step
     function showStep(step) {
-                
+        console.log('Showing step:', step);
+        
         // Hide all steps
         document.querySelectorAll('.form-step').forEach(el => {
             el.classList.remove('active');
@@ -43,7 +45,8 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Show current step
         const currentFormStep = document.querySelector(`.form-step[data-step="${step}"]`);
-                if (currentFormStep) {
+        console.log('Current form step:', currentFormStep);
+        if (currentFormStep) {
             currentFormStep.classList.add('active');
             currentFormStep.style.display = 'block';
         }
@@ -251,48 +254,59 @@ document.addEventListener('DOMContentLoaded', function() {
     // Form submission
     form.addEventListener('submit', function(e) {
         e.preventDefault();
-                
+        console.log('🔵 SUBMIT BUTTON CLICKED - Form submitted, current step:', currentStep);
+        
         // Extra validation logging
         const termsCheckbox = document.getElementById('termsCheck');
         const privacyCheckbox = document.getElementById('privacyCheck');
-                        
+        console.log('Terms checked:', termsCheckbox ? termsCheckbox.checked : 'NOT FOUND');
+        console.log('Privacy checked:', privacyCheckbox ? privacyCheckbox.checked : 'NOT FOUND');
+        
         if (!validateStep(currentStep)) {
-                        // Validation function now shows detailed errors on screen
+            console.log('❌ Validation failed for step', currentStep);
+            // Validation function now shows detailed errors on screen
             return;
         }
         
-                
+        console.log('✅ Validation passed, preparing to submit...');
+        
         // Get form data
         const formData = new FormData(this);
         
         // Log form data for debugging
-                for (let [key, value] of formData.entries()) {
+        console.log('📦 Form data being sent:');
+        for (let [key, value] of formData.entries()) {
             if (value instanceof File) {
-                ');
+                console.log(key + ':', value.name, '(' + value.size + ' bytes)');
             } else {
-                            }
+                console.log(key + ':', value);
+            }
         }
         
         // Show loading state
         submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Submitting...';
         submitBtn.disabled = true;
         
-                
+        console.log('🚀 Sending request to server...');
+        
         // Submit to backend
         fetch('php/submit_driver_application.php', {
             method: 'POST',
             body: formData
         })
         .then(response => {
-                        return response.json();
+            console.log('📡 Server responded with status:', response.status);
+            return response.json();
         })
         .then(data => {
-                        submitBtn.innerHTML = 'Submit Application';
+            console.log('📨 Server response data:', data);
+            submitBtn.innerHTML = 'Submit Application';
             submitBtn.disabled = false;
             
             if (data.success) {
                 // Show success message
-                                showNotification('success', 'Application Submitted!', data.message);
+                console.log('✅ SUCCESS! Application submitted.');
+                showNotification('success', 'Application Submitted!', data.message);
                 
                 // Redirect after a delay
                 setTimeout(() => {
@@ -300,7 +314,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 }, 3000);
             } else {
                 // Show error message
-                                showNotification('error', 'Submission Failed', data.message);
+                console.log('❌ Server returned error:', data.message);
+                showNotification('error', 'Submission Failed', data.message);
                 Swal.fire({
                     title: 'Error',
                     text: 'Error: ' + data.message,
@@ -310,7 +325,8 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         })
         .catch(error => {
-                        submitBtn.innerHTML = 'Submit Application';
+            console.error('❌ FETCH ERROR:', error);
+            submitBtn.innerHTML = 'Submit Application';
             submitBtn.disabled = false;
             Swal.fire({
                 title: 'Network Error',
@@ -592,11 +608,13 @@ document.addEventListener('DOMContentLoaded', function() {
         // Ensure checkbox works properly
         checkbox.addEventListener('click', function(e) {
             // Let the default behavior happen, just log for debugging
-                    });
+            console.log('Checkbox clicked:', this.id, 'Checked:', this.checked);
+        });
         
         // Force re-render on change
         checkbox.addEventListener('change', function() {
-                        // Force visual update
+            console.log('Checkbox changed:', this.id, 'Checked:', this.checked);
+            // Force visual update
             if (this.checked) {
                 this.setAttribute('checked', 'checked');
             } else {
@@ -606,13 +624,15 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     // Initialize first step - make sure it shows
-        showStep(currentStep);
+    console.log('Initializing driver application form');
+    showStep(currentStep);
     
     // Force show first step if still hidden
     setTimeout(() => {
         const firstStep = document.querySelector('.form-step[data-step="1"]');
         if (firstStep && !firstStep.classList.contains('active')) {
-                        firstStep.classList.add('active');
+            console.log('Force activating first step');
+            firstStep.classList.add('active');
         }
     }, 100);
 
@@ -734,7 +754,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     
                     // Show debug OTP if in test mode
                     if (data.debug_otp) {
-                                                Swal.fire({
+                        console.log('OTP Code:', data.debug_otp);
+                        Swal.fire({
                             title: 'OTP',
                             text: 'Your OTP is ' + data.debug_otp,
                             icon: 'info',
@@ -751,7 +772,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             })
             .catch(error => {
-                                Swal.fire({
+                console.error('Error:', error);
+                Swal.fire({
                     title: 'Error',
                     text: 'An error occurred. Please try again.',
                     icon: 'error',
@@ -823,7 +845,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             })
             .catch(error => {
-                                Swal.fire({
+                console.error('Error:', error);
+                Swal.fire({
                     title: 'Error',
                     text: 'An error occurred. Please try again.',
                     icon: 'error',
@@ -863,7 +886,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     startDriverOtpTimer();
                     
                     if (data.debug_otp) {
-                                                Swal.fire({
+                        console.log('New OTP Code:', data.debug_otp);
+                        Swal.fire({
                             title: 'Testing Mode',
                             text: 'Your new OTP is ' + data.debug_otp,
                             icon: 'info',
@@ -880,7 +904,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             })
             .catch(error => {
-                                Swal.fire({
+                console.error('Error:', error);
+                Swal.fire({
                     title: 'Error',
                     text: 'An error occurred. Please try again.',
                     icon: 'error',

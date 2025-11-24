@@ -166,7 +166,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     });
                 }
             } catch (error) {
-                                Swal.fire({
+                console.error('Error:', error);
+                Swal.fire({
                     icon: 'error',
                     title: 'Connection Error',
                     text: 'Unable to send message. Please check your connection and try again.',
@@ -210,7 +211,8 @@ function handleNewsletterSubscribe(e) {
     }
     
     // Here you would typically send the email to your server
-        
+    console.log('Subscribing email:', email);
+    
     // Show success message
     showAlert('Thank you for subscribing to our newsletter!', 'success');
     emailInput.value = '';

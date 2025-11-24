@@ -286,6 +286,12 @@ document.addEventListener('DOMContentLoaded', function() {
             // Get form data
             const formData = new FormData(registerForm);
             
+            // Ensure verified phone is set in the form data
+            if (verifiedPhone) {
+                formData.set('verified_phone', verifiedPhone);
+                formData.set('phone', verifiedPhone);
+            }
+            
             // Check if passwords match
             const password = document.getElementById('password').value;
             const confirmPassword = document.getElementById('confirmPassword').value;
@@ -327,11 +333,39 @@ document.addEventListener('DOMContentLoaded', function() {
                     registerForm.reset();
                 } else {
                     // Show error message in a nice way
-                    showError('email', data.message || 'Registration failed. Please try again.');
+                    let errorMessage = data.message || 'Registration failed. Please try again.';
+                    
+                    // If debug info exists (phone mismatch), log it
+                    if (data.debug) {
+                        console.error('Registration error debug:', data.debug);
+                        
+                        // Show more helpful message
+                        if (errorMessage.includes('match')) {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Phone Verification Issue',
+                                html: `${errorMessage}<br><br><small>Please try verifying your phone again.</small>`,
+                                confirmButtonColor: '#10b981',
+                                confirmButtonText: 'OK'
+                            }).then(() => {
+                                // Reset phone verification
+                                isPhoneVerified = false;
+                                verifiedPhone = '';
+                                document.getElementById('phoneVerificationStatus').style.display = 'none';
+                                sendOtpBtn.style.display = 'inline-block';
+                                phoneInput.readOnly = false;
+                                phoneInput.style.paddingRight = '100px';
+                            });
+                            return;
+                        }
+                    }
+                    
+                    showError('email', errorMessage);
                 }
             })
             .catch(error => {
-                                submitButton.disabled = false;
+                console.error('Error:', error);
+                submitButton.disabled = false;
                 submitButton.innerHTML = originalButtonText;
                 showError('email', 'An error occurred. Please try again.');
             });
@@ -368,13 +402,14 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!phone.value.trim()) {
             showError('phone', 'Please enter your phone number');
             isValid = false;
+        } else if (!isPhoneVerified) {
+            showError('phone', 'Please verify your phone number');
+            isValid = false;
         } else if (!isValidPhilippinePhone(phone.value)) {
             showError('phone', 'Please enter a valid phone number (Format: 09123456789)');
             isValid = false;
         } else {
             clearError('phone');
-            // Format the phone number
-            phone.value = formatPhilippinePhone(phone.value);
         }
         
         // Password
@@ -463,8 +498,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (this.value.trim()) {
                     if (inputId === 'email' && !isValidEmail(this.value)) {
                         showError(inputId, 'Please enter a valid email address');
-                    } else if (inputId === 'phone' && !isValidPhilippinePhone(this.value)) {
-                        showError(inputId, 'Please enter a valid phone number (Format: 09123456789)');
+                    } else if (inputId === 'phone') {
+                        // Skip validation if phone is already verified
+                        if (!isPhoneVerified && !isValidPhilippinePhone(this.value)) {
+                            showError(inputId, 'Please enter a valid phone number (Format: 09123456789)');
+                        } else if (isPhoneVerified) {
+                            clearError(inputId);
+                        }
                     } else if (inputId === 'password' && this.value.length < 8) {
                         showError(inputId, 'Password must be at least 8 characters');
                     } else if (inputId === 'confirmPassword') {
@@ -485,8 +525,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     clearError(inputId);
                 }
                 
-                // Auto-format phone number as user types
-                if (inputId === 'phone') {
+                // Auto-format phone number as user types (only if not verified)
+                if (inputId === 'phone' && !isPhoneVerified) {
                     let value = this.value.replace(/[^\d]/g, ''); // Remove non-digits
                     
                     // If user starts typing and doesn't start with 0, prepend 09
@@ -505,6 +545,13 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                     
                     this.value = value;
+                } else if (inputId === 'phone' && isPhoneVerified) {
+                    // If phone is verified and user tries to change it, show warning
+                    if (this.value !== verifiedPhone) {
+                        // Reset to verified phone
+                        this.value = verifiedPhone;
+                        showError(inputId, 'Phone number is verified. To change it, please re-verify.');
+                    }
                 }
             });
         }
@@ -549,10 +596,17 @@ document.addEventListener('DOMContentLoaded', function() {
         // Remove all spaces, dashes, and parentheses
         const cleaned = phone.replace(/[\s\-\(\)]/g, '');
         
-        // Only accept 09XXXXXXXXX format (11 digits starting with 09)
-        const pattern = /^09\d{9}$/;
+        // Accept multiple formats:
+        // 09XXXXXXXXX (11 digits starting with 09)
+        // +639XXXXXXXXX (13 chars starting with +639)
+        // 639XXXXXXXXX (12 digits starting with 639)
+        const patterns = [
+            /^09\d{9}$/,           // 09XXXXXXXXX
+            /^\+639\d{9}$/,        // +639XXXXXXXXX
+            /^639\d{9}$/           // 639XXXXXXXXX
+        ];
         
-        return pattern.test(cleaned);
+        return patterns.some(pattern => pattern.test(cleaned));
     }
     
     // Format phone number to Philippine format
@@ -651,18 +705,25 @@ document.addEventListener('DOMContentLoaded', function() {
                     verifiedPhone = data.phone;
                     document.getElementById('displayPhone').textContent = verifiedPhone;
                     otpModal.show();
-                    startOtpTimer();
                     
-                    // Clear OTP inputs
-                    document.querySelectorAll('.otp-input').forEach(input => {
-                        input.value = '';
-                        input.classList.remove('error');
-                    });
-                    document.getElementById('otp1').focus();
+                    // Setup OTP inputs after modal is shown
+                    setTimeout(() => {
+                        setupOtpInputs();
+                        
+                        // Clear OTP inputs
+                        document.querySelectorAll('.otp-input').forEach(input => {
+                            input.value = '';
+                            input.classList.remove('error');
+                        });
+                        document.getElementById('otp1').focus();
+                    }, 100);
+                    
+                    startOtpTimer();
                     
                     // For development: Show OTP in console
                     if (data.debug_otp) {
-                                                Swal.fire({
+                        console.log('OTP Code:', data.debug_otp);
+                        Swal.fire({
                             icon: 'info',
                             title: '📱 TEST MODE',
                             html: `Your OTP is <strong>${data.debug_otp}</strong><br><br>Enter this code in the verification modal.`,
@@ -674,7 +735,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     let errorMsg = data.message || 'Failed to send OTP';
                     let errorHtml = errorMsg;
                     if (data.error) {
-                                                errorHtml += '<br><br><small>Technical details: ' + data.error + '</small>';
+                        console.error('Detailed error:', data.error);
+                        errorHtml += '<br><br><small>Technical details: ' + data.error + '</small>';
                     }
                     Swal.fire({
                         icon: 'error',
@@ -686,7 +748,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             })
             .catch(error => {
-                                sendOtpBtn.disabled = false;
+                console.error('Error:', error);
+                sendOtpBtn.disabled = false;
                 sendOtpBtn.innerHTML = '<i class="bi bi-shield-check me-2"></i>Send OTP';
                 Swal.fire({
                     icon: 'error',
@@ -699,18 +762,88 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    const otpInput = document.getElementById('otpInput');
+    // Setup OTP input handlers
+    function setupOtpInputs() {
+        const otpInputs = document.querySelectorAll('.otp-input');
+        
+        otpInputs.forEach((input, index) => {
+            // Remove old listeners by cloning
+            const newInput = input.cloneNode(true);
+            input.parentNode.replaceChild(newInput, input);
+        });
+        
+        // Re-query after cloning
+        const newOtpInputs = document.querySelectorAll('.otp-input');
+        
+        newOtpInputs.forEach((input, index) => {
+            input.addEventListener('input', function(e) {
+                // Only allow numbers
+                this.value = this.value.replace(/[^0-9]/g, '');
+                
+                // Move to next input if value entered
+                if (this.value.length === 1 && index < newOtpInputs.length - 1) {
+                    newOtpInputs[index + 1].focus();
+                }
+            });
+            
+            input.addEventListener('keydown', function(e) {
+                // Move to previous input on backspace if current is empty
+                if (e.key === 'Backspace' && this.value === '' && index > 0) {
+                    newOtpInputs[index - 1].focus();
+                }
+            });
+            
+            input.addEventListener('paste', function(e) {
+                e.preventDefault();
+                const pastedData = e.clipboardData.getData('text').replace(/[^0-9]/g, '').slice(0, 6);
+                
+                // Fill inputs with pasted data
+                pastedData.split('').forEach((char, i) => {
+                    if (newOtpInputs[i]) {
+                        newOtpInputs[i].value = char;
+                    }
+                });
+                
+                // Focus the last filled input or first empty one
+                const lastFilledIndex = Math.min(pastedData.length - 1, newOtpInputs.length - 1);
+                newOtpInputs[lastFilledIndex].focus();
+            });
+        });
+    }
+    
+    // Initialize OTP inputs on page load
+    setupOtpInputs();
     
     // Verify OTP
-    if (verifyOtpBtn && otpInput) {
-        verifyOtpBtn.addEventListener('click', function() {
-            const otp = otpInput.value.trim();
+    if (verifyOtpBtn) {
+        verifyOtpBtn.addEventListener('click', function(e) {
+            console.log('Verify button clicked!'); // Debug log
+            
+            // Get fresh query of OTP inputs
+            const otpInputs = document.querySelectorAll('.otp-input');
+            console.log('Found OTP inputs:', otpInputs.length); // Debug log
+            
+            // Collect OTP from all 6 input fields
+            let otp = '';
+            otpInputs.forEach(input => {
+                otp += input.value;
+            });
+            
+            console.log('Collected OTP:', otp); // Debug log
+            
             const phone = phoneInput.value.trim();
 
             if (!otp || otp.length !== 6) {
+                // Highlight empty inputs
+                otpInputs.forEach(input => {
+                    if (!input.value) {
+                        input.classList.add('error');
+                    }
+                });
+                
                 Swal.fire({
                     title: 'Invalid Code',
-                    text: 'Please enter the 6-digit code',
+                    text: 'Please enter the complete 6-digit code',
                     icon: 'error',
                     confirmButtonText: 'OK'
                 });
@@ -730,9 +863,22 @@ document.addEventListener('DOMContentLoaded', function() {
             })
             .then(response => response.json())
             .then(data => {
+                console.log('Verification response:', data); // Debug log
+                
                 if (data.success) {
                     isPhoneVerified = true;
+                    verifiedPhone = data.phone || phone;
+                    
+                    // Update phone input with formatted verified phone
+                    phoneInput.value = verifiedPhone;
+                    
+                    // Update hidden field with verified phone
+                    document.getElementById('verifiedPhoneHidden').value = verifiedPhone;
+                    
                     otpModal.hide();
+                    
+                    // Clear any errors
+                    clearError('phone');
                     
                     // Show verification status
                     document.getElementById('phoneVerificationStatus').style.display = 'block';
@@ -750,6 +896,11 @@ document.addEventListener('DOMContentLoaded', function() {
                         timer: 2000
                     });
                 } else {
+                    // Highlight all inputs as error
+                    otpInputs.forEach(input => {
+                        input.classList.add('error');
+                    });
+                    
                     Swal.fire({
                         title: 'Verification Failed',
                         text: data.message || 'Invalid or expired code',
@@ -759,7 +910,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             })
             .catch(error => {
-                                Swal.fire({
+                console.error('Error:', error);
+                Swal.fire({
                     title: 'Error',
                     text: 'An error occurred. Please try again.',
                     icon: 'error',
@@ -769,7 +921,6 @@ document.addEventListener('DOMContentLoaded', function() {
             .finally(() => {
                 verifyOtpBtn.disabled = false;
                 verifyOtpBtn.innerHTML = '<i class="bi bi-check-circle me-2"></i>Verify Code';
-                otpInput.value = '';
             });
         });
     }
@@ -795,7 +946,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     startOtpTimer();
                     
                     if (data.debug_otp) {
-                                                Swal.fire({
+                        console.log('New OTP Code:', data.debug_otp);
+                        Swal.fire({
                             title: 'Testing Mode',
                             text: 'Your new OTP is ' + data.debug_otp,
                             icon: 'info',
@@ -812,7 +964,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             })
             .catch(error => {
-                                Swal.fire({
+                console.error('Error:', error);
+                Swal.fire({
                     title: 'Error',
                     text: 'An error occurred. Please try again.',
                     icon: 'error',

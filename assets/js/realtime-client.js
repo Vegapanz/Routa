@@ -29,7 +29,8 @@ class RoutaRealtime {
             this.ws = new WebSocket(this.url);
             
             this.ws.onopen = () => {
-                                this.reconnectAttempts = 0;
+                console.log('[Routa] Connected to real-time server');
+                this.reconnectAttempts = 0;
                 this.authenticate();
                 this.startHeartbeat();
                 this.trigger('connected');
@@ -40,22 +41,26 @@ class RoutaRealtime {
                     const data = JSON.parse(event.data);
                     this.handleMessage(data);
                 } catch (e) {
-                                    }
+                    console.error('[Routa] Invalid message:', e);
+                }
             };
 
             this.ws.onerror = (error) => {
-                                this.trigger('error', error);
+                console.error('[Routa] WebSocket error:', error);
+                this.trigger('error', error);
             };
 
             this.ws.onclose = () => {
-                                this.authenticated = false;
+                console.log('[Routa] Disconnected from real-time server');
+                this.authenticated = false;
                 this.stopHeartbeat();
                 this.trigger('disconnected');
                 this.reconnect();
             };
 
         } catch (error) {
-                        this.reconnect();
+            console.error('[Routa] Connection error:', error);
+            this.reconnect();
         }
     }
 
@@ -75,14 +80,15 @@ class RoutaRealtime {
      */
     reconnect() {
         if (this.reconnectAttempts >= this.maxReconnectAttempts) {
-                        this.trigger('max_reconnect_reached');
+            console.error('[Routa] Max reconnection attempts reached');
+            this.trigger('max_reconnect_reached');
             return;
         }
 
         this.reconnectAttempts++;
         const delay = this.reconnectDelay * this.reconnectAttempts;
         
-        `);
+        console.log(`[Routa] Reconnecting in ${delay}ms... (attempt ${this.reconnectAttempts})`);
         
         setTimeout(() => {
             this.connect(this.userId, this.userRole);
@@ -117,11 +123,13 @@ class RoutaRealtime {
         switch (data.type) {
             case 'auth_success':
                 this.authenticated = true;
-                                this.trigger('authenticated');
+                console.log('[Routa] Authentication successful');
+                this.trigger('authenticated');
                 break;
 
             case 'auth_error':
-                                this.trigger('auth_error', data);
+                console.error('[Routa] Authentication failed:', data.message);
+                this.trigger('auth_error', data);
                 break;
 
             case 'ping':
@@ -168,7 +176,8 @@ class RoutaRealtime {
         if (this.ws && this.ws.readyState === WebSocket.OPEN) {
             this.ws.send(JSON.stringify(data));
         } else {
-                    }
+            console.warn('[Routa] Cannot send message - not connected');
+        }
     }
 
     /**

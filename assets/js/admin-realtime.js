@@ -9,18 +9,21 @@ let adminUserId = null;
 
 function initAdminRealtime(userId) {
     adminUserId = userId;
-        realtimeAdmin = new RoutaRealtime('ws://127.0.0.1:8080');
+    console.log('[Admin] Initializing real-time connection for user:', userId);
+    realtimeAdmin = new RoutaRealtime('ws://127.0.0.1:8080');
     
     // Connect as admin
     realtimeAdmin.connect(userId, 'admin');
     
     // Setup event handlers
     realtimeAdmin.on('authenticated', () => {
-                showToast('Real-time updates enabled', 'success');
+        console.log('Admin real-time connected');
+        showToast('Real-time updates enabled', 'success');
     });
     
     realtimeAdmin.on('new_booking', (data) => {
-                
+        console.log('New booking received:', data);
+        
         // Show notification
         showToast(`New booking from ${data.user_name || 'User'}`, 'info');
         
@@ -35,13 +38,15 @@ function initAdminRealtime(userId) {
     });
     
     realtimeAdmin.on('status_update', (data) => {
-                
+        console.log('Booking status updated:', data);
+        
         // Update booking status in table
         updateBookingStatus(data.ride_id, data.status);
     });
     
     realtimeAdmin.on('driver_rejected', (data) => {
-                
+        console.log('Driver rejected booking:', data);
+        
         // Show notification to admin
         showToast(`Driver rejected booking #${data.booking_id}. Booking returned to pending.`, 'warning');
         playNotificationSound();
@@ -57,7 +62,8 @@ function initAdminRealtime(userId) {
     });
     
     realtimeAdmin.on('error', () => {
-            });
+        console.error('Real-time connection error');
+    });
 }
 
 function addNewBookingToList(data) {
@@ -252,7 +258,8 @@ function playNotificationSound() {
         oscillator.start(audioContext.currentTime);
         oscillator.stop(audioContext.currentTime + 0.5);
     } catch (e) {
-            }
+        console.log('Audio not supported');
+    }
 }
 
 // Add CSS for admin realtime animations

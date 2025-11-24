@@ -24,13 +24,31 @@ $ch = curl_init($tokenUrl);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 curl_setopt($ch, CURLOPT_POST, true);
 curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($tokenData));
+curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); // For local development
 $tokenResponse = curl_exec($ch);
+$httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+$curlError = curl_error($ch);
 curl_close($ch);
+
+// Log the response for debugging
+error_log("Google Token Response: " . $tokenResponse);
+error_log("HTTP Code: " . $httpCode);
+if ($curlError) {
+    error_log("CURL Error: " . $curlError);
+}
 
 $tokenInfo = json_decode($tokenResponse, true);
 
 if (!isset($tokenInfo['access_token'])) {
-    header('Location: ../register.php?error=token_failed');
+    // Log detailed error
+    $errorMsg = isset($tokenInfo['error_description']) ? $tokenInfo['error_description'] : 'Unknown error';
+    error_log("Google OAuth Token Error: " . $errorMsg);
+    
+    // Show detailed error in development
+    echo "<h3>Failed to get access token</h3>";
+    echo "<p>Error: " . htmlspecialchars($errorMsg) . "</p>";
+    echo "<p>Response: " . htmlspecialchars($tokenResponse) . "</p>";
+    echo "<p><a href='../register.php'>Back to Register</a></p>";
     exit();
 }
 

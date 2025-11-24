@@ -9,14 +9,16 @@ let locationTracking = null;
 
 function initDriverRealtime(userId) {
     driverUserId = userId;
-        realtimeDriver = new RoutaRealtime('ws://127.0.0.1:8080');
+    console.log('[Driver] Initializing real-time connection for user:', userId);
+    realtimeDriver = new RoutaRealtime('ws://127.0.0.1:8080');
     
     // Connect as driver
     realtimeDriver.connect(userId, 'driver');
     
     // Setup event handlers
     realtimeDriver.on('authenticated', () => {
-                showToast('Real-time updates enabled', 'success');
+        console.log('Driver real-time connected');
+        showToast('Real-time updates enabled', 'success');
         
         // Start location tracking if online
         const statusToggle = document.getElementById('statusToggle');
@@ -26,7 +28,8 @@ function initDriverRealtime(userId) {
     });
     
     realtimeDriver.on('new_booking', (data) => {
-                
+        console.log('New booking available:', data);
+        
         // Play sound
         playNotificationSound();
         
@@ -35,7 +38,8 @@ function initDriverRealtime(userId) {
     });
     
     realtimeDriver.on('booking_assigned', (data) => {
-                
+        console.log('Booking assigned to you:', data);
+        
         showToast('New booking assigned! Refreshing...', 'success');
         playNotificationSound();
         
@@ -47,7 +51,8 @@ function initDriverRealtime(userId) {
     });
     
     realtimeDriver.on('status_update', (data) => {
-                updateBookingStatusInList(data.ride_id, data.status);
+        console.log('Booking status updated:', data);
+        updateBookingStatusInList(data.ride_id, data.status);
     });
     
     realtimeDriver.on('disconnected', () => {
@@ -144,17 +149,20 @@ function acceptBooking(bookingId) {
         }
     })
     .catch(error => {
-                showToast('Network error. Please try again.', 'danger');
+        console.error('Error:', error);
+        showToast('Network error. Please try again.', 'danger');
     });
 }
 
 function startLocationTracking() {
     if (!realtimeDriver || !realtimeDriver.isConnected()) {
-                return;
+        console.log('Cannot start tracking - not connected');
+        return;
     }
     
     if (locationTracking) {
-                return;
+        console.log('Location tracking already active');
+        return;
     }
     
     // Check if geolocation is available
@@ -163,7 +171,8 @@ function startLocationTracking() {
         return;
     }
     
-        
+    console.log('Starting location tracking...');
+    
     // Track location every 10 seconds
     locationTracking = setInterval(() => {
         navigator.geolocation.getCurrentPosition(
@@ -174,12 +183,14 @@ function startLocationTracking() {
                 // Send location to WebSocket server
                 realtimeDriver.updateLocation(lat, lng);
                 
-                                
+                console.log(`Location updated: ${lat}, ${lng}`);
+                
                 // Update UI indicator
                 updateLocationIndicator(true);
             },
             (error) => {
-                                updateLocationIndicator(false);
+                console.error('Geolocation error:', error);
+                updateLocationIndicator(false);
             },
             {
                 enableHighAccuracy: true,
@@ -196,7 +207,8 @@ function startLocationTracking() {
             updateLocationIndicator(true);
         },
         (error) => {
-                    }
+            console.error('Initial location error:', error);
+        }
     );
 }
 
@@ -205,7 +217,8 @@ function stopLocationTracking() {
         clearInterval(locationTracking);
         locationTracking = null;
         updateLocationIndicator(false);
-            }
+        console.log('Location tracking stopped');
+    }
 }
 
 function updateLocationIndicator(active) {
@@ -315,7 +328,8 @@ function playNotificationSound() {
         oscillator.start(audioContext.currentTime);
         oscillator.stop(audioContext.currentTime + 0.5);
     } catch (e) {
-            }
+        console.log('Audio not supported');
+    }
 }
 
 // Listen for status toggle changes
@@ -385,7 +399,8 @@ function fetchAndUpdateBookings() {
             }
         })
         .catch(error => {
-                        // Fallback to reload on error
+            console.error('Error fetching bookings:', error);
+            // Fallback to reload on error
             setTimeout(() => {
                 location.reload();
             }, 2000);
