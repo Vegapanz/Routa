@@ -193,18 +193,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
 
             case 'delete_driver':
                 if (isset($_POST['driver_id'])) {
-                    error_log("Attempting to delete driver " . $_POST['driver_id']);
+                    error_log("Attempting to archive driver " . $_POST['driver_id']);
                     try {
-                        $stmt = $pdo->prepare("DELETE FROM tricycle_drivers WHERE id = ?");
+                        $stmt = $pdo->prepare("UPDATE tricycle_drivers SET status = 'archived', deleted_at = NOW() WHERE id = ?");
                         if ($stmt->execute([$_POST['driver_id']])) {
                             $response['success'] = true;
-                            $response['message'] = 'Driver deleted successfully';
+                            $response['message'] = 'Driver moved to trash';
                         } else {
-                            $response['message'] = 'Failed to delete driver';
+                            $response['message'] = 'Failed to archive driver';
                         }
                     } catch (Exception $e) {
                         $response['message'] = 'Error: ' . $e->getMessage();
-                        error_log("Delete driver error: " . $e->getMessage());
+                        error_log("Archive driver error: " . $e->getMessage());
                     }
                 } else {
                     $response['message'] = 'Missing driver_id';
@@ -213,18 +213,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
 
             case 'delete_user':
                 if (isset($_POST['user_id'])) {
-                    error_log("Attempting to delete user " . $_POST['user_id']);
+                    error_log("Attempting to archive user " . $_POST['user_id']);
                     try {
-                        $stmt = $pdo->prepare("DELETE FROM users WHERE id = ?");
+                        $stmt = $pdo->prepare("UPDATE users SET status = 'archived', deleted_at = NOW() WHERE id = ?");
                         if ($stmt->execute([$_POST['user_id']])) {
                             $response['success'] = true;
-                            $response['message'] = 'User deleted successfully';
+                            $response['message'] = 'User moved to trash';
                         } else {
-                            $response['message'] = 'Failed to delete user';
+                            $response['message'] = 'Failed to archive user';
                         }
                     } catch (Exception $e) {
                         $response['message'] = 'Error: ' . $e->getMessage();
-                        error_log("Delete user error: " . $e->getMessage());
+                        error_log("Archive user error: " . $e->getMessage());
                     }
                 } else {
                     $response['message'] = 'Missing user_id';
@@ -267,6 +267,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                 $stmt = $pdo->prepare("SELECT d.*, COUNT(r.id) as total_trips 
                     FROM tricycle_drivers d 
                     LEFT JOIN ride_history r ON d.id = r.driver_id AND r.status = 'completed'
+                    WHERE d.status != 'archived'
                     GROUP BY d.id
                     ORDER BY d.created_at DESC");
                 $stmt->execute();
@@ -279,7 +280,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                 $stmt = $pdo->prepare("SELECT u.*, COUNT(r.id) as total_rides 
                     FROM users u 
                     LEFT JOIN ride_history r ON u.id = r.user_id 
-                    WHERE u.is_admin = 0
+                    WHERE (u.status IS NULL OR u.status != 'archived')
                     GROUP BY u.id
                     ORDER BY u.created_at DESC");
                 $stmt->execute();
@@ -294,6 +295,112 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                 $applications = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 $response['success'] = true;
                 $response['data'] = $applications;
+                break;
+
+            case 'get_archived_drivers':
+                $stmt = $pdo->prepare("SELECT d.*, COUNT(r.id) as total_trips 
+                    FROM tricycle_drivers d 
+                    LEFT JOIN ride_history r ON d.id = r.driver_id AND r.status = 'completed'
+                    WHERE d.status = 'archived'
+                    GROUP BY d.id
+                    ORDER BY d.deleted_at DESC");
+                $stmt->execute();
+                $drivers = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                $response['success'] = true;
+                $response['data'] = $drivers;
+                break;
+
+            case 'get_archived_users':
+                $stmt = $pdo->prepare("SELECT u.*, COUNT(r.id) as total_rides 
+                    FROM users u 
+                    LEFT JOIN ride_history r ON u.id = r.user_id 
+                    WHERE u.status = 'archived'
+                    GROUP BY u.id
+                    ORDER BY u.deleted_at DESC");
+                $stmt->execute();
+                $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                $response['success'] = true;
+                $response['data'] = $users;
+                break;
+
+            case 'restore_driver':
+                if (isset($_POST['driver_id'])) {
+                    error_log("Attempting to restore driver " . $_POST['driver_id']);
+                    try {
+                        $stmt = $pdo->prepare("UPDATE tricycle_drivers SET status = 'offline', deleted_at = NULL WHERE id = ?");
+                        if ($stmt->execute([$_POST['driver_id']])) {
+                            $response['success'] = true;
+                            $response['message'] = 'Driver restored successfully';
+                        } else {
+                            $response['message'] = 'Failed to restore driver';
+                        }
+                    } catch (Exception $e) {
+                        $response['message'] = 'Error: ' . $e->getMessage();
+                        error_log("Restore driver error: " . $e->getMessage());
+                    }
+                } else {
+                    $response['message'] = 'Missing driver_id';
+                }
+                break;
+
+            case 'restore_user':
+                if (isset($_POST['user_id'])) {
+                    error_log("Attempting to restore user " . $_POST['user_id']);
+                    try {
+                        $stmt = $pdo->prepare("UPDATE users SET status = NULL, deleted_at = NULL WHERE id = ?");
+                        if ($stmt->execute([$_POST['user_id']])) {
+                            $response['success'] = true;
+                            $response['message'] = 'User restored successfully';
+                        } else {
+                            $response['message'] = 'Failed to restore user';
+                        }
+                    } catch (Exception $e) {
+                        $response['message'] = 'Error: ' . $e->getMessage();
+                        error_log("Restore user error: " . $e->getMessage());
+                    }
+                } else {
+                    $response['message'] = 'Missing user_id';
+                }
+                break;
+
+            case 'permanent_delete_driver':
+                if (isset($_POST['driver_id'])) {
+                    error_log("Attempting to permanently delete driver " . $_POST['driver_id']);
+                    try {
+                        $stmt = $pdo->prepare("DELETE FROM tricycle_drivers WHERE id = ? AND status = 'archived'");
+                        if ($stmt->execute([$_POST['driver_id']])) {
+                            $response['success'] = true;
+                            $response['message'] = 'Driver permanently deleted';
+                        } else {
+                            $response['message'] = 'Failed to delete driver';
+                        }
+                    } catch (Exception $e) {
+                        $response['message'] = 'Error: ' . $e->getMessage();
+                        error_log("Permanent delete driver error: " . $e->getMessage());
+                    }
+                } else {
+                    $response['message'] = 'Missing driver_id';
+                }
+                break;
+
+            case 'permanent_delete_user':
+                if (isset($_POST['user_id'])) {
+                    error_log("Attempting to permanently delete user " . $_POST['user_id']);
+                    try {
+                        $stmt = $pdo->prepare("DELETE FROM users WHERE id = ? AND status = 'archived'");
+                        if ($stmt->execute([$_POST['user_id']])) {
+                            $response['success'] = true;
+                            $response['message'] = 'User permanently deleted';
+                        } else {
+                            $response['message'] = 'Failed to delete user';
+                        }
+                    } catch (Exception $e) {
+                        $response['message'] = 'Error: ' . $e->getMessage();
+                        error_log("Permanent delete user error: " . $e->getMessage());
+                    }
+                } else {
+                    $response['message'] = 'Missing user_id';
+                }
                 break;
         }
     } catch (Exception $e) {
@@ -330,19 +437,21 @@ $stmt = $pdo->prepare("SELECT r.*, u.name as rider_name, u.phone, d.name as driv
 $stmt->execute();
 $all_bookings = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// Fetch drivers
+// Fetch drivers (exclude archived)
 $stmt = $pdo->prepare("SELECT d.*, COUNT(r.id) as total_trips 
     FROM tricycle_drivers d 
     LEFT JOIN ride_history r ON d.id = r.driver_id AND r.status = 'completed'
+    WHERE d.status != 'archived'
     GROUP BY d.id 
     ORDER BY d.id");
 $stmt->execute();
 $drivers = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// Fetch users
+// Fetch users (exclude archived)
 $stmt = $pdo->prepare("SELECT u.*, COUNT(r.id) as total_trips 
     FROM users u 
     LEFT JOIN ride_history r ON u.id = r.user_id 
+    WHERE (u.status IS NULL OR u.status != 'archived')
     GROUP BY u.id 
     ORDER BY u.created_at DESC");
 $stmt->execute();
@@ -420,6 +529,89 @@ $avg_fare = $stmt->fetch(PDO::FETCH_ASSOC)['avg_fare'] ?? 0;
     <link rel="shortcut icon" href="assets/images/Logo.png" type="image/x-icon">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <style>
+        .pagination-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+            padding: 15px 0;
+            border-top: 1px solid #e5e7eb;
+        }
+        .pagination-info {
+            color: #6b7280;
+            font-size: 14px;
+        }
+        .pagination-buttons {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        .pagination-buttons button {
+            padding: 6px 12px;
+            border: 1px solid #d1d5db;
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            color: #374151;
+            transition: all 0.2s;
+        }
+        .pagination-buttons button:hover:not(:disabled) {
+            background: #f9fafb;
+            border-color: #10b981;
+            color: #10b981;
+        }
+        .pagination-buttons button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .pagination-buttons button.active {
+            background: #10b981;
+            color: white;
+            border-color: #10b981;
+        }
+        .entries-selector {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        .entries-selector label {
+            color: #374151;
+            font-size: 14px;
+            margin: 0;
+        }
+        .entries-selector select {
+            padding: 6px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            background: white;
+        }
+        .search-box {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        .search-box input {
+            flex: 1;
+            max-width: 300px;
+            padding: 8px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        .table-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+    </style>
 </head>
 <body>
     <!-- Header -->
@@ -517,6 +709,11 @@ $avg_fare = $stmt->fetch(PDO::FETCH_ASSOC)['avg_fare'] ?? 0;
                     Driver Applications
                 </button>
             </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="trash-tab" data-bs-toggle="tab" data-bs-target="#trash" type="button" role="tab">
+                    <i class="bi bi-trash"></i> Trash
+                </button>
+            </li>
         </ul>
 
         <!-- Tab Content -->
@@ -599,11 +796,27 @@ $avg_fare = $stmt->fetch(PDO::FETCH_ASSOC)['avg_fare'] ?? 0;
                 <div class="section-header mb-4">
                     <h5 class="section-title">Recent Bookings</h5>
                     <p class="section-subtitle">Manage and monitor all ride bookings</p>
-                    <input type="text" class="form-control search-input" placeholder="Search bookings..." id="searchBookings">
+                </div>
+
+                <div class="table-controls">
+                    <div class="entries-selector">
+                        <label>Show</label>
+                        <select id="bookingsEntries" onchange="updateTableEntries('bookingsTable', this.value)">
+                            <option value="5">5</option>
+                            <option value="10" selected>10</option>
+                            <option value="25">25</option>
+                            <option value="50">50</option>
+                            <option value="-1">All</option>
+                        </select>
+                        <label>entries</label>
+                    </div>
+                    <div class="search-box">
+                        <input type="text" placeholder="Search bookings..." id="bookingsSearch" oninput="searchTable('bookingsTable', this.value)" autocomplete="off">
+                    </div>
                 </div>
 
                 <div class="table-responsive">
-                    <table class="table data-table">
+                    <table class="table data-table" id="bookingsTable">
                         <thead>
                             <tr>
                                 <th>Booking ID</th>
@@ -658,6 +871,7 @@ $avg_fare = $stmt->fetch(PDO::FETCH_ASSOC)['avg_fare'] ?? 0;
                         </tbody>
                     </table>
                 </div>
+                <div class="pagination-controls" id="bookingsPagination"></div>
             </div>
 
             <!-- Analytics Tab -->
@@ -719,18 +933,30 @@ $avg_fare = $stmt->fetch(PDO::FETCH_ASSOC)['avg_fare'] ?? 0;
 
             <!-- Drivers Tab -->
             <div class="tab-pane fade" id="drivers" role="tabpanel">
-                <div class="section-header mb-4 d-flex justify-content-between align-items-center">
-                    <div>
-                        <h5 class="section-title">Driver Management</h5>
-                        <p class="section-subtitle">Monitor and manage all registered drivers</p>
+                <div class="section-header mb-4">
+                    <h5 class="section-title">Driver Management</h5>
+                    <p class="section-subtitle">Monitor and manage all registered drivers</p>
+                </div>
+
+                <div class="table-controls">
+                    <div class="entries-selector">
+                        <label>Show</label>
+                        <select id="driversEntries" onchange="updateTableEntries('driversTable', this.value)">
+                            <option value="5">5</option>
+                            <option value="10" selected>10</option>
+                            <option value="25">25</option>
+                            <option value="50">50</option>
+                            <option value="-1">All</option>
+                        </select>
+                        <label>entries</label>
                     </div>
-                    <div>
-                        <input type="text" class="form-control search-input d-inline-block me-2" placeholder="Search drivers..." style="width: 250px;" id="searchDrivers">
+                    <div class="search-box">
+                        <input type="text" placeholder="Search drivers..." id="driversSearch" oninput="searchTable('driversTable', this.value)" autocomplete="off">
                     </div>
                 </div>
 
                 <div class="table-responsive">
-                    <table class="table data-table">
+                    <table class="table data-table" id="driversTable">
                         <thead>
                             <tr>
                                 <th>Driver ID</th>
@@ -779,6 +1005,7 @@ $avg_fare = $stmt->fetch(PDO::FETCH_ASSOC)['avg_fare'] ?? 0;
                         </tbody>
                     </table>
                 </div>
+                <div class="pagination-controls" id="driversPagination"></div>
             </div>
 
             <!-- Users Tab -->
@@ -786,37 +1013,54 @@ $avg_fare = $stmt->fetch(PDO::FETCH_ASSOC)['avg_fare'] ?? 0;
                 <div class="section-header mb-4">
                     <h5 class="section-title">User Management</h5>
                     <p class="section-subtitle">View and manage all registered users</p>
-                    <input type="text" class="form-control search-input" placeholder="Search users..." id="searchUsers">
+                </div>
+
+                <div class="table-controls">
+                    <div class="entries-selector">
+                        <label>Show</label>
+                        <select id="usersEntries" onchange="updateTableEntries('usersTable', this.value)">
+                            <option value="5">5</option>
+                            <option value="10" selected>10</option>
+                            <option value="25">25</option>
+                            <option value="50">50</option>
+                            <option value="-1">All</option>
+                        </select>
+                        <label>entries</label>
+                    </div>
+                    <div class="search-box">
+                        <input type="text" placeholder="Search users..." id="usersSearch" oninput="searchTable('usersTable', this.value)" autocomplete="off">
+                    </div>
                 </div>
 
                 <div class="table-responsive">
-                    <table class="table data-table">
+                    <table class="table data-table" id="usersTable" style="width: 100%; border-collapse: collapse;">
                         <thead>
                             <tr>
-                                <th>User ID</th>
-                                <th>Name</th>
-                                <th>Email</th>
-                                <th>Phone</th>
-                                <th>Total Trips</th>
-                                <th>Joined</th>
-                                <th></th>
+                                <th style="width: 10%; min-width: 90px;">User ID</th>
+                                <th style="width: 30%; min-width: 250px;">Name</th>
+                                <th style="width: 18%; min-width: 150px;">Phone</th>
+                                <th style="width: 15%; min-width: 110px;">Total Rides</th>
+                                <th style="width: 15%; min-width: 110px;">Joined</th>
+                                <th style="width: 12%; min-width: 100px;"></th>
                             </tr>
                         </thead>
                         <tbody>
                             <?php foreach ($users as $user): ?>
                             <tr>
-                                <td class="fw-semibold">USR-<?= str_pad($user['id'], 3, '0', STR_PAD_LEFT) ?></td>
-                                <td>
+                                <td class="fw-semibold" style="width: 10%; min-width: 90px;">USR-<?= str_pad($user['id'], 3, '0', STR_PAD_LEFT) ?></td>
+                                <td style="width: 30%; min-width: 250px;">
                                     <div class="avatar-name">
                                         <span class="avatar"><?= strtoupper(substr($user['name'], 0, 2)) ?></span>
-                                        <?= htmlspecialchars($user['name']) ?>
+                                        <div>
+                                            <div><?= htmlspecialchars($user['name']) ?></div>
+                                            <div class="text-muted" style="font-size: 0.8125rem;"><?= htmlspecialchars($user['email']) ?></div>
+                                        </div>
                                     </div>
                                 </td>
-                                <td class="text-muted"><?= htmlspecialchars($user['email']) ?></td>
-                                <td><?= htmlspecialchars($user['phone'] ?? '+63 912 345 6789') ?></td>
-                                <td><?= $user['total_trips'] ?> trips</td>
-                                <td class="text-muted"><?= date('M Y', strtotime($user['created_at'])) ?></td>
-                                <td>
+                                <td style="width: 18%; min-width: 150px;"><?= htmlspecialchars($user['phone'] ?? 'N/A') ?></td>
+                                <td style="width: 15%; min-width: 110px;"><?= $user['total_trips'] ?> rides</td>
+                                <td class="text-muted" style="width: 15%; min-width: 110px;"><?= date('M d, Y', strtotime($user['created_at'])) ?></td>
+                                <td style="width: 12%; min-width: 100px;">
                                     <button class="btn btn-sm btn-outline-danger" onclick="deleteUser(<?= $user['id'] ?>)">
                                         <i class="bi bi-trash"></i> Delete
                                     </button>
@@ -826,6 +1070,7 @@ $avg_fare = $stmt->fetch(PDO::FETCH_ASSOC)['avg_fare'] ?? 0;
                         </tbody>
                     </table>
                 </div>
+                <div class="pagination-controls" id="usersPagination"></div>
             </div>
 
             <!-- Driver Applications Tab -->
@@ -833,7 +1078,6 @@ $avg_fare = $stmt->fetch(PDO::FETCH_ASSOC)['avg_fare'] ?? 0;
                 <div class="section-header mb-4">
                     <h5 class="section-title">Driver Applications</h5>
                     <p class="section-subtitle">Review and manage driver applications</p>
-                    <input type="text" class="form-control search-input" placeholder="Search applications..." id="searchApplications">
                 </div>
 
                 <?php if (empty($driver_applications)): ?>
@@ -842,8 +1086,24 @@ $avg_fare = $stmt->fetch(PDO::FETCH_ASSOC)['avg_fare'] ?? 0;
                         <p class="text-muted mt-3">No driver applications yet</p>
                     </div>
                 <?php else: ?>
+                    <div class="table-controls">
+                        <div class="entries-selector">
+                            <label>Show</label>
+                            <select id="applicationsEntries" onchange="updateTableEntries('applicationsTable', this.value)">
+                                <option value="5">5</option>
+                                <option value="10" selected>10</option>
+                                <option value="25">25</option>
+                                <option value="50">50</option>
+                                <option value="-1">All</option>
+                            </select>
+                            <label>entries</label>
+                        </div>
+                        <div class="search-box">
+                            <input type="text" placeholder="Search applications..." id="applicationsSearch" oninput="searchTable('applicationsTable', this.value)" autocomplete="off">
+                        </div>
+                    </div>
                     <div class="table-responsive">
-                        <table class="table data-table">
+                        <table class="table data-table" id="applicationsTable">
                             <thead>
                                 <tr>
                                     <th>ID</th>
@@ -903,7 +1163,96 @@ $avg_fare = $stmt->fetch(PDO::FETCH_ASSOC)['avg_fare'] ?? 0;
                             </tbody>
                         </table>
                     </div>
+                    <div class="pagination-controls" id="applicationsPagination"></div>
                 <?php endif; ?>
+            </div>
+
+            <!-- Trash Tab -->
+            <div class="tab-pane fade" id="trash" role="tabpanel">
+                <div class="section-header mb-4">
+                    <h5 class="section-title"><i class="bi bi-trash"></i> Trash</h5>
+                    <p class="section-subtitle">Archived users and drivers - Restore or permanently delete</p>
+                </div>
+
+                <!-- Archived Drivers Section -->
+                <div class="mb-5">
+                    <h6 class="fw-bold mb-3">Archived Drivers</h6>
+                    <div class="table-controls">
+                        <div class="entries-selector">
+                            <label>Show</label>
+                            <select id="trashDriversEntries" onchange="updateTableEntries('trashDriversTable', this.value)">
+                                <option value="5">5</option>
+                                <option value="10" selected>10</option>
+                                <option value="25">25</option>
+                                <option value="50">50</option>
+                                <option value="-1">All</option>
+                            </select>
+                            <label>entries</label>
+                        </div>
+                        <div class="search-box">
+                            <input type="text" placeholder="Search archived drivers..." id="trashDriversSearch" oninput="searchTable('trashDriversTable', this.value)" autocomplete="off">
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table data-table" id="trashDriversTable">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Plate Number</th>
+                                    <th>Total Trips</th>
+                                    <th>Deleted At</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Will be populated via AJAX -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="pagination-controls" id="trashDriversPagination"></div>
+                </div>
+
+                <!-- Archived Users Section -->
+                <div>
+                    <h6 class="fw-bold mb-3">Archived Users</h6>
+                    <div class="table-controls">
+                        <div class="entries-selector">
+                            <label>Show</label>
+                            <select id="trashUsersEntries" onchange="updateTableEntries('trashUsersTable', this.value)">
+                                <option value="5">5</option>
+                                <option value="10" selected>10</option>
+                                <option value="25">25</option>
+                                <option value="50">50</option>
+                                <option value="-1">All</option>
+                            </select>
+                            <label>entries</label>
+                        </div>
+                        <div class="search-box">
+                            <input type="text" placeholder="Search archived users..." id="trashUsersSearch" oninput="searchTable('trashUsersTable', this.value)" autocomplete="off">
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table data-table" id="trashUsersTable">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Phone</th>
+                                    <th>Total Rides</th>
+                                    <th>Deleted At</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Will be populated via AJAX -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="pagination-controls" id="trashUsersPagination"></div>
+                </div>
             </div>
 
         </div>
@@ -1303,61 +1652,613 @@ $avg_fare = $stmt->fetch(PDO::FETCH_ASSOC)['avg_fare'] ?? 0;
             }
         }
 
-        // Search functionality - Wait for DOM to be ready
+        // Custom Pagination System - Global scope
+        window.tablePagination = {};
+
+        window.initializeTable = function(tableId) {
+            console.log('🔧 Initializing:', tableId);
+            const table = document.getElementById(tableId);
+            if (!table) {
+                console.log('❌ Table not found:', tableId);
+                return;
+            }
+            
+            const tbody = table.querySelector('tbody');
+            if (!tbody) {
+                console.log('❌ tbody not found');
+                return;
+            }
+            
+            const rows = Array.from(tbody.querySelectorAll('tr'));
+            console.log('✅ Found rows:', rows.length);
+            
+            window.tablePagination[tableId] = {
+                currentPage: 1,
+                entriesPerPage: 10,
+                allRows: rows,
+                filteredRows: [...rows]
+            };
+            
+            updateTableDisplay(tableId);
+        }
+
+        // Debounce timer for search
+        let searchTimers = {};
+
+        window.searchTable = function(tableId, searchTerm) {
+            console.log('🔍 Searching:', tableId, '|' + searchTerm + '|');
+            
+            // Clear existing timer
+            if (searchTimers[tableId]) {
+                clearTimeout(searchTimers[tableId]);
+            }
+            
+            // Debounce the search
+            searchTimers[tableId] = setTimeout(() => {
+                performSearch(tableId, searchTerm);
+            }, 150);
+        }
+
+        function performSearch(tableId, searchTerm) {
+            if (!window.tablePagination[tableId]) {
+                console.log('⚠️ Table not initialized, initializing now...');
+                window.initializeTable(tableId);
+                // Try again after initialization
+                setTimeout(() => performSearch(tableId, searchTerm), 100);
+                return;
+            }
+            
+            const data = window.tablePagination[tableId];
+            if (!data || !data.allRows) {
+                console.log('❌ No data or rows for table');
+                return;
+            }
+            
+            searchTerm = searchTerm.toLowerCase().trim();
+            console.log('🔎 Performing search for:', searchTerm);
+            
+            if (searchTerm === '') {
+                data.filteredRows = [...data.allRows];
+                console.log('✅ Showing all', data.allRows.length, 'rows');
+            } else {
+                data.filteredRows = data.allRows.filter(row => {
+                    // Get all text content from the row
+                    const text = row.textContent.toLowerCase();
+                    const match = text.includes(searchTerm);
+                    
+                    if (match) {
+                        console.log('✅ Match found in:', text.substring(0, 50) + '...');
+                    }
+                    
+                    return match;
+                });
+                console.log('🎯 Found', data.filteredRows.length, 'matches out of', data.allRows.length, 'rows');
+            }
+            
+            data.currentPage = 1;
+            updateTableDisplay(tableId);
+        }
+
+        window.updateTableEntries = function(tableId, entries) {
+            console.log('📊 Update entries:', tableId, entries);
+            
+            if (!window.tablePagination[tableId]) {
+                console.log('⚠️ Table not initialized, initializing now...');
+                window.initializeTable(tableId);
+            }
+            
+            const data = window.tablePagination[tableId];
+            if (!data) {
+                console.log('❌ No data for table');
+                return;
+            }
+            
+            const entriesValue = parseInt(entries);
+            data.entriesPerPage = entriesValue === -1 ? data.allRows.length : entriesValue;
+            data.currentPage = 1;
+            
+            console.log('✅ Set entries per page:', data.entriesPerPage);
+            updateTableDisplay(tableId);
+        }
+
+        function updateTableDisplay(tableId) {
+            const data = window.tablePagination[tableId];
+            if (!data) {
+                console.log('❌ No data in updateTableDisplay');
+                return;
+            }
+            
+            console.log('🔄 Updating display for', tableId);
+            
+            // Hide all rows first
+            data.allRows.forEach(row => {
+                row.style.display = 'none';
+            });
+            
+            // Calculate pagination
+            const totalRows = data.filteredRows.length;
+            const entriesPerPage = data.entriesPerPage;
+            const totalPages = Math.max(1, Math.ceil(totalRows / entriesPerPage));
+            
+            console.log('📈 Total rows:', totalRows, 'Per page:', entriesPerPage, 'Total pages:', totalPages);
+            
+            // Adjust current page
+            if (data.currentPage > totalPages) {
+                data.currentPage = totalPages;
+            }
+            
+            // Show rows for current page
+            const startIndex = (data.currentPage - 1) * entriesPerPage;
+            const endIndex = Math.min(startIndex + entriesPerPage, totalRows);
+            
+            console.log('👁️ Showing rows', startIndex + 1, 'to', endIndex);
+            
+            for (let i = startIndex; i < endIndex; i++) {
+                if (data.filteredRows[i]) {
+                    data.filteredRows[i].style.display = '';
+                }
+            }
+            
+            // Update pagination controls
+            updatePaginationControls(tableId, totalRows, startIndex, endIndex, totalPages);
+        }
+
+        function updatePaginationControls(tableId, totalRows, startIndex, endIndex, totalPages) {
+            const data = window.tablePagination[tableId];
+            const paginationId = tableId.replace('Table', 'Pagination');
+            const paginationDiv = document.getElementById(paginationId);
+            
+            if (!paginationDiv) return;
+            
+            // Info text
+            const infoText = totalRows === 0 
+                ? 'Showing 0 entries'
+                : `Showing ${startIndex + 1} to ${endIndex} of ${totalRows} entries`;
+            
+            // Generate buttons
+            let buttonsHtml = '';
+            
+            // Previous
+            buttonsHtml += `<button onclick="changePage('${tableId}', ${data.currentPage - 1})" ${data.currentPage === 1 ? 'disabled' : ''}>
+                <i class="bi bi-chevron-left"></i> Previous
+            </button>`;
+            
+            // Page numbers
+            if (totalPages > 1) {
+                const maxButtons = 5;
+                let startPage = Math.max(1, data.currentPage - Math.floor(maxButtons / 2));
+                let endPage = Math.min(totalPages, startPage + maxButtons - 1);
+                
+                if (endPage - startPage < maxButtons - 1) {
+                    startPage = Math.max(1, endPage - maxButtons + 1);
+                }
+                
+                if (startPage > 1) {
+                    buttonsHtml += `<button onclick="changePage('${tableId}', 1)">1</button>`;
+                    if (startPage > 2) {
+                        buttonsHtml += `<button disabled>...</button>`;
+                    }
+                }
+                
+                for (let i = startPage; i <= endPage; i++) {
+                    buttonsHtml += `<button onclick="changePage('${tableId}', ${i})" ${i === data.currentPage ? 'class="active"' : ''}>${i}</button>`;
+                }
+                
+                if (endPage < totalPages) {
+                    if (endPage < totalPages - 1) {
+                        buttonsHtml += `<button disabled>...</button>`;
+                    }
+                    buttonsHtml += `<button onclick="changePage('${tableId}', ${totalPages})">${totalPages}</button>`;
+                }
+            }
+            
+            // Next
+            buttonsHtml += `<button onclick="changePage('${tableId}', ${data.currentPage + 1})" ${data.currentPage >= totalPages ? 'disabled' : ''}>
+                Next <i class="bi bi-chevron-right"></i>
+            </button>`;
+            
+            paginationDiv.innerHTML = `
+                <div class="pagination-info">${infoText}</div>
+                <div class="pagination-buttons">${buttonsHtml}</div>
+            `;
+        }
+
+        window.changePage = function(tableId, page) {
+            const data = window.tablePagination[tableId];
+            if (!data) return;
+            
+            const totalRows = data.filteredRows.length;
+            const totalPages = Math.max(1, Math.ceil(totalRows / data.entriesPerPage));
+            
+            if (page < 1 || page > totalPages) return;
+            
+            data.currentPage = page;
+            updateTableDisplay(tableId);
+        }
+
+        // Initialize when ready
+        function initializeTables() {
+            console.log('🚀 Starting table initialization...');
+            console.log('Document ready state:', document.readyState);
+            
+            // Try multiple times to ensure tabs are loaded
+            let attempts = 0;
+            const maxAttempts = 5;
+            
+            const tryInit = () => {
+                attempts++;
+                console.log(`⏳ Initialization attempt ${attempts}/${maxAttempts}`);
+                
+                window.initializeTable('bookingsTable');
+                window.initializeTable('driversTable');
+                window.initializeTable('usersTable');
+                window.initializeTable('applicationsTable');
+                
+                // Check if any table was initialized
+                const initialized = Object.keys(window.tablePagination).length;
+                console.log('✨ Tables initialized:', initialized);
+                
+                if (initialized === 0 && attempts < maxAttempts) {
+                    console.log('⏭️ Retrying in 300ms...');
+                    setTimeout(tryInit, 300);
+                }
+            };
+            
+            setTimeout(tryInit, 100);
+        }
+
+        // Global function for WebSocket to call after updates
+        window.reinitializeTables = function() {
+            console.log('🔄 WebSocket update detected - Re-initializing tables...');
+            
+            // Store current state
+            const states = {};
+            Object.keys(window.tablePagination).forEach(tableId => {
+                const data = window.tablePagination[tableId];
+                states[tableId] = {
+                    currentPage: data.currentPage,
+                    entriesPerPage: data.entriesPerPage,
+                    searchTerm: document.getElementById(tableId.replace('Table', 'Search'))?.value || ''
+                };
+            });
+            
+            // Re-initialize
+            setTimeout(() => {
+                Object.keys(states).forEach(tableId => {
+                    window.initializeTable(tableId);
+                    
+                    // Restore state
+                    const state = states[tableId];
+                    if (window.tablePagination[tableId]) {
+                        window.tablePagination[tableId].currentPage = state.currentPage;
+                        window.tablePagination[tableId].entriesPerPage = state.entriesPerPage;
+                        
+                        // Reapply search if there was one
+                        if (state.searchTerm) {
+                            window.searchTable(tableId, state.searchTerm);
+                        } else {
+                            updateTableDisplay(tableId);
+                        }
+                    }
+                });
+            }, 100);
+        };
+
+        // Listen for tab changes to initialize tables when they become visible
         document.addEventListener('DOMContentLoaded', function() {
-            // Search functionality for bookings
-            const searchBookings = document.getElementById('searchBookings');
-            if (searchBookings) {
-                searchBookings.addEventListener('input', function(e) {
-                    const searchTerm = e.target.value.toLowerCase();
-                    const rows = document.querySelectorAll('#all-bookings table tbody tr');
-                    
-                    rows.forEach(row => {
-                        const text = row.textContent.toLowerCase();
-                        row.style.display = text.includes(searchTerm) ? '' : 'none';
-                    });
+            initializeTables();
+            
+            // Re-initialize when switching tabs
+            const tabButtons = document.querySelectorAll('[data-bs-toggle="tab"]');
+            tabButtons.forEach(button => {
+                button.addEventListener('shown.bs.tab', function(e) {
+                    console.log('🔄 Tab switched, re-initializing tables...');
+                    setTimeout(initializeTables, 100);
                 });
+            });
+        });
+
+        // Also try to initialize immediately if DOM is already loaded
+        if (document.readyState !== 'loading') {
+            initializeTables();
+        }
+
+        // Set up MutationObserver to detect when table rows change (from WebSocket updates)
+        document.addEventListener('DOMContentLoaded', function() {
+            const observeTables = () => {
+                ['bookingsTable', 'driversTable', 'usersTable', 'applicationsTable'].forEach(tableId => {
+                    const table = document.getElementById(tableId);
+                    if (table) {
+                        const tbody = table.querySelector('tbody');
+                        if (tbody) {
+                            const observer = new MutationObserver((mutations) => {
+                                // Check if rows were added or removed
+                                const hasChanges = mutations.some(mutation => 
+                                    mutation.addedNodes.length > 0 || mutation.removedNodes.length > 0
+                                );
+                                
+                                if (hasChanges) {
+                                    console.log('🔔 Table rows changed:', tableId);
+                                    window.reinitializeTables();
+                                }
+                            });
+                            
+                            observer.observe(tbody, {
+                                childList: true,
+                                subtree: false
+                            });
+                            
+                            console.log('👀 Observing', tableId, 'for changes');
+                        }
+                    }
+                });
+            };
+            
+            setTimeout(observeTables, 500);
+        });
+
+        // ===== Trash Management Functions =====
+        
+        function loadArchivedData() {
+            // Load archived drivers
+            fetch('admin.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: 'action=get_archived_drivers'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    populateArchivedDrivers(data.data);
+                }
+            })
+            .catch(error => console.error('Error loading archived drivers:', error));
+
+            // Load archived users
+            fetch('admin.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: 'action=get_archived_users'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    populateArchivedUsers(data.data);
+                }
+            })
+            .catch(error => console.error('Error loading archived users:', error));
+        }
+
+        function populateArchivedDrivers(drivers) {
+            const tbody = document.querySelector('#trashDriversTable tbody');
+            if (!tbody) return;
+
+            if (drivers.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted py-4">No archived drivers</td></tr>';
+            } else {
+                tbody.innerHTML = drivers.map(driver => `
+                    <tr>
+                        <td class="fw-semibold">DRV-${String(driver.id).padStart(3, '0')}</td>
+                        <td>
+                            <div class="avatar-name">
+                                <span class="avatar">${driver.name.substring(0, 2).toUpperCase()}</span>
+                                ${driver.name}
+                            </div>
+                        </td>
+                        <td class="text-muted">${driver.email}</td>
+                        <td>${driver.plate_number}</td>
+                        <td>${driver.total_trips} trips</td>
+                        <td class="text-muted">${driver.deleted_at ? new Date(driver.deleted_at).toLocaleDateString() : 'N/A'}</td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-success me-2" onclick="restoreDriver(${driver.id})">
+                                <i class="bi bi-arrow-counterclockwise"></i> Restore
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger" onclick="permanentDeleteDriver(${driver.id})">
+                                <i class="bi bi-trash3"></i> Delete Permanently
+                            </button>
+                        </td>
+                    </tr>
+                `).join('');
             }
 
-            // Search functionality for drivers
-            const searchDrivers = document.getElementById('searchDrivers');
-            if (searchDrivers) {
-                searchDrivers.addEventListener('input', function(e) {
-                    const searchTerm = e.target.value.toLowerCase();
-                    const rows = document.querySelectorAll('#drivers table tbody tr');
-                    
-                    rows.forEach(row => {
-                        const text = row.textContent.toLowerCase();
-                        row.style.display = text.includes(searchTerm) ? '' : 'none';
-                    });
-                });
+            window.initializeTable('trashDriversTable');
+        }
+
+        function populateArchivedUsers(users) {
+            const tbody = document.querySelector('#trashUsersTable tbody');
+            if (!tbody) return;
+
+            if (users.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted py-4">No archived users</td></tr>';
+            } else {
+                tbody.innerHTML = users.map(user => `
+                    <tr>
+                        <td class="fw-semibold">USR-${String(user.id).padStart(3, '0')}</td>
+                        <td>
+                            <div class="avatar-name">
+                                <span class="avatar">${user.name.substring(0, 2).toUpperCase()}</span>
+                                ${user.name}
+                            </div>
+                        </td>
+                        <td class="text-muted">${user.email}</td>
+                        <td>${user.phone || 'N/A'}</td>
+                        <td>${user.total_rides} rides</td>
+                        <td class="text-muted">${user.deleted_at ? new Date(user.deleted_at).toLocaleDateString() : 'N/A'}</td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-success me-2" onclick="restoreUser(${user.id})">
+                                <i class="bi bi-arrow-counterclockwise"></i> Restore
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger" onclick="permanentDeleteUser(${user.id})">
+                                <i class="bi bi-trash3"></i> Delete Permanently
+                            </button>
+                        </td>
+                    </tr>
+                `).join('');
             }
 
-            // Search functionality for users
-            const searchUsers = document.getElementById('searchUsers');
-            if (searchUsers) {
-                searchUsers.addEventListener('input', function(e) {
-                    const searchTerm = e.target.value.toLowerCase();
-                    const rows = document.querySelectorAll('#users table tbody tr');
-                    
-                    rows.forEach(row => {
-                        const text = row.textContent.toLowerCase();
-                        row.style.display = text.includes(searchTerm) ? '' : 'none';
-                    });
-                });
-            }
+            window.initializeTable('trashUsersTable');
+        }
 
-            // Search functionality for applications
-            const searchApplications = document.getElementById('searchApplications');
-            if (searchApplications) {
-                searchApplications.addEventListener('input', function(e) {
-                    const searchTerm = e.target.value.toLowerCase();
-                    const rows = document.querySelectorAll('#applications table tbody tr');
-                    
-                    rows.forEach(row => {
-                        const text = row.textContent.toLowerCase();
-                        row.style.display = text.includes(searchTerm) ? '' : 'none';
+        function restoreDriver(driverId) {
+            Swal.fire({
+                title: 'Restore Driver?',
+                text: 'This driver will be able to login again and accept rides.',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#10b981',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'Yes, restore it!',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch('admin.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        body: `action=restore_driver&driver_id=${driverId}`
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            Swal.fire('Restored!', data.message, 'success');
+                            loadArchivedData();
+                        } else {
+                            Swal.fire('Error', data.message, 'error');
+                        }
+                    })
+                    .catch(error => {
+                        Swal.fire('Error', 'Failed to restore driver', 'error');
+                        console.error('Error:', error);
                     });
+                }
+            });
+        }
+
+        function restoreUser(userId) {
+            Swal.fire({
+                title: 'Restore User?',
+                text: 'This user will be able to login again and book rides.',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#10b981',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'Yes, restore it!',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch('admin.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        body: `action=restore_user&user_id=${userId}`
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            Swal.fire('Restored!', data.message, 'success');
+                            loadArchivedData();
+                        } else {
+                            Swal.fire('Error', data.message, 'error');
+                        }
+                    })
+                    .catch(error => {
+                        Swal.fire('Error', 'Failed to restore user', 'error');
+                        console.error('Error:', error);
+                    });
+                }
+            });
+        }
+
+        function permanentDeleteDriver(driverId) {
+            Swal.fire({
+                title: 'Permanently Delete?',
+                text: 'This action cannot be undone! All driver data will be permanently removed.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc2626',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'Yes, delete permanently!',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch('admin.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        body: `action=permanent_delete_driver&driver_id=${driverId}`
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            Swal.fire('Deleted!', data.message, 'success');
+                            loadArchivedData();
+                        } else {
+                            Swal.fire('Error', data.message, 'error');
+                        }
+                    })
+                    .catch(error => {
+                        Swal.fire('Error', 'Failed to delete driver', 'error');
+                        console.error('Error:', error);
+                    });
+                }
+            });
+        }
+
+        function permanentDeleteUser(userId) {
+            Swal.fire({
+                title: 'Permanently Delete?',
+                text: 'This action cannot be undone! All user data will be permanently removed.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc2626',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'Yes, delete permanently!',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch('admin.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        body: `action=permanent_delete_user&user_id=${userId}`
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            Swal.fire('Deleted!', data.message, 'success');
+                            loadArchivedData();
+                        } else {
+                            Swal.fire('Error', data.message, 'error');
+                        }
+                    })
+                    .catch(error => {
+                        Swal.fire('Error', 'Failed to delete user', 'error');
+                        console.error('Error:', error);
+                    });
+                }
+            });
+        }
+
+        // Load archived data when trash tab is shown
+        document.addEventListener('DOMContentLoaded', function() {
+            const trashTab = document.getElementById('trash-tab');
+            if (trashTab) {
+                trashTab.addEventListener('shown.bs.tab', function() {
+                    loadArchivedData();
                 });
             }
         });

@@ -20,8 +20,25 @@ try {
     $stmt = $pdo->prepare("SELECT * FROM tricycle_drivers WHERE id = ?");
     $stmt->execute([$driver_id]);
     $driver_data = $stmt->fetch(PDO::FETCH_ASSOC);
+    
+    // Debug logging
+    error_log("=== DRIVER DASHBOARD ACCESS CHECK ===");
+    error_log("Driver ID: " . $driver_id);
+    error_log("Driver found: " . ($driver_data ? 'YES' : 'NO'));
+    if ($driver_data) {
+        error_log("Driver name: " . $driver_data['name']);
+        error_log("Driver status: " . ($driver_data['status'] ?? 'NULL'));
+    }
 } catch (PDOException $e) {
     error_log("Database error checking driver: " . $e->getMessage());
+}
+
+// Check if driver account is archived
+if ($driver_data && isset($driver_data['status']) && $driver_data['status'] === 'archived') {
+    error_log("❌ BLOCKING ACCESS - Driver account is archived");
+    session_destroy();
+    header('Location: login.php?error=account_deactivated');
+    exit();
 }
 
 // If driver data not found, use cached session data instead of logging out
@@ -114,17 +131,22 @@ $stmt = $pdo->prepare("SELECT * FROM tricycle_drivers WHERE id = ?");
 $stmt->execute([$driver_id]);
 $driver = $stmt->fetch(PDO::FETCH_ASSOC);
 
-// Fetch today's earnings
+// Fetch today's earnings (exclude cancelled rides)
 $stmt = $pdo->prepare("SELECT COALESCE(SUM(fare), 0) as today_earnings, COUNT(*) as today_trips 
     FROM ride_history 
-    WHERE driver_id = ? AND DATE(created_at) = CURDATE() AND status = 'completed'");
+    WHERE driver_id = ? 
+    AND DATE(created_at) = CURDATE() 
+    AND status = 'completed'
+    AND (cancelled_by IS NULL OR cancelled_by = '')");
 $stmt->execute([$driver_id]);
 $today_stats = $stmt->fetch(PDO::FETCH_ASSOC);
 
-// Fetch total earnings
+// Fetch total earnings (exclude cancelled rides)
 $stmt = $pdo->prepare("SELECT COALESCE(SUM(fare), 0) as total_earnings, COUNT(*) as total_trips 
     FROM ride_history 
-    WHERE driver_id = ? AND status = 'completed'");
+    WHERE driver_id = ? 
+    AND status = 'completed'
+    AND (cancelled_by IS NULL OR cancelled_by = '')");
 $stmt->execute([$driver_id]);
 $total_stats = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -146,11 +168,13 @@ $stmt = $pdo->prepare("SELECT r.*, u.name as rider_name, u.phone
 $stmt->execute([$driver_id]);
 $assigned_rides = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// Fetch trip history
+// Fetch trip history (exclude cancelled rides)
 $stmt = $pdo->prepare("SELECT r.*, u.name as rider_name, u.phone 
     FROM ride_history r 
     LEFT JOIN users u ON r.user_id = u.id 
-    WHERE r.driver_id = ? AND r.status = 'completed'
+    WHERE r.driver_id = ? 
+    AND r.status = 'completed'
+    AND (r.cancelled_by IS NULL OR r.cancelled_by = '')
     ORDER BY r.created_at DESC 
     LIMIT 10");
 $stmt->execute([$driver_id]);
@@ -224,7 +248,7 @@ $application = $stmt->fetch(PDO::FETCH_ASSOC);
 
         <!-- Stats Cards -->
         <div class="stats-grid">
-            <div class="stat-card">
+            <div class="stat-card"> 
                 <div class="stat-card-header">
                     <div class="stat-label">
                         <i class="bi bi-currency-dollar"></i>
@@ -978,12 +1002,99 @@ $application = $stmt->fetch(PDO::FETCH_ASSOC);
     
     <script src="assets/js/pages/driver-dashboard.js"></script>
     
-    <!-- Real-time WebSocket Integration -->
-    <script src="assets/js/realtime-client.js"></script>
-    <script src="assets/js/driver-realtime.js"></script>
+    <!-- Simple Polling for New Bookings (Fallback) -->
     <script>
-        // Initialize real-time updates
-        initDriverRealtime(<?= $_SESSION['user_id'] ?>);
+        console.log('Setting up booking polling system...');
+        
+        let lastBookingCount = <?= count($pending_requests) ?>;
+        let pollingInterval = null;
+        
+        // Check for new bookings every 5 seconds
+        function checkForNewBookings() {
+            fetch('php/check_new_bookings.php')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success && data.pending_count > lastBookingCount) {
+                        console.log('New booking detected!', data.pending_count, 'vs', lastBookingCount);
+                        
+                        // Show browser notification
+                        if ('Notification' in window && Notification.permission === 'granted') {
+                            new Notification('New Ride Request!', {
+                                body: 'You have a new ride assignment.',
+                                icon: 'assets/images/Logo.png',
+                                tag: 'new-booking'
+                            });
+                        }
+                        
+                        // Play sound
+                        try {
+                            const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBTGH0fPTgjMGHm7A7+OZQA0PVa7n77BdGAg+ltryxnMpBSh+zPLaizsIGGS57OihUBELTKXh8bllHAU2jdXzz3swBSJ0xO/glEILElyx6OyrWBUIOpvY88p5LQUZD');
+                            audio.volume = 0.5;
+                            audio.play().catch(e => console.log('Audio play failed:', e));
+                        } catch (e) {
+                            console.log('Could not play sound:', e);
+                        }
+                        
+                        // Automatically reload to show new booking
+                        lastBookingCount = data.pending_count;
+                        window.location.reload();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error checking bookings:', error);
+                });
+        }
+        
+        // Request notification permission
+        if ('Notification' in window && Notification.permission === 'default') {
+            Notification.requestPermission().then(permission => {
+                console.log('Notification permission:', permission);
+            });
+        }
+        
+        // Start polling when page loads
+        window.addEventListener('load', function() {
+            console.log('Starting booking poll...');
+            pollingInterval = setInterval(checkForNewBookings, 5000); // Check every 5 seconds
+            
+            // Also check immediately
+            setTimeout(checkForNewBookings, 2000);
+        });
+        
+        // Stop polling when page unloads
+        window.addEventListener('beforeunload', function() {
+            if (pollingInterval) {
+                clearInterval(pollingInterval);
+            }
+        });
+    </script>
+    
+    <!-- Real-time WebSocket Integration (Optional Enhancement) -->
+    <script>
+        // Stub to prevent errors if realtime files don't load
+        window.initDriverRealtime = window.initDriverRealtime || function(userId) {
+            console.log('WebSocket realtime not available, using polling fallback');
+        };
+        
+        // Try to load realtime if available
+        try {
+            const realtimeScript1 = document.createElement('script');
+            realtimeScript1.src = 'assets/js/realtime-client.js';
+            realtimeScript1.onerror = () => console.log('Realtime client not available');
+            document.body.appendChild(realtimeScript1);
+            
+            const realtimeScript2 = document.createElement('script');
+            realtimeScript2.src = 'assets/js/driver-realtime.js';
+            realtimeScript2.onerror = () => console.log('Driver realtime not available');
+            realtimeScript2.onload = () => {
+                if (typeof initDriverRealtime === 'function') {
+                    initDriverRealtime(<?= $_SESSION['user_id'] ?>);
+                }
+            };
+            document.body.appendChild(realtimeScript2);
+        } catch (e) {
+            console.log('Could not load realtime scripts:', e);
+        }
     </script>
 </body>
 </html>

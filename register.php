@@ -196,7 +196,7 @@
                             <div class="form-check">
                                 <input type="checkbox" class="form-check-input" id="terms" required>
                                 <label class="form-check-label" for="terms">
-                                    I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>
+                                    I agree to the <a href="terms.php">Terms of Service</a> and <a href="privacy.php">Privacy Policy</a>
                                 </label>
                             </div>
 
@@ -410,8 +410,11 @@
         document.getElementById('googleLoginBtn').addEventListener('click', function() {
             // Google OAuth URL
             const googleClientId = '941913119965-kld04cl0a3ugka2b0est8l022ji6b8ur.apps.googleusercontent.com';
-            const redirectUri = 'http://localhost/Routa/php/google-callback.php';
+            // Use exact redirect URI that matches Google Console configuration
+            const redirectUri = 'http://localhost/Routas/php/google-callback.php';
             const scope = 'email profile';
+            
+            console.log('Redirect URI being sent:', redirectUri);
             
             const googleAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?` +
                 `client_id=${googleClientId}&` +
@@ -420,6 +423,8 @@
                 `scope=${encodeURIComponent(scope)}&` +
                 `access_type=online&` +
                 `prompt=select_account`;
+            
+            console.log('Full Google Auth URL:', googleAuthUrl);
             
             // Redirect to Google
             window.location.href = googleAuthUrl;

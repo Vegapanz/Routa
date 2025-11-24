@@ -90,6 +90,14 @@ if ($isAdmin) {
     
     if ($user) {
         error_log("User found: " . $user['name'] . " (" . $user['email'] . ")");
+        
+        // Check if user account is archived
+        if (isset($user['status']) && $user['status'] === 'archived') {
+            error_log("User account is archived, logging out");
+            session_destroy();
+            header('Location: login.php?error=account_deactivated');
+            exit();
+        }
     } else {
         error_log("ERROR: User not found with id: " . $userId);
     }
