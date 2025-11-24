@@ -1,0 +1,13 @@
+[2025-11-14 23:15:15] [INFO] [driver_dashboard.php:12] REQUEST: GET /Routa/driver_dashboard.php?check_rides=1 {"method":"GET","uri":"\/Routa\/driver_dashboard.php?check_rides=1","ip":"::1","user_agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36","post":[],"get":{"check_rides":"1"},"session_id":"7grmn2p06dtsqbe53d960nsomc","user_id":7}
+[2025-11-14 23:15:15] [INFO] [unknown:0] EXECUTION COMPLETE | Time: 5.60ms | Memory: 0 B | Peak: 2 MB | Queries: 0 
+[2025-11-14 23:15:15] [INFO] [unknown:0] EXECUTION COMPLETE | Time: 6.42ms | Memory: 0 B | Peak: 2 MB | Queries: 0 
+[2025-11-14 23:15:26] [INFO] [admin.php:13] REQUEST: GET /Routa/admin.php {"method":"GET","uri":"\/Routa\/admin.php","ip":"::1","user_agent":"Mozilla\/5.0 (Linux; Android 6.0; Nexus 5 Build\/MRA58N) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Mobile Safari\/537.36","post":[],"get":[],"session_id":"g5otfog5rpltpoh2jo7r1uodt8","user_id":1}
+[2025-11-14 23:15:26] [INFO] [admin.php:14] Admin dashboard loaded 
+[2025-11-14 23:15:26] [INFO] [unknown:0] EXECUTION COMPLETE | Time: 8.46ms | Memory: 59.23 KB | Peak: 2 MB | Queries: 0 
+[2025-11-14 23:15:26] [INFO] [unknown:0] EXECUTION COMPLETE | Time: 9.13ms | Memory: 60.06 KB | Peak: 2 MB | Queries: 0 
+[2025-11-14 23:15:45] [INFO] [driver_dashboard.php:12] REQUEST: GET /Routa/driver_dashboard.php?check_rides=1 {"method":"GET","uri":"\/Routa\/driver_dashboard.php?check_rides=1","ip":"::1","user_agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36","post":[],"get":{"check_rides":"1"},"session_id":"7grmn2p06dtsqbe53d960nsomc","user_id":7}
+[2025-11-14 23:15:45] [INFO] [unknown:0] EXECUTION COMPLETE | Time: 4.29ms | Memory: 0 B | Peak: 2 MB | Queries: 0 
+[2025-11-14 23:15:45] [INFO] [unknown:0] EXECUTION COMPLETE | Time: 4.68ms | Memory: 0 B | Peak: 2 MB | Queries: 0 
+[2025-11-14 23:16:15] [INFO] [driver_dashboard.php:12] REQUEST: GET /Routa/driver_dashboard.php?check_rides=1 {"method":"GET","uri":"\/Routa\/driver_dashboard.php?check_rides=1","ip":"::1","user_agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36","post":[],"get":{"check_rides":"1"},"session_id":"7grmn2p06dtsqbe53d960nsomc","user_id":7}
+[2025-11-14 23:16:15] [INFO] [unknown:0] EXECUTION COMPLETE | Time: 4.60ms | Memory: 0 B | Peak: 2 MB | Queries: 0 
+[2025-11-14 23:16:15] [INFO] [unknown:0] EXECUTION COMPLETE | Time: 5.00ms | Memory: 0 B | Peak: 2 MB | Queries: 0 
