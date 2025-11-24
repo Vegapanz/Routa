@@ -118,7 +118,7 @@
         document.getElementById('googleLoginBtn')?.addEventListener('click', function() {
             const googleClientId = '941913119965-kld04cl0a3ugka2b0est8l022ji6b8ur.apps.googleusercontent.com';
             // Use exact redirect URI that matches Google Console configuration
-            const redirectUri = 'http://localhost/Routas/php/google-callback.php';
+            const redirectUri = 'http://localhost/Routa/php/google-callback.php';
             const scope = 'email profile';
             
             console.log('Redirect URI being sent:', redirectUri);
