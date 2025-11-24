@@ -20,6 +20,7 @@ body { font-family: 'Inter', sans-serif; background: #f8fafc; color: #1e293b; }
 .admin-tabs .nav-link.active { color: #10b981; background: transparent; }
 .admin-tabs .nav-link.active::after { content: ''; position: absolute; bottom: -2px; left: 0; right: 0; height: 2px; background: #10b981; }
 
+.section-header { margin-bottom: 24px; }
 .section-title { font-size: 1.25rem; font-weight: 700; color: #0f172a; margin-bottom: 4px; }
 .section-subtitle { color: #64748b; font-size: 0.875rem; margin-bottom: 16px; }
 
@@ -75,6 +76,10 @@ body { font-family: 'Inter', sans-serif; background: #f8fafc; color: #1e293b; }
 .metric-label { font-size: 0.8125rem; color: #64748b; font-weight: 500; }
 
 .btn { padding: 10px 20px; border-radius: 8px; font-weight: 500; font-size: 0.875rem; transition: all 0.2s; }
+.btn-primary { background: #091133 !important; border-color: #091133 !important; color: white !important; }
+.btn-primary:hover, .btn-primary:focus, .btn-primary:active { background: #0a1a4d !important; border-color: #0a1a4d !important; color: white !important; }
+.btn-outline-primary { border: 2px solid #091133 !important; color: #091133 !important; background: transparent !important; }
+.btn-outline-primary:hover, .btn-outline-primary:focus, .btn-outline-primary:active { background: #091133 !important; color: white !important; border-color: #091133 !important; }
 .btn-success { background: #10b981; border: none; }
 .btn-success:hover { background: #059669; transform: translateY(-1px); }
 .btn-danger { background: #ef4444; border: none; }

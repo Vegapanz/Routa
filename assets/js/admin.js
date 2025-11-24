@@ -1,23 +1,47 @@
 // Dashboard Initialization
-console.log('Admin.js loaded successfully');
+
+// Real-time update intervals
+let dashboardStatsInterval;
+let pendingBookingsInterval;
+let allBookingsInterval;
+let driversInterval;
+let usersInterval;
+let applicationsInterval;
 
 // Utility function to show alert modal
 function showAlert(message, title = 'Notice', type = 'info') {
-    const modal = new bootstrap.Modal(document.getElementById('alertModal'));
-    document.getElementById('alertModalTitle').textContent = title;
-    document.getElementById('alertModalBody').innerHTML = message;
+    const modalElement = document.getElementById('alertModal');
+    const titleElement = document.getElementById('alertModalTitle');
+    const bodyElement = document.getElementById('alertModalBody');
+    
+    if (!modalElement || !titleElement || !bodyElement) {
+                // Fallback to SweetAlert2
+        Swal.fire({
+            title: title,
+            html: message,
+            icon: type === 'error' || type === 'danger' ? 'error' : type === 'success' ? 'success' : 'info',
+            confirmButtonText: 'OK'
+        });
+        return;
+    }
+    
+    const modal = new bootstrap.Modal(modalElement);
+    titleElement.textContent = title;
+    bodyElement.innerHTML = message;
     
     // Change button color based on type
-    const okBtn = document.querySelector('#alertModal .btn-primary');
-    okBtn.className = 'btn';
-    if (type === 'success') {
-        okBtn.classList.add('btn-success');
-    } else if (type === 'error' || type === 'danger') {
-        okBtn.classList.add('btn-danger');
-    } else if (type === 'warning') {
-        okBtn.classList.add('btn-warning');
-    } else {
-        okBtn.classList.add('btn-primary');
+    const okBtn = modalElement.querySelector('.btn-primary');
+    if (okBtn) {
+        okBtn.className = 'btn';
+        if (type === 'success') {
+            okBtn.classList.add('btn-success');
+        } else if (type === 'error' || type === 'danger') {
+            okBtn.classList.add('btn-danger');
+        } else if (type === 'warning') {
+            okBtn.classList.add('btn-warning');
+        } else {
+            okBtn.classList.add('btn-primary');
+        }
     }
     
     modal.show();
@@ -53,9 +77,7 @@ function showConfirm(message, title = 'Confirm Action', onConfirm) {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('DOM Content Loaded');
-    console.log('Available drivers:', window.availableDrivers);
-    
+            
     // Initialize tooltips
     var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
     tooltipTriggerList.map(function (tooltipTriggerEl) {
@@ -101,10 +123,20 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Charts initialization removed (no canvas elements in current design)
+    // Start real-time updates for dashboard stats
+    startDashboardStatsUpdate();
     
-    // Load Pending Bookings
-    // loadPendingBookings(); // Commented out - bookings loaded from PHP
+    // Start real-time updates for pending bookings (default active tab)
+    startPendingBookingsUpdate();
+    
+    // Handle tab changes
+    const tabButtons = document.querySelectorAll('[data-bs-toggle="tab"]');
+    tabButtons.forEach(button => {
+        button.addEventListener('shown.bs.tab', function(event) {
+            const targetId = event.target.getAttribute('data-bs-target');
+            handleTabSwitch(targetId);
+        });
+    });
 });
 
 // Load Pending Bookings Data
@@ -154,14 +186,12 @@ function loadPendingBookings() {
 
 // Booking Actions
 function confirmBooking(bookingId) {
-    console.log('confirmBooking called with ID:', bookingId);
-    // Show modal to select driver
+        // Show modal to select driver
     showDriverAssignmentModal(bookingId);
 }
 
 async function rejectBooking(bookingId) {
-    console.log('rejectBooking called with ID:', bookingId);
-    
+        
     const confirmed = await showConfirm(
         'Are you sure you want to reject this booking?',
         'Reject Booking'
@@ -169,22 +199,20 @@ async function rejectBooking(bookingId) {
     
     if (!confirmed) return;
 
-    console.log('Sending reject request...');
-    
+        
     fetch('admin.php', {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
+            'Content-Type': 'application/x-www-form-urlencoded'
         },
+        credentials: 'same-origin',
         body: `action=reject_booking&booking_id=${bookingId}`
     })
     .then(response => {
-        console.log('Response status:', response.status);
-        return response.json();
+                return response.json();
     })
     .then(data => {
-        console.log('Response data:', data);
-        if (data.success) {
+                if (data.success) {
             showAlert('Booking rejected successfully', 'Success', 'success');
             setTimeout(() => location.reload(), 1500);
         } else {
@@ -192,14 +220,12 @@ async function rejectBooking(bookingId) {
         }
     })
     .catch(error => {
-        console.error('Error:', error);
-        showAlert('An error occurred while rejecting the booking: ' + error.message, 'Error', 'error');
+                showAlert('An error occurred while rejecting the booking: ' + error.message, 'Error', 'error');
     });
 }
 
 function showDriverAssignmentModal(bookingId) {
-    console.log('showDriverAssignmentModal called with ID:', bookingId);
-    
+        
     // Create and show assignment modal
     const modalHTML = `
         <div class="modal fade" id="assignDriverModal" tabindex="-1">
@@ -238,8 +264,7 @@ function showDriverAssignmentModal(bookingId) {
 
     // Add modal to body
     document.body.insertAdjacentHTML('beforeend', modalHTML);
-    console.log('Modal HTML added to page');
-
+    
     // Load available drivers
     loadAvailableDrivers();
 
@@ -247,17 +272,14 @@ function showDriverAssignmentModal(bookingId) {
     const modalElement = document.getElementById('assignDriverModal');
     const modal = new bootstrap.Modal(modalElement);
     modal.show();
-    console.log('Modal shown');
-
+    
     // Handle form submission
     document.getElementById('assignDriverForm').addEventListener('submit', function(e) {
         e.preventDefault();
-        console.log('Form submitted');
-        const bookingId = document.getElementById('assignBookingId').value;
+                const bookingId = document.getElementById('assignBookingId').value;
         const driverId = document.getElementById('driverSelect').value;
 
-        console.log('Booking ID:', bookingId, 'Driver ID:', driverId);
-
+        
         if (!driverId) {
             showAlert('Please select a driver', 'Warning', 'warning');
             return;
@@ -268,53 +290,65 @@ function showDriverAssignmentModal(bookingId) {
 }
 
 function loadAvailableDrivers() {
-    console.log('loadAvailableDrivers called');
-    console.log('Available drivers from window:', window.availableDrivers);
-    
+            
     // Use the drivers data from the page
     const driverData = window.availableDrivers || [];
     const select = document.getElementById('driverSelect');
     
     if (!select) {
-        console.error('Driver select element not found!');
-        return;
+                return;
     }
     
     select.innerHTML = '<option value="">Choose a driver</option>';
     
     if (driverData.length === 0) {
-        console.warn('No available drivers found');
-        select.innerHTML += '<option value="" disabled>No drivers available</option>';
+                select.innerHTML += '<option value="" disabled>No drivers available</option>';
         return;
     }
     
-    console.log('Loading', driverData.length, 'drivers');
-    
+        
     driverData.forEach(driver => {
         const option = document.createElement('option');
         option.value = driver.id;
         option.textContent = `${driver.name}`;
         select.appendChild(option);
-        console.log('Added driver:', driver.name);
-    });
+            });
 }
 
 function assignBookingToDriver(bookingId, driverId) {
-    console.log('assignBookingToDriver called - Booking:', bookingId, 'Driver:', driverId);
-    
+        
     fetch('admin.php', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
         },
+        credentials: 'same-origin', // Include cookies for session
         body: `action=assign_booking&booking_id=${bookingId}&driver_id=${driverId}`
     })
     .then(response => {
-        console.log('Response status:', response.status);
-        return response.json();
+                );
+        
+        // Clone the response to read it as text first
+        return response.text().then(text => {
+                        try {
+                return JSON.parse(text);
+            } catch (e) {
+                                );
+                throw new Error('Server returned invalid JSON. Check PHP error logs.');
+            }
+        });
     })
     .then(data => {
-        console.log('Response data:', data);
+                
+        // Check if session expired
+        // if (data.redirect) {
+        //     showAlert(data.message || 'Session expired. Please login again.', 'Session Expired', 'warning');
+        //     setTimeout(() => {
+        //         window.location.href = data.redirect;
+        //     }, 2000);
+        //     return;
+        // }
+        
         if (data.success) {
             showAlert('Booking assigned successfully!', 'Success', 'success');
             // Close modal
@@ -325,12 +359,11 @@ function assignBookingToDriver(bookingId, driverId) {
             // Reload page to show updated data
             setTimeout(() => location.reload(), 1500);
         } else {
-            showAlert(data.message, 'Error', 'error');
+            showAlert(data.message || 'Failed to assign booking', 'Error', 'error');
         }
     })
     .catch(error => {
-        console.error('Error:', error);
-        showAlert('An error occurred while assigning the booking: ' + error.message, 'Error', 'error');
+                showAlert('An error occurred while assigning the booking: ' + error.message, 'Error', 'error');
     });
 }
 
@@ -345,6 +378,68 @@ document.querySelectorAll('.sidebar .nav-link').forEach(link => {
 // Search Functionality
 function searchBookings(query) {
     // Add search logic here
+}
+
+// Delete Driver
+async function deleteDriver(driverId) {
+    const confirmed = await showConfirm(
+        'Are you sure you want to delete this driver? This action cannot be undone.',
+        'Delete Driver'
+    );
+    
+    if (!confirmed) return;
+    
+    fetch('admin.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        credentials: 'same-origin',
+        body: `action=delete_driver&driver_id=${driverId}`
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showAlert(data.message, 'Success', 'success');
+            setTimeout(() => location.reload(), 1500);
+        } else {
+            showAlert(data.message, 'Error', 'error');
+        }
+    })
+    .catch(error => {
+                showAlert('An error occurred while deleting the driver', 'Error', 'error');
+    });
+}
+
+// Delete User
+async function deleteUser(userId) {
+    const confirmed = await showConfirm(
+        'Are you sure you want to delete this user? This action cannot be undone.',
+        'Delete User'
+    );
+    
+    if (!confirmed) return;
+    
+    fetch('admin.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        credentials: 'same-origin',
+        body: `action=delete_user&user_id=${userId}`
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showAlert(data.message, 'Success', 'success');
+            setTimeout(() => location.reload(), 1500);
+        } else {
+            showAlert(data.message, 'Error', 'error');
+        }
+    })
+    .catch(error => {
+                showAlert('An error occurred while deleting the user', 'Error', 'error');
+    });
 }
 
 // View Driver Details
@@ -369,6 +464,7 @@ function viewDriverDetails(driverId) {
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
         },
+        credentials: 'same-origin',
         body: `action=get_driver_details&driver_id=${driverId}`
     })
     .then(response => response.json())
@@ -456,8 +552,7 @@ function viewDriverDetails(driverId) {
         }
     })
     .catch(error => {
-        console.error('Error:', error);
-        contentDiv.innerHTML = `
+                contentDiv.innerHTML = `
             <div class="alert alert-danger">
                 <i class="bi bi-exclamation-triangle me-2"></i>
                 An error occurred while loading driver details
@@ -490,8 +585,9 @@ function viewApplicationDetails(applicationId) {
     fetch('admin.php', {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
+            'Content-Type': 'application/x-www-form-urlencoded'
         },
+        credentials: 'same-origin',
         body: `action=get_application_details&application_id=${applicationId}`
     })
     .then(response => response.json())
@@ -560,8 +656,7 @@ function viewApplicationDetails(applicationId) {
         }
     })
     .catch(error => {
-        console.error('Error:', error);
-        contentDiv.innerHTML = `
+                contentDiv.innerHTML = `
             <div class="alert alert-danger">
                 <i class="bi bi-exclamation-triangle me-2"></i>
                 An error occurred while loading application details
@@ -599,8 +694,7 @@ function generateDocumentButtons(app) {
 document.getElementById('approveApplicationBtn')?.addEventListener('click', async function() {
     const applicationId = this.dataset.applicationId;
     
-    console.log('Approve button clicked, applicationId:', applicationId);
-    
+        
     if (!applicationId || applicationId === 'undefined') {
         showAlert('No application ID found. Please close and reopen the application details.', 'Error', 'error');
         return;
@@ -616,14 +710,14 @@ document.getElementById('approveApplicationBtn')?.addEventListener('click', asyn
     fetch('admin.php', {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
+            'Content-Type': 'application/x-www-form-urlencoded'
         },
+        credentials: 'same-origin',
         body: `action=approve_application&application_id=${applicationId}`
     })
     .then(response => response.json())
     .then(data => {
-        console.log('Approve response:', data);
-        if (data.success) {
+                if (data.success) {
             showAlert(data.message, 'Success', 'success');
             setTimeout(() => {
                 const modal = bootstrap.Modal.getInstance(document.getElementById('viewApplicationModal'));
@@ -635,8 +729,7 @@ document.getElementById('approveApplicationBtn')?.addEventListener('click', asyn
         }
     })
     .catch(error => {
-        console.error('Error:', error);
-        showAlert('An error occurred while approving the application', 'Error', 'error');
+                showAlert('An error occurred while approving the application', 'Error', 'error');
     });
 });
 
@@ -644,8 +737,7 @@ document.getElementById('approveApplicationBtn')?.addEventListener('click', asyn
 document.getElementById('rejectApplicationBtn')?.addEventListener('click', async function() {
     const applicationId = this.dataset.applicationId;
     
-    console.log('Reject button clicked, applicationId:', applicationId);
-    
+        
     if (!applicationId || applicationId === 'undefined') {
         showAlert('No application ID found. Please close and reopen the application details.', 'Error', 'error');
         return;
@@ -661,14 +753,14 @@ document.getElementById('rejectApplicationBtn')?.addEventListener('click', async
     fetch('admin.php', {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
+            'Content-Type': 'application/x-www-form-urlencoded'
         },
+        credentials: 'same-origin',
         body: `action=reject_application&application_id=${applicationId}`
     })
     .then(response => response.json())
     .then(data => {
-        console.log('Reject response:', data);
-        if (data.success) {
+                if (data.success) {
             showAlert(data.message, 'Success', 'success');
             setTimeout(() => {
                 const modal = bootstrap.Modal.getInstance(document.getElementById('viewApplicationModal'));
@@ -680,12 +772,453 @@ document.getElementById('rejectApplicationBtn')?.addEventListener('click', async
         }
     })
     .catch(error => {
-        console.error('Error:', error);
-        showAlert('An error occurred while rejecting the application', 'Error', 'error');
+                showAlert('An error occurred while rejecting the application', 'Error', 'error');
     });
 });
 
 // Export Functionality
 function exportData(type) {
     // Add export logic here
+}
+
+// ========== REAL-TIME UPDATE FUNCTIONS ==========
+
+// Handle tab switching - start/stop appropriate intervals
+function handleTabSwitch(targetId) {
+    // Stop all intervals first
+    stopAllIntervals();
+    
+    // Start appropriate interval based on active tab
+    switch(targetId) {
+        case '#pending':
+            startPendingBookingsUpdate();
+            break;
+        case '#all-bookings':
+            startAllBookingsUpdate();
+            break;
+        case '#drivers':
+            startDriversUpdate();
+            break;
+        case '#users':
+            startUsersUpdate();
+            break;
+        case '#applications':
+            startApplicationsUpdate();
+            break;
+        case '#analytics':
+            // Analytics doesn't need frequent updates
+            break;
+    }
+}
+
+// Stop all update intervals
+function stopAllIntervals() {
+    if (pendingBookingsInterval) clearInterval(pendingBookingsInterval);
+    if (allBookingsInterval) clearInterval(allBookingsInterval);
+    if (driversInterval) clearInterval(driversInterval);
+    if (usersInterval) clearInterval(usersInterval);
+    if (applicationsInterval) clearInterval(applicationsInterval);
+}
+
+// Dashboard Stats Update (runs continuously)
+function startDashboardStatsUpdate() {
+    updateDashboardStats(); // Initial load
+    dashboardStatsInterval = setInterval(updateDashboardStats, 5000); // Every 5 seconds
+}
+
+function updateDashboardStats() {
+    fetch('admin.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        credentials: 'same-origin',
+        body: 'action=get_dashboard_stats'
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const stats = data.data;
+            
+            // Update stat cards
+            const revenueEl = document.querySelector('.stat-card h3');
+            const bookingsEl = document.querySelectorAll('.stat-card h3')[1];
+            const driversEl = document.querySelectorAll('.stat-card h3')[2];
+            const pendingEl = document.querySelectorAll('.stat-card h3')[3];
+            
+            if (revenueEl) revenueEl.textContent = '₱' + parseFloat(stats.total_revenue || 0).toLocaleString();
+            if (bookingsEl) bookingsEl.textContent = stats.total_bookings || 0;
+            if (driversEl) driversEl.textContent = stats.active_drivers || 0;
+            if (pendingEl) pendingEl.textContent = stats.pending_bookings || 0;
+        }
+    })
+    .catch(error => );
+}
+
+// Pending Bookings Update
+function startPendingBookingsUpdate() {
+    updatePendingBookings(); // Initial load
+    pendingBookingsInterval = setInterval(updatePendingBookings, 3000); // Every 3 seconds
+}
+
+function updatePendingBookings() {
+    fetch('admin.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        credentials: 'same-origin',
+        body: 'action=get_pending_bookings'
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const tbody = document.querySelector('#pending tbody');
+            if (!tbody) return;
+            
+            const bookings = data.data;
+            
+            if (bookings.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="text-center py-4">
+                            <i class="bi bi-inbox" style="font-size: 3rem; color: #cbd5e1;"></i>
+                            <p class="text-muted mt-2">No pending bookings</p>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            tbody.innerHTML = bookings.map(booking => `
+                <tr>
+                    <td><strong>#${booking.id}</strong></td>
+                    <td>
+                        <div class="fw-semibold">${booking.rider_name || 'Unknown'}</div>
+                        <small class="text-muted">${booking.phone || 'N/A'}</small>
+                    </td>
+                    <td>${booking.pickup_location || 'N/A'}</td>
+                    <td>${booking.dropoff_location || 'N/A'}</td>
+                    <td><strong>₱${parseFloat(booking.fare || 0).toFixed(2)}</strong></td>
+                    <td><small>${formatDateTime(booking.created_at)}</small></td>
+                    <td>
+                        <div class="btn-group btn-group-sm">
+                            <button class="btn btn-success assign-btn-inline" data-booking-id="${booking.id}" onclick="confirmBooking(${booking.id})">
+                                <i class="bi bi-check-circle"></i> Assign
+                            </button>
+                            <button class="btn btn-danger" onclick="rejectBooking(${booking.id})">
+                                <i class="bi bi-x-circle"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+    })
+    .catch(error => );
+}
+
+// All Bookings Update
+function startAllBookingsUpdate() {
+    updateAllBookings(); // Initial load
+    allBookingsInterval = setInterval(updateAllBookings, 5000); // Every 5 seconds
+}
+
+function updateAllBookings() {
+    fetch('admin.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        credentials: 'same-origin',
+        body: 'action=get_all_bookings'
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const tbody = document.querySelector('#all-bookings tbody');
+            if (!tbody) return;
+            
+            const bookings = data.data;
+            
+            if (bookings.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="8" class="text-center py-4">
+                            <i class="bi bi-inbox" style="font-size: 3rem; color: #cbd5e1;"></i>
+                            <p class="text-muted mt-2">No bookings found</p>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            tbody.innerHTML = bookings.map(booking => `
+                <tr>
+                    <td class="fw-semibold">BK-${String(booking.id).padStart(3, '0')}</td>
+                    <td><i class="bi bi-person"></i> ${booking.rider_name || 'Unknown'}</td>
+                    <td>${booking.driver_name ? '<i class="bi bi-bicycle"></i> ' + booking.driver_name : '<span class="text-muted">Not assigned</span>'}</td>
+                    <td class="small">
+                        <div><i class="bi bi-geo-alt-fill text-success"></i> ${(booking.pickup_location || 'N/A').substring(0, 30)}...</div>
+                        <div><i class="bi bi-geo-alt text-danger"></i> ${(booking.destination || booking.dropoff_location || 'N/A').substring(0, 30)}...</div>
+                    </td>
+                    <td class="fw-semibold">₱${parseFloat(booking.fare || 0).toFixed(0)}</td>
+                    <td><span class="badge ${getStatusBadgeClass(booking.status)}">${getStatusText(booking.status)}</span></td>
+                    <td class="text-muted small"><i class="bi bi-clock"></i> ${formatTime(booking.created_at)}</td>
+                    <td><button class="btn btn-sm btn-link text-muted"><i class="bi bi-three-dots-vertical"></i></button></td>
+                </tr>
+            `).join('');
+        }
+    })
+    .catch(error => );
+}
+
+// Drivers Update
+function startDriversUpdate() {
+    updateDrivers(); // Initial load
+    driversInterval = setInterval(updateDrivers, 5000); // Every 5 seconds
+}
+
+function updateDrivers() {
+    fetch('admin.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        credentials: 'same-origin',
+        body: 'action=get_drivers'
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const tbody = document.querySelector('#drivers tbody');
+            if (!tbody) return;
+            
+            const drivers = data.data;
+            
+            if (drivers.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="text-center py-4">
+                            <i class="bi bi-inbox" style="font-size: 3rem; color: #cbd5e1;"></i>
+                            <p class="text-muted mt-2">No drivers found</p>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            tbody.innerHTML = drivers.map(driver => `
+                <tr>
+                    <td class="fw-semibold">DRV-${String(driver.id).padStart(3, '0')}</td>
+                    <td>
+                        <div class="avatar-name">
+                            <span class="avatar">${(driver.name || 'UN').substring(0, 2).toUpperCase()}</span>
+                            ${driver.name || 'Unknown'}
+                        </div>
+                    </td>
+                    <td>${driver.tricycle_number || 'TRY-' + String(driver.id).padStart(3, '0')}</td>
+                    <td><i class="bi bi-star-fill text-warning"></i> ${driver.rating || '4.8'}</td>
+                    <td>${driver.total_trips || 0} trips</td>
+                    <td><span class="badge ${driver.status === 'available' ? 'bg-success' : 'bg-secondary'}">${driver.status === 'available' ? 'Active' : 'Offline'}</span></td>
+                    <td>
+                        <div class="btn-group btn-group-sm">
+                            <button class="btn btn-outline-primary" onclick="viewDriverDetails(${driver.id})">
+                                <i class="bi bi-eye"></i> View
+                            </button>
+                            <button class="btn btn-outline-danger" onclick="deleteDriver(${driver.id})">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+    })
+    .catch(error => );
+}
+
+// Users Update
+function startUsersUpdate() {
+    updateUsers(); // Initial load
+    usersInterval = setInterval(updateUsers, 5000); // Every 5 seconds
+}
+
+function updateUsers() {
+    fetch('admin.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        credentials: 'same-origin',
+        body: 'action=get_users'
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const tbody = document.querySelector('#users tbody');
+            if (!tbody) return;
+            
+            const users = data.data;
+            
+            if (users.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="text-center py-4">
+                            <i class="bi bi-inbox" style="font-size: 3rem; color: #cbd5e1;"></i>
+                            <p class="text-muted mt-2">No users found</p>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            tbody.innerHTML = users.map(user => `
+                <tr>
+                    <td><strong>USR-${String(user.id).padStart(3, '0')}</strong></td>
+                    <td>
+                        <div class="fw-semibold">${user.name || 'Unknown'}</div>
+                        <small class="text-muted">${user.email || 'N/A'}</small>
+                    </td>
+                    <td>${user.phone || 'N/A'}</td>
+                    <td>${user.total_rides || 0} rides</td>
+                    <td><small>${formatDate(user.created_at)}</small></td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-danger" onclick="deleteUser(${user.id})">
+                            <i class="bi bi-trash"></i> Delete
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+    })
+    .catch(error => );
+}
+
+// Applications Update
+function startApplicationsUpdate() {
+    updateApplications(); // Initial load
+    applicationsInterval = setInterval(updateApplications, 5000); // Every 5 seconds
+}
+
+function updateApplications() {
+    fetch('admin.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        credentials: 'same-origin',
+        body: 'action=get_applications'
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const tbody = document.querySelector('#applications tbody');
+            if (!tbody) return;
+            
+            const applications = data.data;
+            
+            if (applications.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="text-center py-4">
+                            <i class="bi bi-inbox" style="font-size: 3rem; color: #cbd5e1;"></i>
+                            <p class="text-muted mt-2">No applications found</p>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            tbody.innerHTML = applications.map(app => `
+                <tr>
+                    <td class="fw-semibold">APP-${String(app.id).padStart(3, '0')}</td>
+                    <td>
+                        <div class="avatar-name">
+                            <span class="avatar">${(app.first_name.substring(0, 1) + app.last_name.substring(0, 1)).toUpperCase()}</span>
+                            ${app.first_name} ${app.last_name}
+                        </div>
+                    </td>
+                    <td class="text-muted">${app.email}</td>
+                    <td>${app.phone}</td>
+                    <td>${app.license_number}</td>
+                    <td>${(app.vehicle_make || '') + ' ' + (app.vehicle_model || '')}</td>
+                    <td><span class="badge ${getApplicationStatusBadge(app.status)}">${getApplicationStatusText(app.status)}</span></td>
+                    <td class="text-muted">${formatDate(app.application_date || app.created_at)}</td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-primary" onclick="viewApplicationDetails(${app.id})">
+                            <i class="bi bi-eye"></i> View
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+    })
+    .catch(error => );
+}
+
+// ========== UTILITY FUNCTIONS ==========
+
+function formatDateTime(datetime) {
+    if (!datetime) return 'N/A';
+    const date = new Date(datetime);
+    return date.toLocaleString('en-US', { 
+        month: 'short', 
+        day: 'numeric', 
+        year: 'numeric',
+        hour: '2-digit', 
+        minute: '2-digit' 
+    });
+}
+
+function formatDate(datetime) {
+    if (!datetime) return 'N/A';
+    const date = new Date(datetime);
+    return date.toLocaleDateString('en-US', { 
+        month: 'short', 
+        day: 'numeric', 
+        year: 'numeric'
+    });
+}
+
+function formatTime(datetime) {
+    if (!datetime) return 'N/A';
+    const date = new Date(datetime);
+    return date.toLocaleTimeString('en-US', { 
+        hour: 'numeric', 
+        minute: '2-digit',
+        hour12: true
+    });
+}
+
+function getStatusBadgeClass(status) {
+    const classes = {
+        'pending': 'bg-warning',
+        'accepted': 'bg-info',
+        'picked_up': 'bg-primary',
+        'in_progress': 'bg-primary',
+        'completed': 'bg-success',
+        'cancelled': 'bg-danger',
+        'rejected': 'bg-danger'
+    };
+    return classes[status] || 'bg-secondary';
+}
+
+function getStatusText(status) {
+    const texts = {
+        'pending': 'Pending',
+        'accepted': 'Accepted',
+        'picked_up': 'Picked Up',
+        'in_progress': 'In Progress',
+        'completed': 'Completed',
+        'cancelled': 'Cancelled',
+        'rejected': 'Rejected'
+    };
+    return texts[status] || status;
+}
+
+function getApplicationStatusBadge(status) {
+    const classes = {
+        'pending': 'bg-warning',
+        'approved': 'bg-success',
+        'rejected': 'bg-danger'
+    };
+    return classes[status] || 'bg-secondary';
+}
+
+function getApplicationStatusText(status) {
+    const texts = {
+        'pending': 'Pending',
+        'approved': 'Approved',
+        'rejected': 'Rejected'
+    };
+    return texts[status] || status;
 }

@@ -341,6 +341,12 @@ body {
     font-weight: 500;
 }
 
+.ride-info-row {
+    display: flex;
+    gap: 12px;
+    margin-top: 8px;
+}
+
 /* Ride Footer */
 .ride-footer {
     display: flex;
@@ -495,55 +501,234 @@ body {
     color: #94a3b8;
 }
 
-
-
-/* Responsive Design */
-@media (max-width: 768px) {
-    .stats-grid {
-        grid-template-columns: 1fr;
-        gap: 1rem;
-    }
-
-    .driver-welcome {
-        font-size: 1.5rem;
-    }
-
-    .stat-value {
-        font-size: 1.75rem;
-    }
-
-    .ride-footer {
-        flex-direction: column;
-        gap: 1rem;
-        align-items: stretch;
-    }
-
-    .btn-start-ride {
-        width: 100%;
-        justify-content: center;
-    }
-
-    .navbar-brand {
-        font-size: 1.25rem;
-    }
-
-    .status-toggle {
-        flex-direction: column;
-        align-items: flex-end;
-    }
+/* Button Styles */
+.btn-primary {
+    background: #091133 !important;
+    border-color: #091133 !important;
+    color: white !important;
 }
 
+.btn-primary:hover,
+.btn-primary:focus,
+.btn-primary:active {
+    background: #0a1a4d !important;
+    border-color: #0a1a4d !important;
+    color: white !important;
+}
+
+/* ========================================
+   RESPONSIVE DESIGN - MOBILE FIRST
+   ======================================== */
+
+/* Tablets and smaller (992px and below) */
+@media (max-width: 992px) {
+    /* Stats Grid */
+    .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 1.25rem; }
+    
+    /* Map Section */
+    #driverMap { height: 350px !important; }
+}
+
+/* Tablets and smaller (768px and below) */
+@media (max-width: 768px) {
+    /* Navigation */
+    .navbar { padding: 0.75rem 0 !important; }
+    .navbar-brand { font-size: 1.125rem !important; }
+    .navbar-brand img { height: 26px; }
+    .navbar .badge { font-size: 0.625rem; padding: 0.25rem 0.5rem; }
+    .status-toggle { flex-direction: row; gap: 0.375rem; }
+    .status-label { font-size: 0.8125rem; }
+    .status-toggle-switch { width: 52px; height: 28px; }
+    .status-toggle-switch .toggle-slider { width: 20px; height: 20px; }
+    .status-toggle-switch.online .toggle-slider { transform: translateX(24px); }
+    .btn-logout-custom { padding: 0.375rem 0.75rem; font-size: 0.8125rem; }
+    
+    /* Welcome Section */
+    .container-fluid h4 { font-size: 1.25rem; }
+    .container-fluid p { font-size: 0.875rem; }
+    
+    /* Stats Grid */
+    .stats-grid { grid-template-columns: 1fr; gap: 1rem; margin: 1.5rem 0; }
+    .stat-card { padding: 1.25rem; }
+    .stat-value { font-size: 1.75rem; }
+    .stat-label { font-size: 0.8125rem; }
+    .stat-meta { font-size: 0.75rem; }
+    .stat-icon { font-size: 1.375rem; }
+    
+    /* Map Section */
+    .map-section { margin-bottom: 2rem; }
+    #driverMap { height: 300px !important; }
+    .section-title { font-size: 1rem; }
+    .section-subtitle { font-size: 0.8125rem; }
+    
+    /* Sections */
+    .section-header { margin-bottom: 1.25rem; }
+    .section-title { font-size: 1rem; }
+    .section-subtitle { font-size: 0.8125rem; }
+    
+    /* Ride Cards */
+    .ride-card { padding: 1.25rem; margin-bottom: 0.875rem; }
+    .ride-card-header { flex-direction: column; gap: 0.75rem; align-items: flex-start; }
+    .booking-id { font-size: 0.875rem; }
+    .status-badge { font-size: 0.75rem; padding: 0.3125rem 0.625rem; }
+    .ride-fare { font-size: 1.375rem; }
+    .rider-info { font-size: 0.8125rem; padding: 0.625rem; }
+    .rider-name { font-size: 0.8125rem; }
+    .rider-phone { font-size: 0.75rem; margin-left: 0; margin-top: 0.5rem; width: 100%; }
+    .location-item { padding: 0.75rem; gap: 0.625rem; }
+    .location-icon { font-size: 1rem; }
+    .location-label { font-size: 0.625rem; }
+    .location-value { font-size: 0.8125rem; }
+    .ride-footer { flex-direction: column; gap: 1rem; align-items: stretch; padding-top: 1rem; margin-top: 1rem; }
+    .ride-time { font-size: 0.8125rem; }
+    .btn-start-ride { width: 100%; justify-content: center; padding: 0.5625rem 1.25rem; font-size: 0.875rem; }
+    .btn-accept, .btn-reject { padding: 10px 16px; font-size: 0.875rem; }
+    .view-map-btn { padding: 8px 12px; font-size: 0.8125rem; }
+    
+    /* Pending Requests */
+    .pending-requests-section { margin-bottom: 2rem; }
+    .ride-actions { flex-direction: column; gap: 8px; }
+    .ride-actions button { width: 100%; }
+    
+    /* Tab Navigation */
+    .tab-navigation { gap: 1.5rem; margin-bottom: 1.5rem; }
+    .tab-button { font-size: 0.875rem; padding: 0.625rem 0; }
+    
+    /* Trip History */
+    .trip-history-section { padding: 1.25rem; }
+    .trip-history-header { margin-bottom: 1.25rem; }
+    .trip-history-title { font-size: 1rem; }
+    .trip-history-desc { font-size: 0.8125rem; }
+    
+    /* Profile Section */
+    .profile-section { padding: 1.25rem 0; }
+    .profile-section-title { font-size: 0.9375rem; }
+    .profile-section-desc { font-size: 0.8125rem; margin-bottom: 1.25rem; }
+    
+    /* Empty State */
+    .empty-state { padding: 2.5rem 1.5rem; }
+    .empty-state-icon { font-size: 3rem; }
+    .empty-state-title { font-size: 0.9375rem; }
+    .empty-state-desc { font-size: 0.8125rem; }
+}
+
+/* Mobile phones (576px and below) */
 @media (max-width: 576px) {
-    .ride-card-header {
-        flex-direction: column;
-        gap: 0.75rem;
-    }
+    /* Container */
+    .container-fluid { padding-left: 12px !important; padding-right: 12px !important; }
+    
+    /* Navigation */
+    .navbar { padding: 0.625rem 0 !important; }
+    .navbar-brand { font-size: 1rem !important; }
+    .navbar-brand span:first-of-type { font-size: 1rem; }
+    .navbar .badge { display: none; }
+    .status-toggle { flex-direction: column; align-items: flex-end; gap: 0.25rem; }
+    .btn-logout-custom span { display: none; }
+    .btn-logout-custom { padding: 0.375rem 0.5rem; }
+    
+    /* Welcome Section */
+    .container-fluid h4 { font-size: 1.125rem; margin-bottom: 0.5rem !important; }
+    .container-fluid p { font-size: 0.8125rem; }
+    
+    /* Stats Grid */
+    .stats-grid { gap: 0.75rem; margin: 1.25rem 0; }
+    .stat-card { padding: 1rem; }
+    .stat-card-header { margin-bottom: 0.625rem; }
+    .stat-label { font-size: 0.75rem; }
+    .stat-label i { font-size: 0.875rem; }
+    .stat-icon { font-size: 1.25rem; }
+    .stat-value { font-size: 1.5rem; }
+    .stat-meta { font-size: 0.6875rem; }
+    .star-filled { font-size: 0.75rem; }
+    
+    /* Map Section */
+    .map-section { margin-bottom: 1.5rem; }
+    .section-header { margin-bottom: 1rem; }
+    .section-title { font-size: 0.9375rem; gap: 0.375rem; }
+    .section-title i { font-size: 1rem; }
+    .section-subtitle { font-size: 0.75rem; }
+    #driverMap { height: 250px !important; border-radius: 8px; border-width: 1px; }
+    
+    /* Ride Cards */
+    .ride-card { padding: 1rem; margin-bottom: 0.75rem; border-radius: 10px; }
+    .ride-id-section { gap: 0.375rem; }
+    .booking-id { font-size: 0.8125rem; }
+    .status-badge { font-size: 0.6875rem; padding: 0.25rem 0.5rem; }
+    .ride-fare { font-size: 1.25rem; }
+    .rider-info { padding: 0.5rem; gap: 0.375rem; flex-direction: column; align-items: flex-start; }
+    .rider-info i { font-size: 0.875rem; }
+    .rider-name { font-size: 0.75rem; }
+    .rider-phone { font-size: 0.6875rem; margin: 0; }
+    .location-item { padding: 0.625rem; gap: 0.5rem; margin-bottom: 0.375rem; }
+    .location-icon { font-size: 0.9375rem; }
+    .location-label { font-size: 0.5625rem; }
+    .location-value { font-size: 0.75rem; }
+    .ride-footer { gap: 0.75rem; padding-top: 0.875rem; margin-top: 0.875rem; }
+    .ride-time { font-size: 0.75rem; }
+    .ride-time i { font-size: 0.875rem; }
+    .btn-start-ride { padding: 0.5rem 1rem; font-size: 0.8125rem; gap: 0.375rem; }
+    .btn-accept, .btn-reject { padding: 8px 12px; font-size: 0.8125rem; }
+    .view-map-btn { padding: 6px 10px; font-size: 0.75rem; margin-top: 6px; }
+    
+    /* Pending Requests */
+    .pending-requests-section { margin-bottom: 1.5rem; }
+    .ride-actions { gap: 6px; margin-top: 12px; }
+    
+    /* Tab Navigation */
+    .tab-navigation { gap: 1.25rem; margin-bottom: 1.25rem; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    .tab-button { font-size: 0.8125rem; padding: 0.5rem 0; white-space: nowrap; }
+    
+    /* Trip History */
+    .trip-history-section { padding: 1rem; }
+    .trip-history-header { margin-bottom: 1rem; }
+    .trip-history-title { font-size: 0.9375rem; gap: 0.375rem; }
+    .trip-history-title i { font-size: 1rem; }
+    .trip-history-desc { font-size: 0.75rem; }
+    
+    /* Profile Section */
+    .profile-section { padding: 1rem 0; }
+    .ride-card h6 { font-size: 0.875rem; margin-bottom: 0.75rem; }
+    .ride-card hr { margin: 1rem 0; }
+    .ride-card label { font-size: 0.625rem; }
+    .ride-card > div > div { font-size: 0.8125rem; padding: 0.625rem 0.875rem; }
+    .profile-section-title { font-size: 0.875rem; }
+    .profile-section-desc { font-size: 0.75rem; margin-bottom: 1rem; }
+    
+    /* Profile Cards - Mobile optimization */
+    .ride-card > div[style*="display: flex"] { flex-direction: column !important; gap: 1rem !important; }
+    .ride-card > div[style*="display: flex"] > div:first-child { width: 60px !important; height: 60px !important; font-size: 1.5rem !important; }
+    .ride-card h4 { font-size: 1.125rem !important; }
+    .ride-card > div[style*="display: grid"] { grid-template-columns: 1fr !important; gap: 0.75rem !important; }
+    
+    /* Empty State */
+    .empty-state { padding: 2rem 1rem; }
+    .empty-state-icon { font-size: 2.5rem; margin-bottom: 0.75rem; }
+    .empty-state-title { font-size: 0.875rem; margin-bottom: 0.375rem; }
+    .empty-state-desc { font-size: 0.75rem; }
+}
 
-    .rider-phone {
-        margin-left: 0;
-    }
+/* Extra small devices (375px and below) */
+@media (max-width: 375px) {
+    .container-fluid { padding-left: 8px !important; padding-right: 8px !important; }
+    .navbar-brand { font-size: 0.9375rem !important; }
+    .navbar-brand img { height: 24px; }
+    .container-fluid h4 { font-size: 1rem; }
+    .stats-grid { gap: 0.625rem; margin: 1rem 0; }
+    .stat-card { padding: 0.875rem; }
+    .stat-value { font-size: 1.375rem; }
+    .stat-label { font-size: 0.6875rem; }
+    #driverMap { height: 220px !important; }
+    .ride-card { padding: 0.875rem; }
+    .booking-id { font-size: 0.75rem; }
+    .ride-fare { font-size: 1.125rem; }
+    .location-value { font-size: 0.6875rem; }
+    .btn-start-ride { padding: 0.4375rem 0.875rem; font-size: 0.75rem; }
+    .btn-accept, .btn-reject { padding: 6px 10px; font-size: 0.75rem; }
+}
 
-    .rider-info {
-        flex-wrap: wrap;
-    }
+/* Landscape orientation adjustments */
+@media (max-height: 600px) and (orientation: landscape) {
+    #driverMap { height: 200px !important; }
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    .ride-card { margin-bottom: 0.625rem; }
 }

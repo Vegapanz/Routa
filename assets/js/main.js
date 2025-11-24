@@ -61,12 +61,21 @@ document.addEventListener('DOMContentLoaded', () => {
                             window.location.reload();
                         }
                     } else {
-                        alert(data.message);
+                        Swal.fire({
+                            title: 'Login Failed',
+                            text: data.message,
+                            icon: 'error',
+                            confirmButtonText: 'OK'
+                        });
                     }
                 })
                 .catch(error => {
-                    console.error('Error:', error);
-                    alert('An error occurred. Please try again.');
+                                        Swal.fire({
+                        title: 'Error',
+                        text: 'An error occurred. Please try again.',
+                        icon: 'error',
+                        confirmButtonText: 'OK'
+                    });
                 });
             }
         });
@@ -85,16 +94,31 @@ document.addEventListener('DOMContentLoaded', () => {
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        alert('Registration successful! Please login.');
-                        $('#registerModal').modal('hide');
-                        $('#loginModal').modal('show');
+                        Swal.fire({
+                            title: 'Success',
+                            text: 'Registration successful! Please login.',
+                            icon: 'success',
+                            confirmButtonText: 'OK'
+                        }).then(() => {
+                            $('#registerModal').modal('hide');
+                            $('#loginModal').modal('show');
+                        });
                     } else {
-                        alert(data.message);
+                        Swal.fire({
+                            title: 'Registration Failed',
+                            text: data.message,
+                            icon: 'error',
+                            confirmButtonText: 'OK'
+                        });
                     }
                 })
                 .catch(error => {
-                    console.error('Error:', error);
-                    alert('An error occurred. Please try again.');
+                                        Swal.fire({
+                        title: 'Error',
+                        text: 'An error occurred. Please try again.',
+                        icon: 'error',
+                        confirmButtonText: 'OK'
+                    });
                 });
             }
         });

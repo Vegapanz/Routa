@@ -19,6 +19,232 @@ let dropoffSelected = false;
 let pickupSuggestions = [];
 let dropoffSuggestions = [];
 
+// Map variables
+let bookingMap = null;
+let pickupMarker = null;
+let dropoffMarker = null;
+let routeLine = null;
+
+// Initialize booking map
+function initBookingMap() {
+    // Default center: Manila, Philippines
+    const manilaCoords = [14.5995, 120.9842];
+    
+    // Create map if it doesn't exist
+    if (!bookingMap) {
+        bookingMap = L.map('bookingMap').setView(manilaCoords, 13);
+        
+        // Add OpenStreetMap tiles (free, no API key needed)
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors',
+            maxZoom: 19
+        }).addTo(bookingMap);
+        
+        // Custom icons for markers
+        const pickupIcon = L.divIcon({
+            html: '<div style="background-color: #10b981; color: white; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; font-size: 18px; border: 3px solid white; box-shadow: 0 2px 8px rgba(0,0,0,0.3);">📍</div>',
+            iconSize: [32, 32],
+            iconAnchor: [16, 16],
+            className: 'custom-marker'
+        });
+        
+        const dropoffIcon = L.divIcon({
+            html: '<div style="background-color: #ef4444; color: white; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; font-size: 18px; border: 3px solid white; box-shadow: 0 2px 8px rgba(0,0,0,0.3);">📍</div>',
+            iconSize: [32, 32],
+            iconAnchor: [16, 16],
+            className: 'custom-marker'
+        });
+        
+        // Store icons for later use
+        bookingMap.pickupIcon = pickupIcon;
+        bookingMap.dropoffIcon = dropoffIcon;
+        
+        // Map click handler to set locations
+        bookingMap.on('click', async function(e) {
+            const { lat, lng } = e.latlng;
+            
+            // Reverse geocode to get address
+            try {
+                const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
+                const data = await response.json();
+                const address = data.display_name;
+                
+                // Check which field is empty or last focused
+                const pickupInput = document.getElementById('pickupLocation');
+                const dropoffInput = document.getElementById('dropoffLocation');
+                
+                if (!pickupInput.value || document.activeElement === pickupInput || (!dropoffInput.value)) {
+                    // Set as pickup if pickup is empty or focused
+                    if (!pickupInput.value) {
+                        selectLocation({ display_name: address, lat: lat, lon: lng }, 'pickup');
+                        addMapMarker(lat, lng, 'pickup');
+                    } else if (!dropoffInput.value) {
+                        // Set as dropoff if pickup is already set
+                        selectLocation({ display_name: address, lat: lat, lon: lng }, 'dropoff');
+                        addMapMarker(lat, lng, 'dropoff');
+                    }
+                }
+            } catch (error) {
+                            }
+        });
+    } else {
+        // If map exists, invalidate size to fix display issues
+        setTimeout(() => bookingMap.invalidateSize(), 100);
+    }
+    
+    return bookingMap;
+}
+
+// Add marker to map
+function addMapMarker(lat, lng, type) {
+    if (!bookingMap) return;
+    
+    const icon = type === 'pickup' ? bookingMap.pickupIcon : bookingMap.dropoffIcon;
+    
+    if (type === 'pickup') {
+        // Remove existing pickup marker
+        if (pickupMarker) {
+            bookingMap.removeLayer(pickupMarker);
+        }
+        // Add new pickup marker
+        pickupMarker = L.marker([lat, lng], { icon: icon }).addTo(bookingMap);
+        pickupMarker.bindPopup('<b>Pickup Location</b>').openPopup();
+    } else {
+        // Remove existing dropoff marker
+        if (dropoffMarker) {
+            bookingMap.removeLayer(dropoffMarker);
+        }
+        // Add new dropoff marker
+        dropoffMarker = L.marker([lat, lng], { icon: icon }).addTo(bookingMap);
+        dropoffMarker.bindPopup('<b>Drop-off Location</b>').openPopup();
+    }
+    
+    // Draw route if both markers exist
+    drawRoute();
+}
+
+// Draw route between pickup and dropoff
+async function drawRoute() {
+    if (!bookingMap || !pickupMarker || !dropoffMarker) return;
+    
+    // Remove existing route
+    if (routeLine) {
+        bookingMap.removeLayer(routeLine);
+    }
+    
+    const pickupLatLng = pickupMarker.getLatLng();
+    const dropoffLatLng = dropoffMarker.getLatLng();
+    
+    try {
+        // Use OSRM (Open Source Routing Machine) for actual road routing
+        const osrmUrl = `https://router.project-osrm.org/route/v1/driving/${pickupLatLng.lng},${pickupLatLng.lat};${dropoffLatLng.lng},${dropoffLatLng.lat}?overview=full&geometries=geojson&steps=true`;
+        
+        const response = await fetch(osrmUrl);
+        const data = await response.json();
+        
+        if (data.code === 'Ok' && data.routes && data.routes.length > 0) {
+            const route = data.routes[0];
+            const coordinates = route.geometry.coordinates;
+            
+            // Convert coordinates from [lng, lat] to [lat, lng] for Leaflet
+            const latlngs = coordinates.map(coord => [coord[1], coord[0]]);
+            
+            // Draw the actual road route
+            routeLine = L.polyline(latlngs, {
+                color: '#10b981',
+                weight: 5,
+                opacity: 0.8,
+                lineJoin: 'round'
+            }).addTo(bookingMap);
+            
+            // Update distance and duration with real road data
+            const distanceKm = (route.distance / 1000).toFixed(2);
+            const durationMin = Math.round(route.duration / 60);
+            
+            document.getElementById('distanceText').textContent = distanceKm + ' km';
+            
+            // Recalculate fare with actual distance
+            const baseFare = 40;
+            const perKmRate = 15;
+            const fare = Math.ceil(baseFare + (parseFloat(distanceKm) * perKmRate));
+            document.getElementById('fareText').textContent = '₱' + fare.toLocaleString();
+            
+            // Show route info tooltip
+            const midPoint = Math.floor(latlngs.length / 2);
+            const popup = L.popup({
+                closeButton: false,
+                autoClose: false,
+                closeOnClick: false,
+                className: 'route-info-popup'
+            })
+            .setLatLng(latlngs[midPoint])
+            .setContent(`
+                <div style="text-align: center; font-size: 12px;">
+                    <div style="font-weight: bold; color: #10b981;">🚗 Fastest Route</div>
+                    <div style="margin-top: 4px;">📏 ${distanceKm} km</div>
+                    <div>⏱️ ~${durationMin} mins</div>
+                </div>
+            `)
+            .addTo(bookingMap);
+            
+            // Store popup reference to remove later
+            if (bookingMap.routePopup) {
+                bookingMap.removeLayer(bookingMap.routePopup);
+            }
+            bookingMap.routePopup = popup;
+            
+            // Fit map to show the entire route
+            bookingMap.fitBounds(routeLine.getBounds(), { padding: [50, 50] });
+            
+                    } else {
+            // Fallback to straight line if routing fails
+                        drawStraightLineRoute(pickupLatLng, dropoffLatLng);
+        }
+    } catch (error) {
+                // Fallback to straight line on error
+        drawStraightLineRoute(pickupLatLng, dropoffLatLng);
+    }
+}
+
+// Fallback function to draw straight line
+function drawStraightLineRoute(pickupLatLng, dropoffLatLng) {
+    routeLine = L.polyline([pickupLatLng, dropoffLatLng], {
+        color: '#10b981',
+        weight: 4,
+        opacity: 0.7,
+        dashArray: '10, 10'
+    }).addTo(bookingMap);
+    
+    // Fit map to show both markers
+    const bounds = L.latLngBounds([pickupLatLng, dropoffLatLng]);
+    bookingMap.fitBounds(bounds, { padding: [50, 50] });
+}
+
+// Clear map markers and route
+function clearMapMarkers() {
+    if (!bookingMap) return;
+    
+    if (pickupMarker) {
+        bookingMap.removeLayer(pickupMarker);
+        pickupMarker = null;
+    }
+    if (dropoffMarker) {
+        bookingMap.removeLayer(dropoffMarker);
+        dropoffMarker = null;
+    }
+    if (routeLine) {
+        bookingMap.removeLayer(routeLine);
+        routeLine = null;
+    }
+    if (bookingMap.routePopup) {
+        bookingMap.removeLayer(bookingMap.routePopup);
+        bookingMap.routePopup = null;
+    }
+    
+    // Reset map view to Manila
+    bookingMap.setView([14.5995, 120.9842], 13);
+}
+
 // Calculate distance between two coordinates using Haversine formula
 function calculateDistance(lat1, lon1, lat2, lon2) {
     const R = 6371; // Radius of Earth in kilometers
@@ -35,8 +261,7 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
 async function searchLocation(query, isPickup) {
     if (query.length < 3) return;
     
-    console.log('Searching location:', query, 'isPickup:', isPickup);
-    
+        
     const type = isPickup ? 'pickup' : 'dropoff';
     
     // Add Philippines to search query for better results
@@ -68,8 +293,7 @@ async function searchLocation(query, isPickup) {
     
     for (const api of apis) {
         try {
-            console.log(`Trying ${api.name} API:`, api.url);
-            
+                        
             const controller = new AbortController();
             const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
             
@@ -84,15 +308,13 @@ async function searchLocation(query, isPickup) {
             clearTimeout(timeoutId);
             
             if (!response.ok) {
-                console.log(`${api.name} returned status:`, response.status);
-                continue; // Try next API
+                                continue; // Try next API
             }
             
             const data = await response.json();
             const results = api.parseResults(data);
             
-            console.log(`${api.name} results:`, results);
-            
+                        
             if (results && results.length > 0) {
                 if (isPickup) {
                     pickupSuggestions = results;
@@ -104,14 +326,12 @@ async function searchLocation(query, isPickup) {
                 return; // Success, stop trying other APIs
             }
         } catch (error) {
-            console.log(`${api.name} failed:`, error.message);
-            continue; // Try next API
+                        continue; // Try next API
         }
     }
     
     // All APIs failed
-    console.error('All geocoding APIs failed');
-    showErrorMessage(type, 'Unable to search locations. Please try again.');
+        showErrorMessage(type, 'Unable to search locations. Please try again.');
 }
 
 // Format Photon API address for display
@@ -186,7 +406,7 @@ function showSuggestions(results, type) {
     
     if (results.length === 0) return;
     
-    console.log('Showing suggestions for', type, ':', results); // Debug log
+     // Debug log
     
     // Create suggestions dropdown
     const suggestionsDiv = document.createElement('div');
@@ -251,7 +471,7 @@ function showSuggestions(results, type) {
     container.style.position = 'relative';
     container.appendChild(suggestionsDiv);
     
-    console.log('Suggestions dropdown appended to:', container); // Debug log
+     // Debug log
 }
 
 // Select a location from suggestions
@@ -261,11 +481,15 @@ function selectLocation(result, type) {
         document.getElementById('pickupLat').value = result.lat;
         document.getElementById('pickupLng').value = result.lon;
         pickupSelected = true;
+        // Add marker to map
+        addMapMarker(result.lat, result.lon, 'pickup');
     } else {
         document.getElementById('dropoffLocation').value = result.display_name;
         document.getElementById('dropoffLat').value = result.lat;
         document.getElementById('dropoffLng').value = result.lon;
         dropoffSelected = true;
+        // Add marker to map
+        addMapMarker(result.lat, result.lon, 'dropoff');
     }
     
     calculateRoute();
@@ -279,7 +503,7 @@ function calculateRoute() {
     const dropoffLng = parseFloat(document.getElementById('dropoffLng').value);
 
     if (pickupLat && pickupLng && dropoffLat && dropoffLng) {
-        // Calculate distance using Haversine formula
+        // Calculate distance using Haversine formula (as fallback)
         const distance = calculateDistance(pickupLat, pickupLng, dropoffLat, dropoffLng);
         const distanceText = distance.toFixed(2) + ' km';
         
@@ -288,10 +512,12 @@ function calculateRoute() {
         const perKmRate = 15;
         const fare = Math.ceil(baseFare + (distance * perKmRate));
 
-        // Display fare and distance
+        // Display initial fare and distance (will be updated by drawRoute with actual road distance)
         document.getElementById('distanceText').textContent = distanceText;
         document.getElementById('fareText').textContent = '₱' + fare.toLocaleString();
         document.getElementById('fareDisplay').classList.remove('d-none');
+        
+        // Note: drawRoute() will be called separately and will update these values with actual road data
     }
 }
 
@@ -308,7 +534,7 @@ function initializeLocationSearch() {
         pickupInput.parentNode.replaceChild(newPickupInput, pickupInput);
         
         newPickupInput.addEventListener('input', function(e) {
-            console.log('Pickup input:', this.value); // Debug log
+             // Debug log
             clearTimeout(pickupTimeout);
             pickupSelected = false;
             
@@ -323,7 +549,7 @@ function initializeLocationSearch() {
             
             pickupTimeout = setTimeout(() => {
                 if (this.value.length >= 3) {
-                    console.log('Searching for:', this.value); // Debug log
+                     // Debug log
                     searchLocation(this.value, true);
                 }
             }, 500);
@@ -343,7 +569,7 @@ function initializeLocationSearch() {
         dropoffInput.parentNode.replaceChild(newDropoffInput, dropoffInput);
         
         newDropoffInput.addEventListener('input', function() {
-            console.log('Dropoff input:', this.value); // Debug log
+             // Debug log
             clearTimeout(dropoffTimeout);
             dropoffSelected = false;
             
@@ -358,7 +584,7 @@ function initializeLocationSearch() {
             
             dropoffTimeout = setTimeout(() => {
                 if (this.value.length >= 3) {
-                    console.log('Searching for:', this.value); // Debug log
+                     // Debug log
                     searchLocation(this.value, false);
                 }
             }, 500);
@@ -401,8 +627,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const bookModal = document.getElementById('bookRideModal');
     if (bookModal) {
         bookModal.addEventListener('shown.bs.modal', function() {
-            console.log('Modal shown, initializing location search'); // Debug log
+             // Debug log
             initializeLocationSearch();
+            // Initialize map when modal is shown
+            initBookingMap();
         });
     }
     
@@ -424,7 +652,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
             // Validate locations are selected
             if (!pickupLat || !dropoffLat) {
-                alert('Please select valid pickup and drop-off locations from the suggestions.');
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Invalid Locations',
+                    text: 'Please select valid pickup and drop-off locations from the suggestions.',
+                    confirmButtonColor: '#10b981'
+                });
                 return;
             }
 
@@ -467,16 +700,28 @@ document.addEventListener('DOMContentLoaded', function() {
                     document.getElementById('pickupLng').value = '';
                     document.getElementById('dropoffLat').value = '';
                     document.getElementById('dropoffLng').value = '';
+                    
+                    // Clear map markers
+                    clearMapMarkers();
 
                     // Show ride tracking modal
                     showRideTrackingModal(data);
 
                 } else {
-                    alert('Error booking ride: ' + (data.message || 'Unknown error'));
+                    Swal.fire({
+                        title: 'Booking Error',
+                        text: 'Error booking ride: ' + (data.message || 'Unknown error'),
+                        icon: 'error',
+                        confirmButtonText: 'OK'
+                    });
                 }
             } catch (error) {
-                console.error('Error:', error);
-                alert('An error occurred while booking the ride. Please try again.');
+                                Swal.fire({
+                    title: 'Error',
+                    text: 'An error occurred while booking the ride. Please try again.',
+                    icon: 'error',
+                    confirmButtonText: 'OK'
+                });
             }
         });
     }
@@ -491,11 +736,14 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('pickupLng').value = '';
             document.getElementById('dropoffLat').value = '';
             document.getElementById('dropoffLng').value = '';
+            // Clear map markers and route
+            clearMapMarkers();
         });
     }
 
     // Check for active booking on page load
-    checkActiveBooking();
+    // DISABLED: Using real-time WebSocket updates instead of polling
+    // checkActiveBooking();
 });
 
 // Show ride tracking modal with real-time updates
@@ -681,7 +929,11 @@ function startRideStatusPolling(bookingId) {
         clearInterval(statusPollingInterval);
     }
     
-    // Poll every 5 seconds
+    // DISABLED: Using real-time WebSocket updates instead of polling
+    // Real-time updates are handled by rider-realtime.js
+    // No need to poll the API every 5 seconds anymore
+    
+    /* OLD POLLING CODE - REPLACED BY WEBSOCKET
     statusPollingInterval = setInterval(async () => {
         try {
             const response = await fetch(`php/booking_api.php?action=status&booking_id=${bookingId}`);
@@ -696,9 +948,9 @@ function startRideStatusPolling(bookingId) {
                 }
             }
         } catch (error) {
-            console.error('Error polling ride status:', error);
-        }
+                    }
     }, 5000);
+    */
 }
 
 // Check for active booking
@@ -724,13 +976,23 @@ async function checkActiveBooking() {
             });
         }
     } catch (error) {
-        console.error('Error checking active booking:', error);
-    }
+            }
 }
 
 // Cancel ride
 async function cancelRide() {
-    if (!confirm('Are you sure you want to cancel this ride?')) {
+    const result = await Swal.fire({
+        icon: 'warning',
+        title: 'Cancel Ride?',
+        text: 'Are you sure you want to cancel this ride?',
+        showCancelButton: true,
+        confirmButtonText: 'Yes, cancel it',
+        cancelButtonText: 'No, keep it',
+        confirmButtonColor: '#ef4444',
+        cancelButtonColor: '#6b7280'
+    });
+    
+    if (!result.isConfirmed) {
         return;
     }
     
@@ -753,29 +1015,52 @@ async function cancelRide() {
         if (data.success) {
             clearInterval(statusPollingInterval);
             bootstrap.Modal.getInstance(document.getElementById('rideTrackingModal')).hide();
-            alert('Ride cancelled successfully');
+            Swal.fire({
+                icon: 'success',
+                title: 'Cancelled',
+                text: 'Ride cancelled successfully',
+                confirmButtonColor: '#10b981',
+                timer: 2000
+            });
             location.reload();
         } else {
-            alert('Error cancelling ride: ' + data.message);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Error cancelling ride: ' + data.message,
+                confirmButtonColor: '#10b981'
+            });
         }
     } catch (error) {
-        console.error('Error:', error);
-        alert('An error occurred while cancelling the ride');
+                Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'An error occurred while cancelling the ride',
+            confirmButtonColor: '#10b981'
+        });
     }
 }
 
 // Confirm cancel ride
-function confirmCancelRide() {
-    return confirm('Are you sure you want to close? Your ride will be cancelled.');
+async function confirmCancelRide() {
+    const result = await Swal.fire({
+        icon: 'warning',
+        title: 'Close Modal?',
+        text: 'Are you sure you want to close? Your ride will be cancelled.',
+        showCancelButton: true,
+        confirmButtonText: 'Yes, close',
+        cancelButtonText: 'No, stay',
+        confirmButtonColor: '#ef4444',
+        cancelButtonColor: '#6b7280'
+    });
+    return result.isConfirmed;
 }
 
 // Show rating modal after trip completion
 function showRatingModal(bookingId) {
-    console.log('Showing rating modal for booking:', bookingId);
-    
+        
     if (!bookingId) {
-        console.error('No booking ID provided for rating');
-        location.reload();
+                location.reload();
         return;
     }
     
@@ -884,10 +1169,14 @@ async function submitRating(bookingId) {
     const rating = document.querySelectorAll('#ratingStars i.bi-star-fill').length;
     const review = document.getElementById('ratingReview').value.trim();
     
-    console.log('Submitting rating:', {bookingId, rating, review});
-    
+        
     if (rating === 0) {
-        alert('Please select a rating');
+        Swal.fire({
+            icon: 'warning',
+            title: 'Rating Required',
+            text: 'Please select a rating',
+            confirmButtonColor: '#10b981'
+        });
         return;
     }
     
@@ -910,8 +1199,7 @@ async function submitRating(bookingId) {
         });
         
         const data = await response.json();
-        console.log('Rating response:', data);
-        
+                
         if (data.success) {
             // Show success message
             const modalBody = document.querySelector('#ratingModal .modal-body');
@@ -932,21 +1220,41 @@ async function submitRating(bookingId) {
                 location.reload();
             }, 2000);
         } else {
-            alert('Error submitting rating: ' + data.message);
+            Swal.fire({
+                icon: 'error',
+                title: 'Submission Failed',
+                text: data.message || 'Error submitting rating',
+                confirmButtonColor: '#10b981'
+            });
             submitBtn.disabled = false;
             submitBtn.innerHTML = '<i class="bi bi-star-fill me-2"></i>Submit Rating';
         }
     } catch (error) {
-        console.error('Error:', error);
-        alert('An error occurred while submitting your rating. Please try again.');
+                Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'An error occurred while submitting your rating. Please try again.',
+            confirmButtonColor: '#10b981'
+        });
         submitBtn.disabled = false;
         submitBtn.innerHTML = '<i class="bi bi-star-fill me-2"></i>Submit Rating';
     }
 }
 
 // Skip rating
-function skipRating() {
-    if (confirm('Are you sure you want to skip rating? You can rate later from your trip history.')) {
+async function skipRating() {
+    const result = await Swal.fire({
+        icon: 'question',
+        title: 'Skip Rating?',
+        text: 'You can rate later from your trip history.',
+        showCancelButton: true,
+        confirmButtonText: 'Yes, skip',
+        cancelButtonText: 'No, I\'ll rate now',
+        confirmButtonColor: '#6b7280',
+        cancelButtonColor: '#10b981'
+    });
+    
+    if (result.isConfirmed) {
         const modalInstance = bootstrap.Modal.getInstance(document.getElementById('ratingModal'));
         if (modalInstance) {
             modalInstance.hide();
@@ -954,3 +1262,486 @@ function skipRating() {
         location.reload();
     }
 }
+
+// ============================================
+// EDIT PROFILE FUNCTIONALITY
+// ============================================
+
+document.addEventListener('DOMContentLoaded', function() {
+    const saveProfileBtn = document.getElementById('saveProfileBtn');
+    const editProfileForm = document.getElementById('editProfileForm');
+    const editProfileModal = document.getElementById('editProfileModal');
+    const editPhoneInput = document.getElementById('editPhone');
+    const sendOtpEditBtn = document.getElementById('sendOtpEditBtn');
+    let phoneVerified = false;
+    let originalPhone = '';
+    
+    if (!saveProfileBtn || !editProfileForm) return;
+    
+    // Store original phone number
+    if (editPhoneInput) {
+        originalPhone = editPhoneInput.getAttribute('data-original-phone') || '';
+    }
+    
+    // Phone number validation - strict 09XXXXXXXXX format
+    if (editPhoneInput) {
+        editPhoneInput.addEventListener('input', function(e) {
+            // Only allow digits
+            let value = e.target.value.replace(/\D/g, '');
+            
+            // Ensure it starts with 09
+            if (value.length > 0 && !value.startsWith('09')) {
+                value = '09' + value.replace(/^0+/, '');
+            }
+            
+            // Limit to 11 digits
+            if (value.length > 11) {
+                value = value.substring(0, 11);
+            }
+            
+            e.target.value = value;
+            
+            // Check if phone changed from original
+            const phoneChanged = value !== originalPhone;
+            
+            // Enable Send OTP button only if valid and changed
+            if (value.length === 11 && value.match(/^09\d{9}$/)) {
+                editPhoneInput.setCustomValidity('');
+                editPhoneInput.classList.remove('is-invalid');
+                editPhoneInput.classList.add('is-valid');
+                
+                if (phoneChanged) {
+                    sendOtpEditBtn.disabled = false;
+                    phoneVerified = false;
+                    document.getElementById('phoneEditVerificationStatus').style.display = 'none';
+                } else {
+                    // Phone same as original, no need to verify
+                    sendOtpEditBtn.disabled = true;
+                    phoneVerified = true;
+                }
+            } else {
+                editPhoneInput.classList.remove('is-valid');
+                if (value.length > 0) {
+                    editPhoneInput.setCustomValidity('Invalid phone number');
+                    editPhoneInput.classList.add('is-invalid');
+                }
+                sendOtpEditBtn.disabled = true;
+                phoneVerified = phoneChanged ? false : true;
+            }
+        });
+        
+        // Trigger validation on load
+        editPhoneInput.dispatchEvent(new Event('input'));
+    }
+    
+    // Send OTP for phone verification
+    if (sendOtpEditBtn) {
+        sendOtpEditBtn.addEventListener('click', async function() {
+            const phone = editPhoneInput.value;
+            
+            if (!phone.match(/^09\d{9}$/)) {
+                showAlert('Please enter a valid 11-digit phone number starting with 09', 'danger');
+                return;
+            }
+            
+            // Disable button and show loading
+            sendOtpEditBtn.disabled = true;
+            sendOtpEditBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Sending...';
+            
+            try {
+                const formData = new FormData();
+                formData.append('phone', phone);
+                
+                const response = await fetch('php/send_otp.php', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                                
+                if (data.success) {
+                    // Store normalized phone for verification
+                    const normalizedPhone = data.phone || phone;
+                    document.getElementById('normalizedEditPhone').value = normalizedPhone;
+                    
+                    // Show OTP modal
+                    document.getElementById('displayEditPhone').textContent = phone;
+                    const otpEditModal = new bootstrap.Modal(document.getElementById('otpEditModal'));
+                    otpEditModal.show();
+                    
+                    // Setup OTP input handlers
+                    setupOTPEditInputs();
+                    
+                    // If debug OTP is present (development), show it prominently
+                    if (data.debug_otp) {
+                                                showAlert('OTP sent! Check console for code (dev mode)', 'success');
+                    } else {
+                        showAlert('OTP sent successfully to your phone', 'success');
+                    }
+                } else {
+                    showAlert(data.message || 'Failed to send OTP', 'danger');
+                }
+            } catch (error) {
+                                showAlert('An error occurred. Please try again.', 'danger');
+            } finally {
+                sendOtpEditBtn.disabled = false;
+                sendOtpEditBtn.innerHTML = '<i class="bi bi-shield-check me-1"></i>Send OTP';
+            }
+        });
+    }
+    
+    // Password validation
+    const newPassword = document.getElementById('newPassword');
+    const confirmPassword = document.getElementById('confirmPassword');
+    
+    // Real-time password match validation
+    if (confirmPassword) {
+        confirmPassword.addEventListener('input', function() {
+            if (newPassword.value && confirmPassword.value) {
+                if (newPassword.value !== confirmPassword.value) {
+                    confirmPassword.setCustomValidity('Passwords do not match');
+                    confirmPassword.classList.add('is-invalid');
+                } else {
+                    confirmPassword.setCustomValidity('');
+                    confirmPassword.classList.remove('is-invalid');
+                    confirmPassword.classList.add('is-valid');
+                }
+            }
+        });
+    }
+    
+    // Setup OTP input fields for edit profile
+    function setupOTPEditInputs() {
+        const inputs = ['otpEdit1', 'otpEdit2', 'otpEdit3', 'otpEdit4', 'otpEdit5', 'otpEdit6'];
+        
+        inputs.forEach((inputId, index) => {
+            const input = document.getElementById(inputId);
+            if (!input) return;
+            
+            input.value = '';
+            input.classList.remove('error');
+            
+            // Auto-focus first input
+            if (index === 0) {
+                setTimeout(() => input.focus(), 100);
+            }
+            
+            input.addEventListener('input', function(e) {
+                // Only allow numbers
+                this.value = this.value.replace(/[^0-9]/g, '');
+                
+                // Move to next input
+                if (this.value.length === 1 && index < inputs.length - 1) {
+                    document.getElementById(inputs[index + 1]).focus();
+                }
+            });
+            
+            input.addEventListener('keydown', function(e) {
+                // Move to previous input on backspace
+                if (e.key === 'Backspace' && this.value === '' && index > 0) {
+                    document.getElementById(inputs[index - 1]).focus();
+                }
+            });
+        });
+    }
+    
+    // Verify OTP for edit profile
+    if (document.getElementById('verifyOtpEditBtn')) {
+        document.getElementById('verifyOtpEditBtn').addEventListener('click', async function() {
+            const otp = ['otpEdit1', 'otpEdit2', 'otpEdit3', 'otpEdit4', 'otpEdit5', 'otpEdit6']
+                .map(id => document.getElementById(id).value)
+                .join('');
+            
+            if (otp.length !== 6) {
+                const errorDiv = document.getElementById('otpEditError');
+                errorDiv.textContent = 'Please enter all 6 digits';
+                errorDiv.style.display = 'block';
+                return;
+            }
+            
+            const verifyBtn = document.getElementById('verifyOtpEditBtn');
+            verifyBtn.disabled = true;
+            verifyBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Verifying...';
+            
+            // Hide previous errors
+            document.getElementById('otpEditError').style.display = 'none';
+            
+            try {
+                // Use normalized phone from send_otp response
+                const normalizedPhone = document.getElementById('normalizedEditPhone').value || editPhoneInput.value;
+                
+                const formData = new FormData();
+                formData.append('phone', normalizedPhone);
+                formData.append('otp', otp);
+                
+                                
+                const response = await fetch('php/verify_otp.php', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                                
+                if (data.success) {
+                    phoneVerified = true;
+                    
+                    // Close OTP modal
+                    const otpModalEl = document.getElementById('otpEditModal');
+                    const otpModalInstance = bootstrap.Modal.getInstance(otpModalEl);
+                    if (otpModalInstance) {
+                        otpModalInstance.hide();
+                    }
+                    
+                    // Show verification status
+                    document.getElementById('phoneEditVerificationStatus').style.display = 'block';
+                    sendOtpEditBtn.disabled = true;
+                    sendOtpEditBtn.innerHTML = '<i class="bi bi-check-circle-fill me-1"></i>Verified';
+                    sendOtpEditBtn.classList.remove('btn-outline-success');
+                    sendOtpEditBtn.classList.add('btn-success');
+                    editPhoneInput.readOnly = true;
+                    
+                    showAlert('Phone number verified successfully!', 'success');
+                } else {
+                    const errorDiv = document.getElementById('otpEditError');
+                    errorDiv.textContent = data.message || 'Invalid OTP code';
+                    errorDiv.style.display = 'block';
+                    
+                    // Add error animation
+                    ['otpEdit1', 'otpEdit2', 'otpEdit3', 'otpEdit4', 'otpEdit5', 'otpEdit6'].forEach(id => {
+                        const input = document.getElementById(id);
+                        input.classList.add('error');
+                        setTimeout(() => input.classList.remove('error'), 500);
+                    });
+                }
+            } catch (error) {
+                                const errorDiv = document.getElementById('otpEditError');
+                errorDiv.textContent = 'An error occurred. Please try again.';
+                errorDiv.style.display = 'block';
+            } finally {
+                verifyBtn.disabled = false;
+                verifyBtn.innerHTML = '<i class="bi bi-check-circle me-2"></i>Verify Code';
+            }
+        });
+    }
+    
+    // Resend OTP for edit profile
+    if (document.getElementById('resendOtpEditBtn')) {
+        document.getElementById('resendOtpEditBtn').addEventListener('click', async function(e) {
+            e.preventDefault();
+            
+            const phone = editPhoneInput.value;
+            const originalText = this.textContent;
+            this.textContent = 'Sending...';
+            
+            try {
+                const formData = new FormData();
+                formData.append('phone', phone);
+                
+                const response = await fetch('php/send_otp.php', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                                
+                if (data.success) {
+                    // Update normalized phone
+                    const normalizedPhone = data.phone || phone;
+                    document.getElementById('normalizedEditPhone').value = normalizedPhone;
+                    
+                    this.textContent = '✓ OTP Sent!';
+                    
+                    // Hide error message
+                    document.getElementById('otpEditError').style.display = 'none';
+                    
+                    // Clear OTP inputs
+                    ['otpEdit1', 'otpEdit2', 'otpEdit3', 'otpEdit4', 'otpEdit5', 'otpEdit6'].forEach(id => {
+                        const input = document.getElementById(id);
+                        input.value = '';
+                        input.classList.remove('error');
+                    });
+                    document.getElementById('otpEdit1').focus();
+                    
+                    if (data.debug_otp) {
+                                            }
+                    
+                    setTimeout(() => {
+                        this.textContent = originalText;
+                    }, 3000);
+                } else {
+                    this.textContent = originalText;
+                    const errorDiv = document.getElementById('otpEditError');
+                    errorDiv.textContent = data.message || 'Failed to resend OTP';
+                    errorDiv.style.display = 'block';
+                }
+            } catch (error) {
+                                this.textContent = originalText;
+                const errorDiv = document.getElementById('otpEditError');
+                errorDiv.textContent = 'An error occurred. Please try again.';
+                errorDiv.style.display = 'block';
+            }
+        });
+    }
+    
+    // Save profile button click handler
+    saveProfileBtn.addEventListener('click', async function() {
+        // Validate form
+        if (!editProfileForm.checkValidity()) {
+            editProfileForm.classList.add('was-validated');
+            return;
+        }
+        
+        // Get form values
+        const name = document.getElementById('editName').value.trim();
+        const phone = document.getElementById('editPhone').value.trim();
+        const currentPassword = document.getElementById('currentPassword').value;
+        const newPasswordValue = document.getElementById('newPassword').value;
+        const confirmPasswordValue = document.getElementById('confirmPassword').value;
+        
+        // Check if phone changed and needs verification
+        if (phone !== originalPhone && !phoneVerified) {
+            showAlert('Please verify your new phone number first', 'danger');
+            return;
+        }
+        
+        // Validate password fields
+        if ((currentPassword || newPasswordValue || confirmPasswordValue)) {
+            if (!currentPassword) {
+                showAlert('Please enter your current password to change password', 'danger');
+                return;
+            }
+            if (!newPasswordValue) {
+                showAlert('Please enter a new password', 'danger');
+                return;
+            }
+            if (newPasswordValue !== confirmPasswordValue) {
+                showAlert('New passwords do not match', 'danger');
+                return;
+            }
+            if (newPasswordValue.length < 6) {
+                showAlert('New password must be at least 6 characters', 'danger');
+                return;
+            }
+        }
+        
+        // Disable button and show loading state
+        saveProfileBtn.disabled = true;
+        saveProfileBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Saving...';
+        
+        try {
+            const response = await fetch('php/update_profile.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    name: name,
+                    phone: phone,
+                    currentPassword: currentPassword,
+                    newPassword: newPasswordValue,
+                    confirmPassword: confirmPasswordValue
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                showAlert(data.message, 'success');
+                
+                // Update the profile display
+                updateProfileDisplay(data.data);
+                
+                // Reset form
+                editProfileForm.classList.remove('was-validated');
+                document.getElementById('currentPassword').value = '';
+                document.getElementById('newPassword').value = '';
+                document.getElementById('confirmPassword').value = '';
+                
+                // Close modal after 1.5 seconds
+                setTimeout(() => {
+                    const modalInstance = bootstrap.Modal.getInstance(editProfileModal);
+                    if (modalInstance) {
+                        modalInstance.hide();
+                    }
+                    location.reload(); // Reload to update all profile instances
+                }, 1500);
+            } else {
+                showAlert(data.message || 'Failed to update profile', 'danger');
+            }
+        } catch (error) {
+                        showAlert('An error occurred while updating your profile. Please try again.', 'danger');
+        } finally {
+            saveProfileBtn.disabled = false;
+            saveProfileBtn.innerHTML = '<i class="bi bi-check-circle me-1"></i>Save Changes';
+        }
+    });
+    
+    // Show alert in modal
+    function showAlert(message, type) {
+        const alertDiv = document.getElementById('editProfileAlert');
+        alertDiv.className = `alert alert-${type}`;
+        alertDiv.textContent = message;
+        alertDiv.classList.remove('d-none');
+        
+        // Auto-hide success messages
+        if (type === 'success') {
+            setTimeout(() => {
+                alertDiv.classList.add('d-none');
+            }, 3000);
+        }
+    }
+    
+    // Update profile display in the page
+    function updateProfileDisplay(data) {
+        // Update name in profile card
+        const profileUsernames = document.querySelectorAll('.profile-username');
+        profileUsernames.forEach(elem => {
+            elem.textContent = data.name;
+        });
+        
+        // Update phone in profile fields
+        const phoneInputs = document.querySelectorAll('.profile-field-input[value*="09"], .profile-field-input[value*="+63"]');
+        phoneInputs.forEach(elem => {
+            if (elem.previousElementSibling && elem.previousElementSibling.textContent.includes('Phone')) {
+                elem.value = data.phone || 'Not set';
+            }
+        });
+    }
+    
+    // Clear validation on modal close
+    if (editProfileModal) {
+        editProfileModal.addEventListener('hidden.bs.modal', function() {
+            editProfileForm.classList.remove('was-validated');
+            document.getElementById('editProfileAlert').classList.add('d-none');
+            
+            // Clear password fields
+            document.getElementById('currentPassword').value = '';
+            document.getElementById('newPassword').value = '';
+            document.getElementById('confirmPassword').value = '';
+            confirmPassword.classList.remove('is-invalid', 'is-valid');
+            
+            // Reset phone verification state
+            phoneVerified = false;
+            editPhoneInput.readOnly = false;
+            editPhoneInput.value = originalPhone;
+            document.getElementById('phoneEditVerificationStatus').style.display = 'none';
+            sendOtpEditBtn.textContent = 'Send OTP';
+            editPhoneInput.dispatchEvent(new Event('input'));
+        });
+    }
+    
+    // Clear OTP modal on close
+    const otpEditModalEl = document.getElementById('otpEditModal');
+    if (otpEditModalEl) {
+        otpEditModalEl.addEventListener('hidden.bs.modal', function() {
+            ['otpEdit1', 'otpEdit2', 'otpEdit3', 'otpEdit4', 'otpEdit5', 'otpEdit6'].forEach(id => {
+                const input = document.getElementById(id);
+                if (input) {
+                    input.value = '';
+                    input.classList.remove('error');
+                }
+            });
+            document.getElementById('otpEditError').style.display = 'none';
+        });
+    }
+});

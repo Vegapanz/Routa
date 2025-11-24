@@ -11,8 +11,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Check if elements exist
     if (!form || !prevBtn || !nextBtn || !submitBtn) {
-        console.error('Required form elements not found');
-        return;
+                return;
     }
     
     // File upload handlers
@@ -35,8 +34,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Show step
     function showStep(step) {
-        console.log('Showing step:', step);
-        
+                
         // Hide all steps
         document.querySelectorAll('.form-step').forEach(el => {
             el.classList.remove('active');
@@ -45,8 +43,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Show current step
         const currentFormStep = document.querySelector(`.form-step[data-step="${step}"]`);
-        console.log('Current form step:', currentFormStep);
-        if (currentFormStep) {
+                if (currentFormStep) {
             currentFormStep.classList.add('active');
             currentFormStep.style.display = 'block';
         }
@@ -254,59 +251,48 @@ document.addEventListener('DOMContentLoaded', function() {
     // Form submission
     form.addEventListener('submit', function(e) {
         e.preventDefault();
-        console.log('🔵 SUBMIT BUTTON CLICKED - Form submitted, current step:', currentStep);
-        
+                
         // Extra validation logging
         const termsCheckbox = document.getElementById('termsCheck');
         const privacyCheckbox = document.getElementById('privacyCheck');
-        console.log('Terms checked:', termsCheckbox ? termsCheckbox.checked : 'NOT FOUND');
-        console.log('Privacy checked:', privacyCheckbox ? privacyCheckbox.checked : 'NOT FOUND');
-        
+                        
         if (!validateStep(currentStep)) {
-            console.log('❌ Validation failed for step', currentStep);
-            // Validation function now shows detailed errors on screen
+                        // Validation function now shows detailed errors on screen
             return;
         }
         
-        console.log('✅ Validation passed, preparing to submit...');
-        
+                
         // Get form data
         const formData = new FormData(this);
         
         // Log form data for debugging
-        console.log('📦 Form data being sent:');
-        for (let [key, value] of formData.entries()) {
+                for (let [key, value] of formData.entries()) {
             if (value instanceof File) {
-                console.log(key + ':', value.name, '(' + value.size + ' bytes)');
+                ');
             } else {
-                console.log(key + ':', value);
-            }
+                            }
         }
         
         // Show loading state
         submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Submitting...';
         submitBtn.disabled = true;
         
-        console.log('🚀 Sending request to server...');
-        
+                
         // Submit to backend
         fetch('php/submit_driver_application.php', {
             method: 'POST',
             body: formData
         })
         .then(response => {
-            console.log('📡 Server responded with status:', response.status);
-            return response.json();
+                        return response.json();
         })
         .then(data => {
-            console.log('📨 Server response data:', data);
-            submitBtn.innerHTML = 'Submit Application';
+                        submitBtn.innerHTML = 'Submit Application';
             submitBtn.disabled = false;
             
             if (data.success) {
                 // Show success message
-                console.log('✅ SUCCESS! Application submitted.');
-                showNotification('success', 'Application Submitted!', data.message);
+                                showNotification('success', 'Application Submitted!', data.message);
                 
                 // Redirect after a delay
                 setTimeout(() => {
@@ -314,16 +300,24 @@ document.addEventListener('DOMContentLoaded', function() {
                 }, 3000);
             } else {
                 // Show error message
-                console.log('❌ Server returned error:', data.message);
-                showNotification('error', 'Submission Failed', data.message);
-                alert('Error: ' + data.message);
+                                showNotification('error', 'Submission Failed', data.message);
+                Swal.fire({
+                    title: 'Error',
+                    text: 'Error: ' + data.message,
+                    icon: 'error',
+                    confirmButtonText: 'OK'
+                });
             }
         })
         .catch(error => {
-            console.error('❌ FETCH ERROR:', error);
-            submitBtn.innerHTML = 'Submit Application';
+                        submitBtn.innerHTML = 'Submit Application';
             submitBtn.disabled = false;
-            alert('Network error: ' + error.message + '\n\nPlease check if XAMPP is running and try again.');
+            Swal.fire({
+                title: 'Network Error',
+                html: 'Network error: ' + error.message + '<br><br>Please check if XAMPP is running and try again.',
+                icon: 'error',
+                confirmButtonText: 'OK'
+            });
             showNotification('error', 'Submission Failed', 'An error occurred while submitting your application. Please try again.');
         });
     });
@@ -598,13 +592,11 @@ document.addEventListener('DOMContentLoaded', function() {
         // Ensure checkbox works properly
         checkbox.addEventListener('click', function(e) {
             // Let the default behavior happen, just log for debugging
-            console.log('Checkbox clicked:', this.id, 'Checked:', this.checked);
-        });
+                    });
         
         // Force re-render on change
         checkbox.addEventListener('change', function() {
-            console.log('Checkbox changed:', this.id, 'Checked:', this.checked);
-            // Force visual update
+                        // Force visual update
             if (this.checked) {
                 this.setAttribute('checked', 'checked');
             } else {
@@ -614,15 +606,332 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     // Initialize first step - make sure it shows
-    console.log('Initializing driver application form');
-    showStep(currentStep);
+        showStep(currentStep);
     
     // Force show first step if still hidden
     setTimeout(() => {
         const firstStep = document.querySelector('.form-step[data-step="1"]');
         if (firstStep && !firstStep.classList.contains('active')) {
-            console.log('Force activating first step');
-            firstStep.classList.add('active');
+                        firstStep.classList.add('active');
         }
     }, 100);
+
+    // ========== PHONE VERIFICATION (OTP) ==========
+    let isPhoneVerified = false;
+    let otpTimer = null;
+    let otpExpiryTime = null;
+    const sendDriverOtpBtn = document.getElementById('sendDriverOtpBtn');
+    const verifyDriverOtpBtn = document.getElementById('verifyDriverOtpBtn');
+    const resendDriverOtpBtn = document.getElementById('resendDriverOtpBtn');
+    const driverPhoneInput = document.getElementById('driverPhone');
+    const otpInputs = document.querySelectorAll('.otp-input');
+    const otpModal = new bootstrap.Modal(document.getElementById('otpModal'));
+
+    // Setup OTP inputs - auto-focus and navigation
+    otpInputs.forEach((input, index) => {
+        input.addEventListener('input', function(e) {
+            const value = e.target.value;
+            
+            // Only allow numbers
+            if (!/^\d*$/.test(value)) {
+                e.target.value = '';
+                return;
+            }
+            
+            // Move to next input if value entered
+            if (value && index < otpInputs.length - 1) {
+                otpInputs[index + 1].focus();
+            }
+        });
+        
+        input.addEventListener('keydown', function(e) {
+            // Move to previous input on backspace
+            if (e.key === 'Backspace' && !e.target.value && index > 0) {
+                otpInputs[index - 1].focus();
+            }
+        });
+        
+        // Handle paste - distribute digits across inputs
+        input.addEventListener('paste', function(e) {
+            e.preventDefault();
+            const pastedData = e.clipboardData.getData('text').trim();
+            
+            if (/^\d{6}$/.test(pastedData)) {
+                pastedData.split('').forEach((char, i) => {
+                    if (otpInputs[i]) {
+                        otpInputs[i].value = char;
+                    }
+                });
+                otpInputs[5].focus();
+            }
+        });
+    });
+
+    // Auto-format phone number to always start with 09
+    if (driverPhoneInput) {
+        driverPhoneInput.addEventListener('input', function() {
+            let value = this.value.replace(/[^\d]/g, ''); // Remove non-digits
+            
+            // If user starts typing and doesn't start with 0, prepend 09
+            if (value.length > 0 && value[0] !== '0') {
+                value = '09' + value;
+            }
+            
+            // If starts with 0 but not 09, convert to 09
+            if (value.length > 1 && value[0] === '0' && value[1] !== '9') {
+                value = '09' + value.substring(1);
+            }
+            
+            // Limit to 11 digits
+            if (value.length > 11) {
+                value = value.substring(0, 11);
+            }
+            
+            this.value = value;
+        });
+    }
+
+    // Send OTP
+    if (sendDriverOtpBtn && driverPhoneInput) {
+        sendDriverOtpBtn.addEventListener('click', function() {
+            const phone = driverPhoneInput.value.trim();
+            
+            // Validate phone format
+            if (!phone || !/^09[0-9]{9}$/.test(phone)) {
+                Swal.fire({
+                    title: 'Invalid Phone Number',
+                    text: 'Please enter a valid phone number (e.g., 09123456789)',
+                    icon: 'error',
+                    confirmButtonText: 'OK'
+                });
+                return;
+            }
+
+            sendDriverOtpBtn.disabled = true;
+            sendDriverOtpBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Sending...';
+
+            const formData = new FormData();
+            formData.append('phone', phone);
+
+            fetch('php/send_otp.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById('otpPhoneDisplay').textContent = phone;
+                    
+                    // Clear all OTP inputs
+                    otpInputs.forEach(input => input.value = '');
+                    
+                    otpModal.show();
+                    
+                    // Focus first input after modal is shown
+                    setTimeout(() => otpInputs[0].focus(), 500);
+                    
+                    startDriverOtpTimer();
+                    
+                    // Show debug OTP if in test mode
+                    if (data.debug_otp) {
+                                                Swal.fire({
+                            title: 'OTP',
+                            text: 'Your OTP is ' + data.debug_otp,
+                            icon: 'info',
+                            confirmButtonText: 'OK'
+                        });
+                    }
+                } else {
+                    Swal.fire({
+                        title: 'Error',
+                        text: data.message || 'Failed to send OTP',
+                        icon: 'error',
+                        confirmButtonText: 'OK'
+                    });
+                }
+            })
+            .catch(error => {
+                                Swal.fire({
+                    title: 'Error',
+                    text: 'An error occurred. Please try again.',
+                    icon: 'error',
+                    confirmButtonText: 'OK'
+                });
+            })
+            .finally(() => {
+                sendDriverOtpBtn.disabled = false;
+                sendDriverOtpBtn.innerHTML = '<i class="bi bi-shield-check me-1"></i>Verify';
+            });
+        });
+    }
+
+    // Verify OTP
+    if (verifyDriverOtpBtn && otpInputs.length > 0) {
+        verifyDriverOtpBtn.addEventListener('click', function() {
+            const otp = Array.from(otpInputs).map(input => input.value).join('');
+            const phone = driverPhoneInput.value.trim();
+
+            if (otp.length !== 6) {
+                Swal.fire({
+                    title: 'Invalid Code',
+                    text: 'Please enter all 6 digits',
+                    icon: 'error',
+                    confirmButtonText: 'OK'
+                });
+                return;
+            }
+
+            verifyDriverOtpBtn.disabled = true;
+            verifyDriverOtpBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Verifying...';
+
+            const verifyFormData = new FormData();
+            verifyFormData.append('phone', phone);
+            verifyFormData.append('otp', otp);
+
+            fetch('php/verify_otp.php', {
+                method: 'POST',
+                body: verifyFormData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    isPhoneVerified = true;
+                    otpModal.hide();
+                    
+                    // Show verification status
+                    document.getElementById('phoneVerificationStatus').style.display = 'block';
+                    sendDriverOtpBtn.style.display = 'none';
+                    driverPhoneInput.readOnly = true;
+                    driverPhoneInput.style.paddingRight = '12px';
+                    
+                    if (otpTimer) clearInterval(otpTimer);
+                    
+                    Swal.fire({
+                        title: 'Success',
+                        text: 'Phone number verified successfully!',
+                        icon: 'success',
+                        confirmButtonText: 'OK',
+                        timer: 2000
+                    });
+                } else {
+                    Swal.fire({
+                        title: 'Verification Failed',
+                        text: data.message || 'Invalid or expired code',
+                        icon: 'error',
+                        confirmButtonText: 'OK'
+                    });
+                }
+            })
+            .catch(error => {
+                                Swal.fire({
+                    title: 'Error',
+                    text: 'An error occurred. Please try again.',
+                    icon: 'error',
+                    confirmButtonText: 'OK'
+                });
+            })
+            .finally(() => {
+                verifyDriverOtpBtn.disabled = false;
+                verifyDriverOtpBtn.innerHTML = '<i class="bi bi-check-circle me-2"></i>Verify Code';
+                otpInputs.forEach(input => input.value = '');
+            });
+        });
+    }
+
+    // Resend OTP
+    if (resendDriverOtpBtn) {
+        resendDriverOtpBtn.addEventListener('click', function() {
+            const phone = driverPhoneInput.value.trim();
+            
+            resendDriverOtpBtn.disabled = true;
+            resendDriverOtpBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Sending...';
+
+            const resendFormData = new FormData();
+            resendFormData.append('phone', phone);
+
+            fetch('php/send_otp.php', {
+                method: 'POST',
+                body: resendFormData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Clear all OTP inputs
+                    otpInputs.forEach(input => input.value = '');
+                    otpInputs[0].focus();
+                    
+                    startDriverOtpTimer();
+                    
+                    if (data.debug_otp) {
+                                                Swal.fire({
+                            title: 'Testing Mode',
+                            text: 'Your new OTP is ' + data.debug_otp,
+                            icon: 'info',
+                            confirmButtonText: 'OK'
+                        });
+                    }
+                } else {
+                    Swal.fire({
+                        title: 'Error',
+                        text: data.message || 'Failed to resend OTP',
+                        icon: 'error',
+                        confirmButtonText: 'OK'
+                    });
+                }
+            })
+            .catch(error => {
+                                Swal.fire({
+                    title: 'Error',
+                    text: 'An error occurred. Please try again.',
+                    icon: 'error',
+                    confirmButtonText: 'OK'
+                });
+            })
+            .finally(() => {
+                resendDriverOtpBtn.innerHTML = '<i class="bi bi-arrow-clockwise me-1"></i>Resend Code';
+            });
+        });
+    }
+
+    // OTP Timer
+    function startDriverOtpTimer() {
+        otpExpiryTime = Date.now() + (5 * 60 * 1000); // 5 minutes
+        
+        if (otpTimer) {
+            clearInterval(otpTimer);
+        }
+
+        // Enable resend button immediately
+        resendDriverOtpBtn.disabled = false;
+
+        otpTimer = setInterval(() => {
+            const now = Date.now();
+            const timeLeft = otpExpiryTime - now;
+
+            if (timeLeft <= 0) {
+                clearInterval(otpTimer);
+                document.getElementById('otpTimer').textContent = '0:00';
+                return;
+            }
+
+            const minutes = Math.floor(timeLeft / 60000);
+            const seconds = Math.floor((timeLeft % 60000) / 1000);
+            document.getElementById('otpTimer').textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        }, 1000);
+    }
+
+    // Update form validation to check phone verification
+    const originalValidateStep = validateStep;
+    validateStep = function(step) {
+        if (step === 1 && !isPhoneVerified) {
+            Swal.fire({
+                title: 'Phone Not Verified',
+                text: 'Please verify your phone number before proceeding.',
+                icon: 'warning',
+                confirmButtonText: 'OK'
+            });
+            return false;
+        }
+        return originalValidateStep(step);
+    };
 });

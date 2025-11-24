@@ -120,36 +120,63 @@ document.addEventListener('DOMContentLoaded', function() {
     // Form submission handling
     const contactForm = document.querySelector('#contactForm');
     if (contactForm) {
-        contactForm.addEventListener('submit', function(e) {
+        contactForm.addEventListener('submit', async function(e) {
             e.preventDefault();
             
-            // Get form data
-            const formData = new FormData(contactForm);
-            const formObject = {};
-            formData.forEach((value, key) => {
-                formObject[key] = value;
-            });
+            // Get submit button
+            const submitBtn = contactForm.querySelector('button[type="submit"]');
+            const originalBtnText = submitBtn.innerHTML;
             
-            // Here you would typically send the form data to a server
-            console.log('Form submitted:', formObject);
+            // Disable button and show loading
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="bi bi-hourglass-split me-2"></i> Sending...';
             
-            // Show success message
-            const successAlert = `
-                <div class="alert alert-success alert-dismissible fade show" role="alert">
-                    Thank you for your message! We'll get back to you soon.
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-            `;
-            
-            const formMessages = document.querySelector('#form-messages');
-            if (formMessages) {
-                formMessages.innerHTML = successAlert;
-                contactForm.reset();
+            try {
+                // Get form data
+                const formData = new FormData(contactForm);
                 
-                // Scroll to success message
-                setTimeout(() => {
-                    formMessages.scrollIntoView({ behavior: 'smooth' });
-                }, 100);
+                // Send to server
+                const response = await fetch('php/send_contact_email.php', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    // Show success message with SweetAlert2
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Message Sent!',
+                        text: result.message,
+                        confirmButtonColor: '#10b981',
+                        confirmButtonText: 'OK'
+                    });
+                    
+                    // Reset form
+                    contactForm.reset();
+                } else {
+                    // Show error message
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Oops...',
+                        text: result.message || 'Something went wrong. Please try again.',
+                        confirmButtonColor: '#ef4444',
+                        confirmButtonText: 'OK'
+                    });
+                }
+            } catch (error) {
+                                Swal.fire({
+                    icon: 'error',
+                    title: 'Connection Error',
+                    text: 'Unable to send message. Please check your connection and try again.',
+                    confirmButtonColor: '#ef4444',
+                    confirmButtonText: 'OK'
+                });
+            } finally {
+                // Re-enable button
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalBtnText;
             }
         });
     }
@@ -183,8 +210,7 @@ function handleNewsletterSubscribe(e) {
     }
     
     // Here you would typically send the email to your server
-    console.log('Subscribing email:', email);
-    
+        
     // Show success message
     showAlert('Thank you for subscribing to our newsletter!', 'success');
     emailInput.value = '';

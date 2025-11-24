@@ -4,14 +4,18 @@
  */
 
 const DriverDashboard = {
+    driverMap: null,
+    currentMarkers: [],
+    currentRoute: null,
+    
     /**
      * Initialize the driver dashboard
      */
     init() {
         this.bindEvents();
         this.setupAutoRefresh();
-        console.log('Driver Dashboard initialized');
-    },
+        this.initializeMap();
+            },
 
     /**
      * Bind event listeners
@@ -22,6 +26,23 @@ const DriverDashboard = {
         if (statusToggle) {
             statusToggle.addEventListener('click', () => this.toggleStatus());
         }
+
+        // View on Map buttons
+        document.querySelectorAll('.view-map-btn').forEach(button => {
+            button.addEventListener('click', (e) => {
+                const btn = e.currentTarget;
+                const rideId = btn.dataset.rideId;
+                const pickupLocation = btn.dataset.pickupLocation;
+                const dropoffLocation = btn.dataset.dropoffLocation;
+                const pickupLat = btn.dataset.pickupLat;
+                const pickupLng = btn.dataset.pickupLng;
+                const dropoffLat = btn.dataset.dropoffLat;
+                const dropoffLng = btn.dataset.dropoffLng;
+                
+                                
+                this.showRideOnMap(rideId, pickupLocation, dropoffLocation, pickupLat, pickupLng, dropoffLat, dropoffLng);
+            });
+        });
 
         // Arrived buttons
         document.querySelectorAll('[data-action="arrived"]').forEach(button => {
@@ -35,7 +56,7 @@ const DriverDashboard = {
         document.querySelectorAll('[data-action="start-ride"]').forEach(button => {
             button.addEventListener('click', (e) => {
                 const bookingId = e.currentTarget.dataset.bookingId;
-                this.startTrip(bookingId);
+                this.startTrip(bookingId);  
             });
         });
 
@@ -105,8 +126,7 @@ const DriverDashboard = {
                 return false;
             }
         } catch (error) {
-            console.error('Error updating status:', error);
-            this.showNotification('Network error. Please try again.', 'error');
+                        this.showNotification('Network error. Please try again.', 'error');
             return false;
         }
     },
@@ -115,8 +135,7 @@ const DriverDashboard = {
      * Accept a ride request
      */
     async acceptRide(bookingId) {
-        console.log('acceptRide called with bookingId:', bookingId);
-        
+                
         const confirmed = await this.showConfirmModal(
             'Accept Ride',
             'Do you want to accept this ride request?',
@@ -125,13 +144,11 @@ const DriverDashboard = {
         );
         
         if (!confirmed) {
-            console.log('User cancelled confirmation');
-            return;
+                        return;
         }
 
         try {
-            console.log('Sending accept request...');
-            const response = await fetch('php/driver_api.php?action=accept_ride', {
+                        const response = await fetch('php/driver_api.php?action=accept_ride', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -139,10 +156,8 @@ const DriverDashboard = {
                 body: JSON.stringify({ ride_id: bookingId })
             });
 
-            console.log('Response status:', response.status);
-            const data = await response.json();
-            console.log('Response data:', data);
-            
+                        const data = await response.json();
+                        
             if (data.success) {
                 this.showNotification('Ride accepted! Navigate to pickup location.', 'success');
                 setTimeout(() => window.location.reload(), 1500);
@@ -150,8 +165,7 @@ const DriverDashboard = {
                 this.showNotification('Failed to accept ride: ' + data.message, 'error');
             }
         } catch (error) {
-            console.error('Error accepting ride:', error);
-            this.showNotification('Network error. Please try again.', 'error');
+                        this.showNotification('Network error. Please try again.', 'error');
         }
     },
 
@@ -159,8 +173,7 @@ const DriverDashboard = {
      * Reject a ride request
      */
     async rejectRide(bookingId) {
-        console.log('rejectRide called with bookingId:', bookingId);
-        
+                
         const confirmed = await this.showConfirmModal(
             'Reject Ride',
             'Are you sure you want to reject this ride request?',
@@ -170,15 +183,13 @@ const DriverDashboard = {
         );
         
         if (!confirmed) {
-            console.log('User cancelled rejection');
-            return;
+                        return;
         }
         
         const reason = 'Driver declined';
 
         try {
-            console.log('Sending reject request...');
-            const response = await fetch('php/driver_api.php?action=reject_ride', {
+                        const response = await fetch('php/driver_api.php?action=reject_ride', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -189,10 +200,8 @@ const DriverDashboard = {
                 })
             });
 
-            console.log('Response status:', response.status);
-            const data = await response.json();
-            console.log('Response data:', data);
-            
+                        const data = await response.json();
+                        
             if (data.success) {
                 this.showNotification('Ride rejected.', 'info');
                 setTimeout(() => window.location.reload(), 1500);
@@ -200,8 +209,7 @@ const DriverDashboard = {
                 this.showNotification('Failed to reject ride: ' + data.message, 'error');
             }
         } catch (error) {
-            console.error('Error rejecting ride:', error);
-            this.showNotification('Network error. Please try again.', 'error');
+                        this.showNotification('Network error. Please try again.', 'error');
         }
     },
 
@@ -236,8 +244,7 @@ const DriverDashboard = {
                 this.showNotification('Failed to update status: ' + data.message, 'error');
             }
         } catch (error) {
-            console.error('Error marking as arrived:', error);
-            this.showNotification('Network error. Please try again.', 'error');
+                        this.showNotification('Network error. Please try again.', 'error');
         }
     },
 
@@ -272,8 +279,7 @@ const DriverDashboard = {
                 this.showNotification('Failed to start trip: ' + data.message, 'error');
             }
         } catch (error) {
-            console.error('Error starting trip:', error);
-            this.showNotification('Network error. Please try again.', 'error');
+                        this.showNotification('Network error. Please try again.', 'error');
         }
     },
 
@@ -309,8 +315,7 @@ const DriverDashboard = {
                 this.showNotification('Failed to complete trip: ' + data.message, 'error');
             }
         } catch (error) {
-            console.error('Error completing trip:', error);
-            this.showNotification('Network error. Please try again.', 'error');
+                        this.showNotification('Network error. Please try again.', 'error');
         }
     },
 
@@ -420,8 +425,7 @@ const DriverDashboard = {
                 this.playNotificationSound();
             }
         } catch (error) {
-            console.error('Error checking for new rides:', error);
-        }
+                    }
     },
 
     /**
@@ -431,7 +435,7 @@ const DriverDashboard = {
         // Create audio element for notification sound
         const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBTGH0fPTgjMGHm7A7+OZQA0PVa7n77BdGAg+ltryxnMpBSh+zPLaizsIGGS57OihUBELTKXh8bllHAU2jdXzz3swBSJ0xO/glEILElyx6OyrWBUIOpvY88p5LQUZD');
         audio.volume = 0.3;
-        audio.play().catch(err => console.log('Audio play failed:', err));
+        audio.play().catch(err => );
     },
 
     /**
@@ -470,6 +474,263 @@ const DriverDashboard = {
         }
 
         return 'just now';
+    },
+
+    /**
+     * Initialize map
+     */
+    initializeMap() {
+        const mapElement = document.getElementById('driverMap');
+        if (!mapElement) {
+                        return;
+        }
+
+        // Default center: Manila, Philippines
+        const manilaCoords = [14.5995, 120.9842];
+        
+        // Create map
+        this.driverMap = L.map('driverMap').setView(manilaCoords, 12);
+        
+        // Add OpenStreetMap tiles
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors',
+            maxZoom: 19
+        }).addTo(this.driverMap);
+        
+        // Fix map display issues
+        setTimeout(() => {
+            this.driverMap.invalidateSize();
+        }, 100);
+        
+        // Load all active rides onto map
+        this.loadAllRidesOnMap();
+        
+            },
+
+    /**
+     * Load all active rides onto the map
+     */
+    loadAllRidesOnMap() {
+        if (!this.driverMap) return;
+        
+        // Get all view map buttons
+        const viewMapButtons = document.querySelectorAll('.view-map-btn');
+        const bounds = [];
+        
+                
+        viewMapButtons.forEach(btn => {
+            try {
+                const pickupLat = btn.dataset.pickupLat;
+                const pickupLng = btn.dataset.pickupLng;
+                const dropoffLat = btn.dataset.dropoffLat;
+                const dropoffLng = btn.dataset.dropoffLng;
+                const pickupLocation = btn.dataset.pickupLocation;
+                const dropoffLocation = btn.dataset.dropoffLocation;
+                
+                // Validate coordinates
+                const validPickupLat = pickupLat && pickupLat !== '' && !isNaN(parseFloat(pickupLat)) ? parseFloat(pickupLat) : null;
+                const validPickupLng = pickupLng && pickupLng !== '' && !isNaN(parseFloat(pickupLng)) ? parseFloat(pickupLng) : null;
+                const validDropoffLat = dropoffLat && dropoffLat !== '' && !isNaN(parseFloat(dropoffLat)) ? parseFloat(dropoffLat) : null;
+                const validDropoffLng = dropoffLng && dropoffLng !== '' && !isNaN(parseFloat(dropoffLng)) ? parseFloat(dropoffLng) : null;
+                
+                if (validPickupLat && validPickupLng) {
+                    bounds.push([validPickupLat, validPickupLng]);
+                    
+                    // Add pickup marker
+                    const pickupMarker = L.marker([validPickupLat, validPickupLng], {
+                        icon: L.divIcon({
+                            html: '<div style="background-color: #10b981; color: white; border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; font-size: 16px; border: 3px solid white; box-shadow: 0 2px 6px rgba(0,0,0,0.3);">📍</div>',
+                            iconSize: [28, 28],
+                            iconAnchor: [14, 14],
+                            className: 'custom-marker'
+                        })
+                    }).addTo(this.driverMap);
+                    
+                    pickupMarker.bindPopup(`<b>Pickup</b><br>${pickupLocation || 'Pickup Location'}`);
+                    this.currentMarkers.push(pickupMarker);
+                }
+                
+                if (validDropoffLat && validDropoffLng) {
+                    bounds.push([validDropoffLat, validDropoffLng]);
+                    
+                    // Add dropoff marker
+                    const dropoffMarker = L.marker([validDropoffLat, validDropoffLng], {
+                        icon: L.divIcon({
+                            html: '<div style="background-color: #ef4444; color: white; border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; font-size: 16px; border: 3px solid white; box-shadow: 0 2px 6px rgba(0,0,0,0.3);">🎯</div>',
+                            iconSize: [28, 28],
+                            iconAnchor: [14, 14],
+                            className: 'custom-marker'
+                        })
+                    }).addTo(this.driverMap);
+                    
+                    dropoffMarker.bindPopup(`<b>Drop-off</b><br>${dropoffLocation || 'Drop-off Location'}`);
+                    this.currentMarkers.push(dropoffMarker);
+                }
+            } catch (error) {
+                            }
+        });
+        
+        // Fit map to show all markers
+        if (bounds.length > 0) {
+            this.driverMap.fitBounds(bounds, { padding: [50, 50] });
+                    } else {
+                    }
+    },
+
+    /**
+     * Show specific ride on map
+     */
+    async showRideOnMap(rideId, pickupLocation, dropoffLocation, pickupLat, pickupLng, dropoffLat, dropoffLng) {
+                
+        // Validate and convert coordinates
+        const validPickupLat = pickupLat && pickupLat !== '' && pickupLat !== 'null' && !isNaN(parseFloat(pickupLat)) ? parseFloat(pickupLat) : null;
+        const validPickupLng = pickupLng && pickupLng !== '' && pickupLng !== 'null' && !isNaN(parseFloat(pickupLng)) ? parseFloat(pickupLng) : null;
+        const validDropoffLat = dropoffLat && dropoffLat !== '' && dropoffLat !== 'null' && !isNaN(parseFloat(dropoffLat)) ? parseFloat(dropoffLat) : null;
+        const validDropoffLng = dropoffLng && dropoffLng !== '' && dropoffLng !== 'null' && !isNaN(parseFloat(dropoffLng)) ? parseFloat(dropoffLng) : null;
+        
+                
+        if (!validPickupLat || !validPickupLng || !validDropoffLat || !validDropoffLng) {
+            this.showNotification('Location coordinates are missing. Please ensure locations were selected from the map when booking.', 'warning');
+            return;
+        }
+        
+        // Initialize map if not already done
+        if (!this.driverMap) {
+                        this.initializeMap();
+            // Wait for map to be ready
+            await new Promise(resolve => setTimeout(resolve, 300));
+        }
+        
+        if (!this.driverMap) {
+                        this.showNotification('Map failed to load', 'error');
+            return;
+        }
+        
+        // Clear existing markers and route
+        this.clearMapMarkers();
+        
+        // Add pickup marker
+        const pickupMarker = L.marker([validPickupLat, validPickupLng], {
+            icon: L.divIcon({
+                html: '<div style="background-color: #10b981; color: white; border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; font-size: 20px; border: 3px solid white; box-shadow: 0 3px 10px rgba(0,0,0,0.4);">📍</div>',
+                iconSize: [36, 36],
+                iconAnchor: [18, 18],
+                className: 'custom-marker'
+            })
+        }).addTo(this.driverMap);
+        
+        pickupMarker.bindPopup(`<b>Pickup</b><br>${pickupLocation || 'Pickup Location'}`).openPopup();
+        this.currentMarkers.push(pickupMarker);
+        
+        // Add dropoff marker
+        const dropoffMarker = L.marker([validDropoffLat, validDropoffLng], {
+            icon: L.divIcon({
+                html: '<div style="background-color: #ef4444; color: white; border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; font-size: 20px; border: 3px solid white; box-shadow: 0 3px 10px rgba(0,0,0,0.4);">🎯</div>',
+                iconSize: [36, 36],
+                iconAnchor: [18, 18],
+                className: 'custom-marker'
+            })
+        }).addTo(this.driverMap);
+        
+        dropoffMarker.bindPopup(`<b>Drop-off</b><br>${dropoffLocation || 'Drop-off Location'}`);
+        this.currentMarkers.push(dropoffMarker);
+        
+        // Draw route
+        await this.drawRoute(validPickupLat, validPickupLng, validDropoffLat, validDropoffLng);
+        
+        // Fit map to show both markers
+        const group = L.featureGroup(this.currentMarkers);
+        this.driverMap.fitBounds(group.getBounds(), { padding: [50, 50] });
+        
+        // Scroll to map smoothly
+        const mapElement = document.getElementById('driverMap');
+        if (mapElement) {
+            mapElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+        
+        this.showNotification('Route displayed on map', 'success');
+    },
+
+    /**
+     * Draw route between two points using OSRM
+     */
+    async drawRoute(pickupLat, pickupLng, dropoffLat, dropoffLng) {
+        try {
+            // Use OSRM for routing
+            const osrmUrl = `https://router.project-osrm.org/route/v1/driving/${pickupLng},${pickupLat};${dropoffLng},${dropoffLat}?overview=full&geometries=geojson&steps=true`;
+            
+            const response = await fetch(osrmUrl);
+            const data = await response.json();
+            
+            if (data.code === 'Ok' && data.routes && data.routes.length > 0) {
+                const route = data.routes[0];
+                const coordinates = route.geometry.coordinates;
+                
+                // Convert coordinates from [lng, lat] to [lat, lng]
+                const latlngs = coordinates.map(coord => [coord[1], coord[0]]);
+                
+                // Draw the route
+                this.currentRoute = L.polyline(latlngs, {
+                    color: '#10b981',
+                    weight: 5,
+                    opacity: 0.8,
+                    lineJoin: 'round'
+                }).addTo(this.driverMap);
+                
+                // Calculate route info
+                const distanceKm = (route.distance / 1000).toFixed(2);
+                const durationMin = Math.round(route.duration / 60);
+                
+                // Add route info popup
+                const midPoint = Math.floor(latlngs.length / 2);
+                const popup = L.popup({
+                    closeButton: false,
+                    autoClose: false,
+                    closeOnClick: false,
+                    className: 'route-info-popup'
+                })
+                .setLatLng(latlngs[midPoint])
+                .setContent(`
+                    <div style="text-align: center; font-size: 12px; font-weight: 600;">
+                        <div style="color: #10b981; margin-bottom: 4px;">🚗 Fastest Route</div>
+                        <div>📏 ${distanceKm} km</div>
+                        <div>⏱️ ~${durationMin} mins</div>
+                    </div>
+                `)
+                .addTo(this.driverMap);
+                
+                            }
+        } catch (error) {
+                        // Draw straight line as fallback
+            this.currentRoute = L.polyline([
+                [pickupLat, pickupLng],
+                [dropoffLat, dropoffLng]
+            ], {
+                color: '#10b981',
+                weight: 4,
+                opacity: 0.7,
+                dashArray: '10, 10'
+            }).addTo(this.driverMap);
+        }
+    },
+
+    /**
+     * Clear map markers and route
+     */
+    clearMapMarkers() {
+        if (!this.driverMap) return;
+        
+        // Remove markers
+        this.currentMarkers.forEach(marker => {
+            this.driverMap.removeLayer(marker);
+        });
+        this.currentMarkers = [];
+        
+        // Remove route
+        if (this.currentRoute) {
+            this.driverMap.removeLayer(this.currentRoute);
+            this.currentRoute = null;
+        }
     },
 
     /**
@@ -688,3 +949,5 @@ window.DriverDashboard = DriverDashboard;
 // Global functions for onclick handlers
 window.acceptRide = (bookingId) => DriverDashboard.acceptRide(bookingId);
 window.rejectRide = (bookingId) => DriverDashboard.rejectRide(bookingId);
+window.showRideOnMap = (rideId, pickupLocation, dropoffLocation, pickupLat, pickupLng, dropoffLat, dropoffLng) => 
+    DriverDashboard.showRideOnMap(rideId, pickupLocation, dropoffLocation, pickupLat, pickupLng, dropoffLat, dropoffLng);
