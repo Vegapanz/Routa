@@ -26,7 +26,7 @@ A modern, responsive web-based tricycle booking system built with PHP, MySQL, an
 ### 1. Clone Repository
 
 ```bash
-git clone https://github.com/yourusername/routa.git
+git clone https://github.com/vegapanz/routa
 cd routa
 ```
 
@@ -39,7 +39,7 @@ composer install
 ### 3. Database Setup
 
 1. Create a MySQL database
-2. Import `database/routa_database.sql`
+2. Import `database/routa_db.sql`
 3. Configure database connection in `includes/config/database.php`
 
 ### 4. Configuration
@@ -160,4 +160,5 @@ Contributions welcome! Please open an issue or submit a pull request.
 For issues and questions:
 - GitHub Issues: https://github.com/yourusername/routa/issues
 - Email: monroyojohnpatrick@gmail.com
+
 
