@@ -104,13 +104,6 @@ routa/
 3. View all bookings and analytics
 4. Approve/reject driver applications
 
-## 🌐 Deployment
-
-See deployment guides:
-- `QUICK_START_DEPLOY.md` - Quick 10-minute guide
-- `DEPLOYMENT_FINAL_CHECKLIST.md` - Complete checklist
-- `INFINITYFREE_DEPLOYMENT_GUIDE.md` - Free hosting guide
-
 ## 🔒 Security Features
 
 - Password hashing with `password_hash()`
@@ -156,7 +149,7 @@ MIT License - See LICENSE file
 
 ## 👨‍💻 Author
 
-Your Name - [@yourusername](https://github.com/yourusername)
+Your Name - [@Vegapanz](https://github.com/Vegapanz)
 
 ## 🤝 Contributing
 
@@ -166,4 +159,5 @@ Contributions welcome! Please open an issue or submit a pull request.
 
 For issues and questions:
 - GitHub Issues: https://github.com/yourusername/routa/issues
-- Email: your.email@example.com
+- Email: monroyojohnpatrick@gmail.com
+
