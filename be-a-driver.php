@@ -21,6 +21,9 @@
     <link rel="stylesheet" href="assets/css/style.css">
     <link rel="stylesheet" href="assets/css/pages/be-a-driver.css">
     <link rel="shortcut icon" href="assets/images/Logo.png" type="image/x-icon">
+    
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
     <!-- Navigation -->

@@ -20,6 +20,9 @@
     <!-- Custom CSS -->
     <link rel="stylesheet" href="assets/css/style.css">
     <link rel="shortcut icon" href="assets/images/Logo.png" type="image/x-icon">
+    
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
     <!-- Navigation -->
@@ -329,23 +332,26 @@
                             <h3 class="h4 fw-bold text-center mb-2">Send us a Message</h3>
                             <p class="text-muted text-center mb-4">Fill out the form below and our team will get back to you within 24 hours</p>
                             
+                            <!-- Message container -->
+                            <div id="contactFormMessage"></div>
+                            
                             <form id="contactForm">
                                 <div class="row g-3">
                                     <div class="col-md-6">
                                         <label class="form-label fw-semibold">Full Name <span class="text-danger">*</span></label>
-                                        <input type="text" class="form-control" placeholder="Juan Dela Cruz" required style="padding: 12px; border-radius: 8px;">
+                                        <input type="text" name="name" class="form-control" placeholder="Juan Dela Cruz" required style="padding: 12px; border-radius: 8px;">
                                     </div>
                                     <div class="col-md-6">
                                         <label class="form-label fw-semibold">Email Address <span class="text-danger">*</span></label>
-                                        <input type="email" class="form-control" placeholder="juan@email.com" required style="padding: 12px; border-radius: 8px;">
+                                        <input type="email" name="email" class="form-control" placeholder="juan@email.com" required style="padding: 12px; border-radius: 8px;">
                                     </div>
                                     <div class="col-12">
                                         <label class="form-label fw-semibold">Subject <span class="text-danger">*</span></label>
-                                        <input type="text" class="form-control" placeholder="How can we help?" required style="padding: 12px; border-radius: 8px;">
+                                        <input type="text" name="subject" class="form-control" placeholder="How can we help?" required style="padding: 12px; border-radius: 8px;">
                                     </div>
                                     <div class="col-12">
                                         <label class="form-label fw-semibold">Message <span class="text-danger">*</span></label>
-                                        <textarea class="form-control" rows="5" placeholder="Tell us more about your inquiry..." required style="padding: 12px; border-radius: 8px;"></textarea>
+                                        <textarea name="message" class="form-control" rows="5" placeholder="Tell us more about your inquiry..." required style="padding: 12px; border-radius: 8px;"></textarea>
                                     </div>
                                     <div class="col-12">
                                         <button type="submit" class="btn btn-success w-100" style="padding: 14px; font-weight: 600; border-radius: 8px; font-size: 16px;">
@@ -448,9 +454,9 @@
                     <h4 class="text-white mb-4">Support</h4>
                     <ul class="footer-links">
                         <li><a href="#">Help Center</a></li>
-                        <li><a href="#">Safety</a></li>
-                        <li><a href="#">Terms of Agreements</a></li>
-                        <li><a href="#">Privacy Policy</a></li>
+                        <li><a href="safety.php">Safety</a></li>
+                        <li><a href="terms.php">Terms of Agreements</a></li>
+                        <li><a href="privacy-policy.php">Privacy Policy</a></li>
                     </ul>
                 </div>
                 <div class="col-lg-3 mb-4">
@@ -530,5 +536,6 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="assets/js/main.js"></script>
+    <script src="assets/js/pages/home.js"></script>
 </body>
 </html>

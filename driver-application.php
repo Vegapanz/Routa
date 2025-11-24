@@ -22,6 +22,9 @@
     <link rel="stylesheet" href="assets/css/pages/driver-application.css">
     <link rel="shortcut icon" href="assets/images/Logo.png" type="image/x-icon">
     
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
     <!-- Custom Checkbox Styling -->
     <style>
         /* COMPLETE RESET - Remove all browser defaults */
@@ -209,10 +212,20 @@
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Phone Number <span class="text-danger">*</span></label>
-                                <input type="tel" class="form-control" name="phone" placeholder="09123456789"
-                                    pattern="09[0-9]{9}"
-                                    title="Format: 09XXXXXXXXX (11 digits)"
-                                    minlength="11" maxlength="11" required>
+                                <div style="position: relative;">
+                                    <input type="tel" class="form-control" id="driverPhone" name="phone" placeholder="09123456789"
+                                        pattern="09[0-9]{9}"
+                                        title="Format: 09XXXXXXXXX (11 digits)"
+                                        minlength="11" maxlength="11" required style="padding-right: 100px;">
+                                    <button type="button" class="btn btn-sm btn-outline-success" id="sendDriverOtpBtn" 
+                                        style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); font-size: 12px; padding: 4px 12px; border-radius: 6px;">
+                                        <i class="bi bi-shield-check me-1"></i>Verify
+                                    </button>
+                                </div>
+                                <div id="phoneVerificationStatus" style="font-size: 12px; margin-top: 6px; display: none;">
+                                    <i class="bi bi-check-circle-fill text-success"></i>
+                                    <span class="text-success">Phone verified</span>
+                                </div>
                                 <div class="form-text">Format: 09123456789</div>
                             </div>
                             <div class="col-md-6">
@@ -346,9 +359,7 @@
                                 <select class="form-select" name="vehicleType" required>
                                     <option value="">Select vehicle type</option>
                                     <option value="tricycle">Standard Tricycle</option>
-                                    <option value="motorcycle">Motorcycle</option>
-                                    <option value="car">Car</option>
-                                    <option value="van">Van</option>
+                                    <option value="e-trike">E-Trike</option>
                                 </select>
                             </div>
                             <div class="col-md-6">
@@ -514,11 +525,118 @@
     </section>
 
     <!-- Footer -->
-    <footer class="bg-dark text-white py-4 mt-5">
-        <div class="container text-center">
-            <p class="mb-0">© 2025 Routa. All rights reserved.</p>
+    <footer>
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-4 mb-4">
+                    <h3 class="text-white mb-4">Routa</h3>
+                    <p class="text-white-50">Your trusted partner for safe, affordable, and convenient tricycle rides.</p>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-facebook"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+                <div class="col-lg-2 mb-4">
+                    <h4 class="text-white mb-4">Quick Links</h4>
+                    <ul class="footer-links">
+                        <li><a href="index.php#home">Home</a></li>
+                        <li><a href="index.php#about">About Us</a></li>
+                        <li><a href="index.php#services">Services</a></li>
+                        <li><a href="index.php#download">Download App</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-3 mb-4">
+                    <h4 class="text-white mb-4">Support</h4>
+                    <ul class="footer-links">
+                        <li><a href="#">Help Center</a></li>
+                        <li><a href="#">Safety</a></li>
+                        <li><a href="#">Terms of Agreements</a></li>
+                        <li><a href="#">Privacy Policy</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-3 mb-4">
+                    <h4 class="text-white mb-4">Contact Us</h4>
+                    <ul class="footer-links">
+                        <li><a href="mailto:support@routa.ph">support@routa.ph</a></li>
+                        <li><a href="tel:+63123456789">+63 123 456 7890</a></li>
+                        <li>Cavite, Philippines</li>
+                    </ul>
+                </div>
+            </div>
+            <hr class="border-secondary">
+            <div class="text-center text-white-50 py-3">
+                © 2025 Routa. All rights reserved. Made with ❤️ in the Philippines.
+            </div>
         </div>
     </footer>
+
+    <!-- OTP Verification Modal -->
+    <div class="modal fade" id="otpModal" tabindex="-1" aria-labelledby="otpModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="border-radius: 16px; border: none; box-shadow: 0 10px 40px rgba(0,0,0,0.1);">
+                <div class="modal-header" style="border-bottom: 1px solid #e5e7eb; padding: 24px;">
+                    <h5 class="modal-title" id="otpModalLabel" style="font-weight: 600; color: #1f2937;">
+                        <i class="bi bi-phone text-success me-2"></i>Verify Your Phone
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" style="padding: 24px;">
+                    <p class="text-center mb-4" style="color: #6b7280;">
+                        We sent a 6-digit code to <strong id="otpPhoneDisplay"></strong>
+                    </p>
+
+                    <!-- OTP Input -->
+                    <div class="mb-4">
+                        <label class="form-label text-center d-block" style="font-weight: 500; color: #374151;">Enter Verification Code</label>
+                        <style>
+                            .otp-input {
+                                border: 2px solid #6c757d !important;
+                                background-color: #ffffff !important;
+                            }
+                            .otp-input:focus {
+                                outline: none !important;
+                                border-color: #495057 !important;
+                                box-shadow: none !important;
+                                background-color: #ffffff !important;
+                            }
+                        </style>
+                        <div class="d-flex justify-content-center gap-2 mb-3" id="otpInputGroup">
+                            <input type="text" class="otp-input text-center" maxlength="1" data-index="0" 
+                                style="width: 50px; height: 50px; font-size: 24px; border: 2px solid #6c757d !important; border-radius: 8px; font-weight: 600; background-color: #ffffff !important;">
+                            <input type="text" class="otp-input text-center" maxlength="1" data-index="1" 
+                                style="width: 50px; height: 50px; font-size: 24px; border: 2px solid #6c757d !important; border-radius: 8px; font-weight: 600; background-color: #ffffff !important;">
+                            <input type="text" class="otp-input text-center" maxlength="1" data-index="2" 
+                                style="width: 50px; height: 50px; font-size: 24px; border: 2px solid #6c757d !important; border-radius: 8px; font-weight: 600; background-color: #ffffff !important;">
+                            <input type="text" class="otp-input text-center" maxlength="1" data-index="3" 
+                                style="width: 50px; height: 50px; font-size: 24px; border: 2px solid #6c757d !important; border-radius: 8px; font-weight: 600; background-color: #ffffff !important;">
+                            <input type="text" class="otp-input text-center" maxlength="1" data-index="4" 
+                                style="width: 50px; height: 50px; font-size: 24px; border: 2px solid #6c757d !important; border-radius: 8px; font-weight: 600; background-color: #ffffff !important;">
+                            <input type="text" class="otp-input text-center" maxlength="1" data-index="5" 
+                                style="width: 50px; height: 50px; font-size: 24px; border: 2px solid #6c757d !important; border-radius: 8px; font-weight: 600; background-color: #ffffff !important;">
+                        </div>
+                        <div class="form-text text-center" style="color: #9ca3af;">
+                            <i class="bi bi-clock me-1"></i>Code expires in <span id="otpTimer" style="font-weight: 600; color: #10b981;">5:00</span>
+                        </div>
+                    </div>
+
+                    <!-- Verify Button -->
+                    <button type="button" class="btn btn-success w-100 mb-3" id="verifyDriverOtpBtn" 
+                        style="padding: 12px; border-radius: 12px; font-weight: 600;">
+                        <i class="bi bi-check-circle me-2"></i>Verify Code
+                    </button>
+
+                    <!-- Resend -->
+                    <div class="text-center">
+                        <button type="button" class="btn btn-link text-decoration-none" id="resendDriverOtpBtn" 
+                            style="color: #6b7280; font-size: 14px;" disabled>
+                            <i class="bi bi-arrow-clockwise me-1"></i>Resend Code
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Scripts -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>

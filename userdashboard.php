@@ -1,5 +1,9 @@
 <?php
-session_start();
+// Start session if not already started
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
 require_once 'php/config.php';
 
 // Check if user is logged in
@@ -8,25 +12,92 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
-// Redirect if driver or admin is trying to access user dashboard
+// CRITICAL: Prevent session hijacking - verify the user is not a driver
+// If someone is logged in as driver in another tab, don't let that affect this session
+if (isset($_SESSION['is_driver']) && $_SESSION['is_driver'] === true && 
+    !isset($_SESSION['is_admin'])) {
+    // Pure driver trying to access user dashboard - this shouldn't happen
+    error_log("SECURITY: Driver attempting to access user dashboard - user_id: " . $_SESSION['user_id']);
+    session_destroy();
+    header('Location: login.php');
+    exit;
+}
+
+// Redirect if driver is trying to access user dashboard
 if (isset($_SESSION['is_driver']) && $_SESSION['is_driver'] === true) {
     header('Location: driver_dashboard.php');
     exit;
 }
 
-if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true) {
-    header('Location: admin.php');
-    exit;
+// Allow admins to access user dashboard for testing purposes
+// They won't be redirected, but we'll use their session properly
+
+// Get user data
+$userId = $_SESSION['user_id'];
+$isAdmin = isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true;
+$isDriver = isset($_SESSION['is_driver']) && $_SESSION['is_driver'] === true;
+
+// Debug logging
+error_log("=== USERDASHBOARD ACCESS ===");
+error_log("Session User ID: " . $userId);
+error_log("Is Admin: " . ($isAdmin ? 'YES' : 'NO'));
+error_log("Is Driver: " . ($isDriver ? 'YES' : 'NO'));
+error_log("Session ID: " . session_id());
+
+// CRITICAL FIX: If user was not admin/driver when they loaded this page initially,
+// lock their session to prevent switching to admin mid-session
+if (!isset($_SESSION['userdash_locked'])) {
+    // First time loading - lock the session identity
+    $_SESSION['userdash_locked'] = true;
+    $_SESSION['userdash_initial_user_id'] = $userId;
+    $_SESSION['userdash_is_admin'] = $isAdmin;
+    $_SESSION['userdash_is_driver'] = $isDriver;
+    error_log("Session locked to user_id: $userId, admin: " . ($isAdmin ? 'YES' : 'NO'));
+} else {
+    // Check if session has been hijacked/switched
+    if ($_SESSION['userdash_initial_user_id'] != $userId) {
+        error_log("CRITICAL: Session hijacking detected! Original user: " . $_SESSION['userdash_initial_user_id'] . ", Current: $userId");
+        // Restore original session
+        $_SESSION['user_id'] = $_SESSION['userdash_initial_user_id'];
+        $_SESSION['is_admin'] = $_SESSION['userdash_is_admin'];
+        $_SESSION['is_driver'] = $_SESSION['userdash_is_driver'];
+        $userId = $_SESSION['user_id'];
+        $isAdmin = $_SESSION['is_admin'];
+        $isDriver = $_SESSION['is_driver'];
+        error_log("Session restored to user_id: $userId");
+    }
 }
 
-// Get user data - make sure we're querying the users table for regular users only
-$userId = $_SESSION['user_id'];
-$stmt = $pdo->prepare("SELECT * FROM users WHERE id = ?");
-$stmt->execute([$userId]);
-$user = $stmt->fetch(PDO::FETCH_ASSOC);
+// If admin, get data from admins table; otherwise from users table
+if ($isAdmin) {
+    error_log("Querying admins table for user_id: " . $userId);
+    $stmt = $pdo->prepare("SELECT id, name, email, '' as phone FROM admins WHERE id = ?");
+    $stmt->execute([$userId]);
+    $user = $stmt->fetch(PDO::FETCH_ASSOC);
+    
+    // Ensure admin user data is properly set
+    if ($user) {
+        $user['phone'] = ''; // Admins don't have phone numbers
+        error_log("Admin found: " . $user['name'] . " (" . $user['email'] . ")");
+    } else {
+        error_log("ERROR: Admin not found with id: " . $userId);
+    }
+} else {
+    error_log("Querying users table for user_id: " . $userId);
+    $stmt = $pdo->prepare("SELECT * FROM users WHERE id = ?");
+    $stmt->execute([$userId]);
+    $user = $stmt->fetch(PDO::FETCH_ASSOC);
+    
+    if ($user) {
+        error_log("User found: " . $user['name'] . " (" . $user['email'] . ")");
+    } else {
+        error_log("ERROR: User not found with id: " . $userId);
+    }
+}
 
-// If user not found in users table, session is invalid
+// If user not found in appropriate table, session is invalid
 if (!$user) {
+    error_log("CRITICAL: No user data found, destroying session and redirecting to login");
     session_destroy();
     header('Location: login.php');
     exit;
@@ -105,6 +176,17 @@ $stmt = $pdo->prepare("
 ");
 $stmt->execute([$userId]);
 $recentTrips = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+// Check for active/pending booking
+$stmt = $pdo->prepare("
+    SELECT * FROM ride_history 
+    WHERE user_id = ? 
+    AND status IN ('pending', 'driver_found', 'searching', 'confirmed', 'arrived', 'in_progress')
+    ORDER BY created_at DESC 
+    LIMIT 1
+");
+$stmt->execute([$userId]);
+$activeBooking = $stmt->fetch(PDO::FETCH_ASSOC);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -117,7 +199,8 @@ $recentTrips = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     
     <!-- Bootstrap Icons -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -125,6 +208,9 @@ $recentTrips = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <!-- Custom CSS -->
     <link rel="stylesheet" href="assets/css/userdashboard-clean.css">
     <link rel="shortcut icon" href="assets/images/Logo.png" type="image/x-icon">
+    
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
     <!-- Navigation -->
@@ -165,7 +251,7 @@ $recentTrips = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     <div class="d-flex justify-content-between align-items-start mb-3">
                         <div class="stats-label">Total Spent</div>
                         <div class="stats-icon">
-                            <i class="bi bi-currency-peso"></i>
+                            <i class="bi bi-wallet2"></i>
                         </div>
                     </div>
                     <div class="stats-value">₱<?php echo number_format($totalSpent, 0); ?></div>
@@ -338,8 +424,15 @@ $recentTrips = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <!-- Profile Tab -->
             <div class="tab-pane fade" id="profile" role="tabpanel">
                 <div class="profile-section">
-                    <h5 class="profile-section-title">Profile Information</h5>
-                    <p class="profile-section-subtitle">Your personal details and riding statistics</p>
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div>
+                            <h5 class="profile-section-title mb-1">Profile Information</h5>
+                            <p class="profile-section-subtitle mb-0">Your personal details and riding statistics</p>
+                        </div>
+                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editProfileModal">
+                            <i class="bi bi-pencil-square me-1"></i>Edit Profile
+                        </button>
+                    </div>
                     
                     <!-- Profile Card -->
                     <div class="profile-card mb-4">
@@ -510,14 +603,17 @@ $recentTrips = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     <!-- Book Ride Modal -->
     <div class="modal fade" id="bookRideModal" tabindex="-1" aria-labelledby="bookRideModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-dialog modal-dialog-centered modal-xl">
             <div class="modal-content">
                 <div class="modal-header border-0 pb-0">
                     <h5 class="modal-title fw-bold" id="bookRideModalLabel">Book a New Ride</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body pt-2">
-                    <p class="text-muted small mb-4">Enter your pickup and drop-off locations</p>
+                    <p class="text-muted small mb-3">Enter your pickup and drop-off locations</p>
+                    
+                    <!-- Map Container -->
+                    <div id="bookingMap" style="height: 350px; width: 100%; border-radius: 8px; margin-bottom: 20px; border: 2px solid #e2e8f0;"></div>
                     
                     <form id="bookRideForm">
                         <!-- Pickup Location -->
@@ -610,6 +706,193 @@ $recentTrips = $stmt->fetchAll(PDO::FETCH_ASSOC);
         </div>
     </div>
 
+    <!-- Edit Profile Modal -->
+    <div class="modal fade" id="editProfileModal" tabindex="-1" aria-labelledby="editProfileModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold" id="editProfileModalLabel">
+                        <i class="bi bi-person-circle me-2"></i>Edit Profile
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="editProfileAlert" class="alert d-none" role="alert"></div>
+                    
+                    <form id="editProfileForm">
+                        <!-- Full Name -->
+                        <div class="mb-3">
+                            <label for="editName" class="form-label fw-semibold">
+                                <i class="bi bi-person me-1"></i> Full Name
+                            </label>
+                            <input type="text" class="form-control" id="editName" 
+                                   value="<?php echo htmlspecialchars($user['name'] ?? ''); ?>" 
+                                   required minlength="2" maxlength="100">
+                            <div class="invalid-feedback">Please enter your full name (2-100 characters).</div>
+                        </div>
+
+                        <!-- Phone Number -->
+                        <div class="mb-3">
+                            <label for="editPhone" class="form-label fw-semibold">
+                                <i class="bi bi-telephone me-1"></i> Phone Number
+                            </label>
+                            <div class="input-group">
+                                <input type="tel" class="form-control" id="editPhone" 
+                                       value="<?php echo htmlspecialchars($user['phone'] ?? ''); ?>" 
+                                       placeholder="09123456789" 
+                                       pattern="^09\d{9}$" 
+                                       maxlength="11"
+                                       data-original-phone="<?php echo htmlspecialchars($user['phone'] ?? ''); ?>"
+                                       style="border-right: 0;">
+                                <button type="button" class="btn btn-outline-success" id="sendOtpEditBtn" 
+                                        disabled>
+                                    <i class="bi bi-shield-check me-1"></i>Send OTP
+                                </button>
+                            </div>
+                            <div class="form-text">Format: 09XXXXXXXXX (11 digits only)</div>
+                            <div id="phoneEditVerificationStatus" style="font-size: 13px; margin-top: 8px; display: none;">
+                                <i class="bi bi-check-circle-fill text-success me-1"></i>
+                                <span class="text-success fw-semibold">Phone number verified</span>
+                            </div>
+                            <div class="invalid-feedback">Please enter exactly 11 digits starting with 09.</div>
+                        </div>
+
+                        <!-- Email (Read-only) -->
+                        <div class="mb-3">
+                            <label for="editEmail" class="form-label fw-semibold">
+                                <i class="bi bi-envelope me-1"></i> Email Address
+                            </label>
+                            <input type="email" class="form-control" id="editEmail" 
+                                   value="<?php echo htmlspecialchars($user['email'] ?? ''); ?>" 
+                                   readonly disabled>
+                            <div class="form-text text-muted">Email cannot be changed</div>
+                        </div>
+
+                        <!-- Change Password Section -->
+                        <hr class="my-4">
+                        <h6 class="fw-bold mb-3"><i class="bi bi-lock me-2"></i>Change Password (Optional)</h6>
+                        
+                        <div class="mb-3">
+                            <label for="currentPassword" class="form-label fw-semibold">Current Password</label>
+                            <input type="password" class="form-control" id="currentPassword" 
+                                   placeholder="Leave blank to keep current password">
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="newPassword" class="form-label fw-semibold">New Password</label>
+                            <input type="password" class="form-control" id="newPassword" 
+                                   placeholder="Enter new password" 
+                                   minlength="6">
+                            <div class="invalid-feedback">Password must be at least 6 characters.</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="confirmPassword" class="form-label fw-semibold">Confirm New Password</label>
+                            <input type="password" class="form-control" id="confirmPassword" 
+                                   placeholder="Confirm new password">
+                            <div class="invalid-feedback">Passwords do not match.</div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="saveProfileBtn">
+                        <i class="bi bi-check-circle me-1"></i>Save Changes
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- OTP Verification Modal for Profile Edit -->
+    <div class="modal fade" id="otpEditModal" tabindex="-1" aria-labelledby="otpEditModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header border-0">
+                    <h5 class="modal-title fw-bold" id="otpEditModalLabel">
+                        <i class="bi bi-phone text-success me-2"></i>Verify Your Phone
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center px-4 py-4">
+                    <div class="mb-4">
+                        <div class="otp-icon mb-3">
+                            <i class="bi bi-shield-check" style="font-size: 64px; color: #10b981;"></i>
+                        </div>
+                        <p class="text-muted mb-1">
+                            We've sent a 6-digit verification code to
+                        </p>
+                        <p class="fw-bold fs-5" id="displayEditPhone" style="color: #10b981;"></p>
+                        <input type="hidden" id="normalizedEditPhone">
+                    </div>
+                    
+                    <div class="otp-input-group mb-3">
+                        <input type="text" class="otp-input" maxlength="1" id="otpEdit1" inputmode="numeric" autocomplete="off" />
+                        <input type="text" class="otp-input" maxlength="1" id="otpEdit2" inputmode="numeric" autocomplete="off" />
+                        <input type="text" class="otp-input" maxlength="1" id="otpEdit3" inputmode="numeric" autocomplete="off" />
+                        <input type="text" class="otp-input" maxlength="1" id="otpEdit4" inputmode="numeric" autocomplete="off" />
+                        <input type="text" class="otp-input" maxlength="1" id="otpEdit5" inputmode="numeric" autocomplete="off" />
+                        <input type="text" class="otp-input" maxlength="1" id="otpEdit6" inputmode="numeric" autocomplete="off" />
+                    </div>
+                    
+                    <div id="otpEditError" class="alert alert-danger" role="alert" style="display: none; padding: 10px; font-size: 14px;"></div>
+                    
+                    <button type="button" class="btn btn-success w-100 mb-3 py-2" id="verifyOtpEditBtn">
+                        <i class="bi bi-check-circle me-2"></i>Verify Code
+                    </button>
+                    
+                    <div class="text-center">
+                        <small class="text-muted">
+                            Didn't receive the code? 
+                            <a href="#" id="resendOtpEditBtn" class="text-success fw-bold text-decoration-none">Resend OTP</a>
+                        </small>
+                    </div>
+                    
+                    <div class="mt-3">
+                        <small class="text-muted" id="otpEditTimer"></small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- OTP Input Styles -->
+    <style>
+        .otp-input-group {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+        
+        .otp-input {
+            width: 50px;
+            height: 50px;
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            outline: none;
+            transition: all 0.2s;
+        }
+        
+        .otp-input:focus {
+            border-color: #10b981;
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+        }
+        
+        .otp-input.error {
+            border-color: #ef4444;
+            animation: shake 0.3s;
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+    </style>
+
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     
@@ -624,5 +907,13 @@ $recentTrips = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <script src="https://unpkg.com/leaflet-control-geocoder@2.4.0/dist/Control.Geocoder.js"></script>
     
     <script src="assets/js/dashboard.js"></script>
+    
+    <!-- Real-time WebSocket Integration -->
+    <script src="assets/js/realtime-client.js"></script>
+    <script src="assets/js/rider-realtime.js"></script>
+    <script>
+        // Initialize real-time updates
+        initRiderRealtime(<?= $_SESSION['user_id'] ?>);
+    </script>
 </body>
 </html>

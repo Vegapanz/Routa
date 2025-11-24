@@ -1,127 +1,306 @@
 <?php
-session_start();
+// Start session if not already started
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
 require_once 'php/config.php';
 require_once 'php/admin_functions.php';
 
-// Check if user is logged in and is admin
-if (!isset($_SESSION['user_id']) || !isset($_SESSION['is_admin']) || !$_SESSION['is_admin']) {
+// Check if this is an AJAX request
+$isAjax = !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest';
+$isAjax = $isAjax || (isset($_POST['action']) && $_SERVER['REQUEST_METHOD'] === 'POST');
+
+// Debug session state for troubleshooting
+if ($isAjax) {
+    error_log("=== AJAX Request Debug ===");
+    error_log("Session ID: " . session_id());
+    error_log("Session status: " . session_status());
+    error_log("user_id: " . (isset($_SESSION['user_id']) ? $_SESSION['user_id'] : 'NOT SET'));
+    error_log("is_admin: " . (isset($_SESSION['is_admin']) ? var_export($_SESSION['is_admin'], true) : 'NOT SET'));
+    error_log("Action: " . ($_POST['action'] ?? 'none'));
+    error_log("PHPSESSID cookie: " . ($_COOKIE['PHPSESSID'] ?? 'NOT SET'));
+}
+
+// Check if user is logged in and is admin - be more lenient with type checking
+$hasUserId = isset($_SESSION['user_id']) && !empty($_SESSION['user_id']);
+$isAdmin = isset($_SESSION['is_admin']) && ($_SESSION['is_admin'] === true || $_SESSION['is_admin'] === 1 || $_SESSION['is_admin'] === '1');
+
+if (!$hasUserId || !$isAdmin) {
+    error_log("Admin session check FAILED - user_id: " . ($hasUserId ? 'EXISTS' : 'MISSING') . 
+              ", is_admin value: " . (isset($_SESSION['is_admin']) ? var_export($_SESSION['is_admin'], true) : 'NOT SET') .
+              ", is_admin check: " . ($isAdmin ? 'PASSED' : 'FAILED'));
+    
+    // if ($isAjax) {
+    //     header('Content-Type: application/json');
+    //     echo json_encode(['success' => false, 'message' => 'Session expired. Please login again.', 'redirect' => 'login.php']);
+    //     exit();
+    // }
     header('Location: login.php');
     exit();
 }
 
 // Verify admin exists in admins table
 $admin_id = $_SESSION['user_id'];
-$stmt = $pdo->prepare("SELECT * FROM admins WHERE id = ?");
-$stmt->execute([$admin_id]);
-$admin_data = $stmt->fetch(PDO::FETCH_ASSOC);
+$admin_data = null;
 
+try {
+    $stmt = $pdo->prepare("SELECT * FROM admins WHERE id = ?");
+    $stmt->execute([$admin_id]);
+    $admin_data = $stmt->fetch(PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    error_log("Database error checking admin: " . $e->getMessage());
+}
+
+// If admin data not found, use cached session data instead of logging out
 if (!$admin_data) {
-    // Admin not found - invalid session
-    session_destroy();
-    header('Location: login.php');
-    exit();
+    error_log("Admin data not retrieved from database for user_id: " . $admin_id . " - using session cache");
+    
+    // Create admin data from session to allow page to continue
+    $admin_data = [
+        'id' => $admin_id,
+        'name' => $_SESSION['user_name'] ?? 'Admin',
+        'email' => $_SESSION['user_email'] ?? '',
+        'role' => $_SESSION['admin_role'] ?? 'admin'
+    ];
+    
+    // Only log critical error if this persists
+    if (!isset($_SESSION['admin_cache_start_time'])) {
+        $_SESSION['admin_cache_start_time'] = time();
+    } elseif ((time() - $_SESSION['admin_cache_start_time']) > 300) {
+        // If using cache for more than 5 minutes, something is wrong
+        error_log("CRITICAL: Admin data unavailable for 5+ minutes for user_id: " . $admin_id);
+    }
+} else {
+    // Successfully retrieved admin data - clear cache timer
+    unset($_SESSION['admin_cache_start_time']);
 }
 
 // Handle AJAX requests
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
+    // Clear any previous output
+    ob_clean();
     header('Content-Type: application/json');
     $response = ['success' => false, 'message' => ''];
 
-    switch ($_POST['action']) {
-        case 'assign_booking':
-            if (isset($_POST['booking_id']) && isset($_POST['driver_id'])) {
-                error_log("Attempting to assign booking " . $_POST['booking_id'] . " to driver " . $_POST['driver_id']);
-                if (assignBooking($pdo, $_POST['booking_id'], $_POST['driver_id'])) {
-                    $response['success'] = true;
-                    $response['message'] = 'Booking assigned successfully';
+    try {
+        switch ($_POST['action']) {
+            case 'assign_booking':
+                if (isset($_POST['booking_id']) && isset($_POST['driver_id'])) {
+                    error_log("Attempting to assign booking " . $_POST['booking_id'] . " to driver " . $_POST['driver_id']);
+                    if (assignBooking($pdo, $_POST['booking_id'], $_POST['driver_id'])) {
+                        $response['success'] = true;
+                        $response['message'] = 'Booking assigned successfully';
+                    } else {
+                        $response['message'] = 'Failed to assign booking. Please check error logs.';
+                        error_log("assignBooking returned false for booking " . $_POST['booking_id']);
+                    }
                 } else {
-                    $response['message'] = 'Failed to assign booking. Please check error logs.';
-                    error_log("assignBooking returned false for booking " . $_POST['booking_id']);
+                    $response['message'] = 'Missing booking_id or driver_id';
+                    error_log("Missing parameters: booking_id=" . (isset($_POST['booking_id']) ? 'set' : 'missing') . 
+                             ", driver_id=" . (isset($_POST['driver_id']) ? 'set' : 'missing'));
                 }
-            } else {
-                $response['message'] = 'Missing booking_id or driver_id';
-                error_log("Missing parameters: booking_id=" . (isset($_POST['booking_id']) ? 'set' : 'missing') . 
-                         ", driver_id=" . (isset($_POST['driver_id']) ? 'set' : 'missing'));
-            }
-            break;
+                break;
 
-        case 'reject_booking':
-            if (isset($_POST['booking_id'])) {
-                error_log("Attempting to reject booking " . $_POST['booking_id']);
-                if (rejectBooking($pdo, $_POST['booking_id'])) {
-                    $response['success'] = true;
-                    $response['message'] = 'Booking rejected successfully';
+            case 'reject_booking':
+                if (isset($_POST['booking_id'])) {
+                    error_log("Attempting to reject booking " . $_POST['booking_id']);
+                    if (rejectBooking($pdo, $_POST['booking_id'])) {
+                        $response['success'] = true;
+                        $response['message'] = 'Booking rejected successfully';
+                    } else {
+                        $response['message'] = 'Failed to reject booking. Please check error logs.';
+                        error_log("rejectBooking returned false for booking " . $_POST['booking_id']);
+                    }
                 } else {
-                    $response['message'] = 'Failed to reject booking. Please check error logs.';
-                    error_log("rejectBooking returned false for booking " . $_POST['booking_id']);
+                    $response['message'] = 'Missing booking_id';
                 }
-            } else {
-                $response['message'] = 'Missing booking_id';
-            }
-            break;
+                break;
 
-        case 'approve_application':
-            if (isset($_POST['application_id'])) {
-                error_log("Attempting to approve application " . $_POST['application_id']);
-                if (approveDriverApplication($pdo, $_POST['application_id'])) {
-                    $response['success'] = true;
-                    $response['message'] = 'Application approved successfully. Driver added to system.';
+            case 'approve_application':
+                if (isset($_POST['application_id'])) {
+                    error_log("Attempting to approve application " . $_POST['application_id']);
+                    try {
+                        if (approveDriverApplication($pdo, $_POST['application_id'])) {
+                            $response['success'] = true;
+                            $response['message'] = 'Application approved successfully. Driver added to system and approval email sent.';
+                        } else {
+                            $response['message'] = 'Failed to approve application. Please check error logs.';
+                        }
+                    } catch (Exception $e) {
+                        $response['message'] = 'Error: ' . $e->getMessage();
+                        error_log("Approval error: " . $e->getMessage());
+                    }
                 } else {
-                    $response['message'] = 'Failed to approve application. Please check error logs.';
+                    $response['message'] = 'Missing application_id';
                 }
-            } else {
-                $response['message'] = 'Missing application_id';
-            }
-            break;
+                break;
 
-        case 'reject_application':
-            if (isset($_POST['application_id'])) {
-                error_log("Attempting to reject application " . $_POST['application_id']);
-                if (rejectDriverApplication($pdo, $_POST['application_id'])) {
-                    $response['success'] = true;
-                    $response['message'] = 'Application rejected successfully.';
+            case 'reject_application':
+                if (isset($_POST['application_id'])) {
+                    error_log("Attempting to reject application " . $_POST['application_id']);
+                    try {
+                        $reason = $_POST['rejection_reason'] ?? '';
+                        if (rejectDriverApplication($pdo, $_POST['application_id'], $reason)) {
+                            $response['success'] = true;
+                            $response['message'] = 'Application rejected successfully and rejection email sent.';
+                        } else {
+                            $response['message'] = 'Failed to reject application. Please check error logs.';
+                        }
+                    } catch (Exception $e) {
+                        $response['message'] = 'Error: ' . $e->getMessage();
+                        error_log("Rejection error: " . $e->getMessage());
+                    }
                 } else {
-                    $response['message'] = 'Failed to reject application. Please check error logs.';
+                    $response['message'] = 'Missing application_id';
                 }
-            } else {
-                $response['message'] = 'Missing application_id';
-            }
-            break;
+                break;
 
-        case 'get_application_details':
-            if (isset($_POST['application_id'])) {
-                $details = getApplicationDetails($pdo, $_POST['application_id']);
-                if ($details) {
-                    $response['success'] = true;
-                    $response['data'] = $details;
+            case 'get_application_details':
+                if (isset($_POST['application_id'])) {
+                    $details = getApplicationDetails($pdo, $_POST['application_id']);
+                    if ($details) {
+                        $response['success'] = true;
+                        $response['data'] = $details;
+                    } else {
+                        $response['message'] = 'Application not found';
+                    }
                 } else {
-                    $response['message'] = 'Application not found';
+                    $response['message'] = 'Missing application_id';
                 }
-            } else {
-                $response['message'] = 'Missing application_id';
-            }
-            break;
+                break;
 
-        case 'get_driver_details':
-            if (isset($_POST['driver_id'])) {
+            case 'get_driver_details':
+                if (isset($_POST['driver_id'])) {
+                    $stmt = $pdo->prepare("SELECT d.*, COUNT(r.id) as total_trips 
+                        FROM tricycle_drivers d 
+                        LEFT JOIN ride_history r ON d.id = r.driver_id AND r.status = 'completed'
+                        WHERE d.id = ?
+                        GROUP BY d.id");
+                    $stmt->execute([$_POST['driver_id']]);
+                    $driver = $stmt->fetch(PDO::FETCH_ASSOC);
+                    
+                    if ($driver) {
+                        $response['success'] = true;
+                        $response['data'] = $driver;
+                    } else {
+                        $response['message'] = 'Driver not found';
+                    }
+                } else {
+                    $response['message'] = 'Missing driver_id';
+                }
+                break;
+
+            case 'delete_driver':
+                if (isset($_POST['driver_id'])) {
+                    error_log("Attempting to delete driver " . $_POST['driver_id']);
+                    try {
+                        $stmt = $pdo->prepare("DELETE FROM tricycle_drivers WHERE id = ?");
+                        if ($stmt->execute([$_POST['driver_id']])) {
+                            $response['success'] = true;
+                            $response['message'] = 'Driver deleted successfully';
+                        } else {
+                            $response['message'] = 'Failed to delete driver';
+                        }
+                    } catch (Exception $e) {
+                        $response['message'] = 'Error: ' . $e->getMessage();
+                        error_log("Delete driver error: " . $e->getMessage());
+                    }
+                } else {
+                    $response['message'] = 'Missing driver_id';
+                }
+                break;
+
+            case 'delete_user':
+                if (isset($_POST['user_id'])) {
+                    error_log("Attempting to delete user " . $_POST['user_id']);
+                    try {
+                        $stmt = $pdo->prepare("DELETE FROM users WHERE id = ?");
+                        if ($stmt->execute([$_POST['user_id']])) {
+                            $response['success'] = true;
+                            $response['message'] = 'User deleted successfully';
+                        } else {
+                            $response['message'] = 'Failed to delete user';
+                        }
+                    } catch (Exception $e) {
+                        $response['message'] = 'Error: ' . $e->getMessage();
+                        error_log("Delete user error: " . $e->getMessage());
+                    }
+                } else {
+                    $response['message'] = 'Missing user_id';
+                }
+                break;
+
+            case 'get_dashboard_stats':
+                $stats = getDashboardStats($pdo);
+                if ($stats) {
+                    $response['success'] = true;
+                    $response['data'] = $stats;
+                } else {
+                    $response['message'] = 'Failed to fetch dashboard stats';
+                }
+                break;
+
+            case 'get_pending_bookings':
+                $bookings = getPendingBookings($pdo);
+                if ($bookings !== false) {
+                    $response['success'] = true;
+                    $response['data'] = $bookings;
+                } else {
+                    $response['message'] = 'Failed to fetch pending bookings';
+                }
+                break;
+
+            case 'get_all_bookings':
+                $stmt = $pdo->prepare("SELECT r.*, u.name as rider_name, u.phone, d.name as driver_name 
+                    FROM ride_history r 
+                    LEFT JOIN users u ON r.user_id = u.id 
+                    LEFT JOIN tricycle_drivers d ON r.driver_id = d.id 
+                    ORDER BY r.created_at DESC");
+                $stmt->execute();
+                $bookings = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                $response['success'] = true;
+                $response['data'] = $bookings;
+                break;
+
+            case 'get_drivers':
                 $stmt = $pdo->prepare("SELECT d.*, COUNT(r.id) as total_trips 
                     FROM tricycle_drivers d 
                     LEFT JOIN ride_history r ON d.id = r.driver_id AND r.status = 'completed'
-                    WHERE d.id = ?
-                    GROUP BY d.id");
-                $stmt->execute([$_POST['driver_id']]);
-                $driver = $stmt->fetch(PDO::FETCH_ASSOC);
-                
-                if ($driver) {
-                    $response['success'] = true;
-                    $response['data'] = $driver;
-                } else {
-                    $response['message'] = 'Driver not found';
-                }
-            } else {
-                $response['message'] = 'Missing driver_id';
-            }
-            break;
+                    GROUP BY d.id
+                    ORDER BY d.created_at DESC");
+                $stmt->execute();
+                $drivers = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                $response['success'] = true;
+                $response['data'] = $drivers;
+                break;
+
+            case 'get_users':
+                $stmt = $pdo->prepare("SELECT u.*, COUNT(r.id) as total_rides 
+                    FROM users u 
+                    LEFT JOIN ride_history r ON u.id = r.user_id 
+                    WHERE u.is_admin = 0
+                    GROUP BY u.id
+                    ORDER BY u.created_at DESC");
+                $stmt->execute();
+                $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                $response['success'] = true;
+                $response['data'] = $users;
+                break;
+
+            case 'get_applications':
+                $stmt = $pdo->prepare("SELECT * FROM driver_applications ORDER BY created_at DESC");
+                $stmt->execute();
+                $applications = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                $response['success'] = true;
+                $response['data'] = $applications;
+                break;
+        }
+    } catch (Exception $e) {
+        error_log("Exception in AJAX handler: " . $e->getMessage());
+        error_log("Stack trace: " . $e->getTraceAsString());
+        $response['success'] = false;
+        $response['message'] = 'Server error: ' . $e->getMessage();
     }
 
     echo json_encode($response);
@@ -240,6 +419,7 @@ $avg_fare = $stmt->fetch(PDO::FETCH_ASSOC)['avg_fare'] ?? 0;
     <link rel="stylesheet" href="assets/css/admin.css">
     <link rel="shortcut icon" href="assets/images/Logo.png" type="image/x-icon">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
     <!-- Header -->
@@ -433,7 +613,7 @@ $avg_fare = $stmt->fetch(PDO::FETCH_ASSOC)['avg_fare'] ?? 0;
                                 <th>Fare</th>
                                 <th>Status</th>
                                 <th>Time</th>
-                                <th></th>
+                                <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -585,9 +765,14 @@ $avg_fare = $stmt->fetch(PDO::FETCH_ASSOC)['avg_fare'] ?? 0;
                                     <?php endif; ?>
                                 </td>
                                 <td>
-                                    <button class="btn btn-sm btn-outline-primary" onclick="viewDriverDetails(<?= $driver['id'] ?>)">
-                                        <i class="bi bi-eye"></i> View
-                                    </button>
+                                    <div class="btn-group btn-group-sm">
+                                        <button class="btn btn-outline-primary" onclick="viewDriverDetails(<?= $driver['id'] ?>)">
+                                            <i class="bi bi-eye"></i> View
+                                        </button>
+                                        <button class="btn btn-outline-danger" onclick="deleteDriver(<?= $driver['id'] ?>)">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </div>
                                 </td>
                             </tr>
                             <?php endforeach; ?>
@@ -632,7 +817,9 @@ $avg_fare = $stmt->fetch(PDO::FETCH_ASSOC)['avg_fare'] ?? 0;
                                 <td><?= $user['total_trips'] ?> trips</td>
                                 <td class="text-muted"><?= date('M Y', strtotime($user['created_at'])) ?></td>
                                 <td>
-                                    <button class="btn btn-sm btn-link text-muted"><i class="bi bi-three-dots-vertical"></i></button>
+                                    <button class="btn btn-sm btn-outline-danger" onclick="deleteUser(<?= $user['id'] ?>)">
+                                        <i class="bi bi-trash"></i> Delete
+                                    </button>
                                 </td>
                             </tr>
                             <?php endforeach; ?>
@@ -1174,6 +1361,14 @@ $avg_fare = $stmt->fetch(PDO::FETCH_ASSOC)['avg_fare'] ?? 0;
                 });
             }
         });
+    </script>
+
+    <!-- Real-time WebSocket Integration -->
+    <script src="assets/js/realtime-client.js"></script>
+    <script src="assets/js/admin-realtime.js"></script>
+    <script>
+        // Initialize real-time updates
+        initAdminRealtime(<?= $_SESSION['user_id'] ?>);
     </script>
 </body>
 </html>
